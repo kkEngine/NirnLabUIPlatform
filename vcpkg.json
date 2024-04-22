@@ -1,0 +1,14 @@
+{
+  "name": "NirnLabUIPlatform",
+  "version": "0.0.1",
+  "description": "UI platform for Skyrim, including CEF (Chromium Embedded Framework) integration and more",
+  "homepage": "https://github.com/kkEngine/NirnLabUIPlatform",
+  "license": "MIT",
+  "supports": "windows & x64",
+  "dependencies": [
+    {
+      "name": "directxtk",
+      "platform": "windows"
+    }
+  ]
+}

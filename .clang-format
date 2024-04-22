@@ -1,0 +1,13 @@
+﻿BasedOnStyle: Microsoft
+AlwaysBreakAfterReturnType: None
+BinPackArguments: 'false'
+BinPackParameters: 'false'
+ColumnLimit: '0'
+IndentPPDirectives: BeforeHash
+NamespaceIndentation: All
+PointerAlignment: Left
+SortUsingDeclarations: 'false'
+SpaceAfterTemplateKeyword: 'false'
+TabWidth: '4'
+SortIncludes: 'false'
+FixNamespaceComments: 'false'

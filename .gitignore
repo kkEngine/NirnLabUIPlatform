@@ -1,0 +1,20 @@
+#Ignore thumbnails created by Windows
+Thumbs.db
+
+#Ignore files built by Visual Studio
+[Bb]in
+[Dd]ebug*/
+obj/
+[Rr]elease*/
+_ReSharper*/
+[Tt]est[Rr]esult*
+.vs/
+.vscode
+
+#Nuget packages folder
+packages/
+
+#Other stuff
+build
+.cache
+[Aa]ssets-nc*/
