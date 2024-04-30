@@ -26,6 +26,7 @@ project(
     LANGUAGES CXX
     VERSION ${MAJOR_VERSION}.${MINOR_VERSION}.0
 )
+include(${CMAKE_SOURCE_DIR}/cmake/set_compile_options.cmake)
 set(CMAKE_GENERATOR_PLATFORM x64)
 
 # Deps
@@ -85,22 +86,28 @@ add_custom_target(
 
 # ============================ CEF Subprocess ============================
 set(CEFSubprocessProjectName "CEFSubprocess")
+
 file(
     GLOB_RECURSE
     CEFSubprocessProjectName_src "src/CEFSubprocess/*"
 )
 source_group(" " FILES ${CEFSubprocessProjectName_src})
 list(APPEND CEFSubprocessProjectName_src ".clang-format")
+
 add_executable(
     ${CEFSubprocessProjectName}
     WIN32
         ${CEFSubprocessProjectName_src}
 )
+
 target_link_libraries(
     ${CEFSubprocessProjectName}
     PUBLIC
         cef
 )
+
+set_compile_options(${CEFSubprocessProjectName})
+
 set_target_properties(
     ${CEFSubprocessProjectName}
     PROPERTIES
@@ -111,10 +118,12 @@ set_target_properties(
         #ARCHIVE_OUTPUT_DIRECTORY ${NL_UI_PATH}/archive
         #PDB_OUTPUT_DIRECTORY ${NL_UI_PATH}/pdb
 )
+
 add_dependencies(${CEFSubprocessProjectName} CefLibraryFiles)
 
 # ============================ Platform ============================
 set(PlatformProjectName "NirnLabUIPlatform")
+
 file(
     GLOB_RECURSE
     PlatformProjectName_src
@@ -150,6 +159,8 @@ target_include_directories(
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Platform
 )
+
+set_compile_options(${PlatformProjectName})
 
 target_link_libraries(
     ${PlatformProjectName}
