@@ -29,7 +29,29 @@ project(
 include(${CMAKE_SOURCE_DIR}/cmake/set_compile_options.cmake)
 set(CMAKE_GENERATOR_PLATFORM x64)
 
+# Configure files
+configure_file(
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Version.h.in
+	${CMAKE_CURRENT_BINARY_DIR}/include/Version.h
+	@ONLY
+)
+configure_file(
+	${CMAKE_CURRENT_SOURCE_DIR}/src/version.rc.in
+	${CMAKE_CURRENT_BINARY_DIR}/version.rc
+	@ONLY
+)
+
+file(
+    GLOB 
+    proj_stuff
+        ${CMAKE_SOURCE_DIR}/.clang-format
+        ${CMAKE_CURRENT_BINARY_DIR}/include/Version.h
+        ${CMAKE_CURRENT_BINARY_DIR}/version.rc
+)
+source_group(" " FILES ${proj_stuff})
+
 # Deps
+find_package(CommonLibSSE CONFIG REQUIRED)
 find_package(directxtk CONFIG REQUIRED)
 find_package(directxmath CONFIG REQUIRED)
 
@@ -92,12 +114,18 @@ file(
     CEFSubprocessProjectName_src "src/CEFSubprocess/*"
 )
 source_group(" " FILES ${CEFSubprocessProjectName_src})
-list(APPEND CEFSubprocessProjectName_src ".clang-format")
+list(APPEND CEFSubprocessProjectName_src ${proj_stuff})
 
 add_executable(
     ${CEFSubprocessProjectName}
     WIN32
         ${CEFSubprocessProjectName_src}
+)
+
+target_include_directories(
+    ${CEFSubprocessProjectName}
+    PRIVATE
+        ${CMAKE_CURRENT_BINARY_DIR}/include
 )
 
 target_link_libraries(
@@ -135,7 +163,7 @@ source_group(
     TREE "${CMAKE_CURRENT_SOURCE_DIR}/src/Platform"
     FILES ${PlatformProjectName_src}
 )
-list(APPEND PlatformProjectName_src ".clang-format")
+list(APPEND PlatformProjectName_src ${proj_stuff})
 
 # Build type
 if(BUILD_AS_SHARED)
@@ -157,6 +185,7 @@ endif()
 target_include_directories(
     ${PlatformProjectName}
     PUBLIC
+        ${CMAKE_CURRENT_BINARY_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Platform
 )
 
@@ -165,5 +194,13 @@ set_compile_options(${PlatformProjectName})
 target_link_libraries(
     ${PlatformProjectName}
     PUBLIC
+        CommonLibSSE::CommonLibSSE
         Microsoft::DirectXTK
+)
+
+target_compile_definitions(
+    ${PlatformProjectName}
+    PRIVATE
+        NL_UI_REL_PATH="${NL_UI_REL_PATH}"
+        NL_UI_SUBPROC_NAME="${PlatformProjectName}"
 )

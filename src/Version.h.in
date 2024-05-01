@@ -1,0 +1,12 @@
+#pragma once
+
+namespace Version {
+    inline constexpr std::size_t MAJOR = @PROJECT_VERSION_MAJOR@;
+    inline constexpr std::size_t MINOR = @PROJECT_VERSION_MINOR@;
+    inline constexpr std::size_t PATCH = @PROJECT_VERSION_PATCH@;
+    inline constexpr std::size_t BETA = 0;    
+    inline constexpr auto PROJECT_NAME = "@PROJECT_NAME@"sv;
+
+    inline constexpr auto AS_STRING = "@PROJECT_VERSION@"sv;
+    inline constexpr std::uint32_t AS_INT = (static_cast<std::uint32_t>((MAJOR * 1000000) + (MINOR * 10000) + (PATCH * 100) + (BETA)));
+}
