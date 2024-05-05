@@ -202,6 +202,7 @@ target_link_libraries(
     PUBLIC
         CommonLibSSE::CommonLibSSE
         Microsoft::DirectXTK
+        cef
 )
 
 target_compile_definitions(

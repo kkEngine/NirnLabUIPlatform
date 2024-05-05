@@ -29,6 +29,7 @@
 // spdlog
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/msvc_sink.h>
+#include <spdlog/sinks/basic_file_sink.h>
 
 using namespace std::literals;
 using namespace std::string_literals;
@@ -45,7 +46,7 @@ namespace stl
 }
 
 // CEF
-#include <cef_app.h>
+#include <include/cef_app.h>
 
 #define DLLEXPORT __declspec(dllexport)
 
