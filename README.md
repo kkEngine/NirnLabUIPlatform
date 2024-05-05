@@ -16,5 +16,9 @@ todo
     - C++ desktop dev
 - Microsoft Visual C++ 2015-2022 Redistributable (x64)
 
+## Runtime dependencies
+- Address library (https://www.nexusmods.com/skyrimspecialedition/mods/32444)
+- SKSE (https://skse.silverlock.org/)
+
 ### License
 MIT

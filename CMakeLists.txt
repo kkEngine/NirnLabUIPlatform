@@ -149,27 +149,27 @@ set_target_properties(
 
 add_dependencies(${CEFSubprocessProjectName} CefLibraryFiles)
 
-# ============================ Platform ============================
-set(PlatformProjectName "NirnLabUIPlatform")
+# ============================ UIPlatform ============================
+set(UIPlatformProjectName "NirnLabUIPlatform")
 
 file(
     GLOB_RECURSE
-    PlatformProjectName_src
-        "src/Platform/**.h"
-        "src/Platform/**.hpp"
-        "src/Platform/**.cpp"
+    UIPlatformProjectName_src
+        "src/UIPlatform/**.h"
+        "src/UIPlatform/**.hpp"
+        "src/UIPlatform/**.cpp"
 )
 source_group(
-    TREE "${CMAKE_CURRENT_SOURCE_DIR}/src/Platform"
-    FILES ${PlatformProjectName_src}
+    TREE "${CMAKE_CURRENT_SOURCE_DIR}/src/UIPlatform"
+    FILES ${UIPlatformProjectName_src}
 )
-list(APPEND PlatformProjectName_src ${proj_stuff})
+list(APPEND UIPlatformProjectName_src ${proj_stuff})
 
 # Build type
 if(BUILD_AS_SHARED)
-    add_library(${PlatformProjectName} SHARED ${PlatformProjectName_src})
+    add_library(${UIPlatformProjectName} SHARED ${UIPlatformProjectName_src})
     set_target_properties(
-        ${PlatformProjectName}
+        ${UIPlatformProjectName}
         PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY_DEBUG ${SKSE_PLUGIN_PATH}
             RUNTIME_OUTPUT_DIRECTORY_RELEASE ${SKSE_PLUGIN_PATH}
@@ -179,28 +179,34 @@ if(BUILD_AS_SHARED)
             #PDB_OUTPUT_DIRECTORY ${SKSE_PLUGIN_PATH}/pdb
 )
 else()
-    add_library(${PlatformProjectName} STATIC ${PlatformProjectName_src})
+    add_library(${UIPlatformProjectName} STATIC ${UIPlatformProjectName_src})
 endif()
 
 target_include_directories(
-    ${PlatformProjectName}
+    ${UIPlatformProjectName}
     PUBLIC
         ${CMAKE_CURRENT_BINARY_DIR}/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/Platform
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/UIPlatform
 )
 
-set_compile_options(${PlatformProjectName})
+set_compile_options(${UIPlatformProjectName})
+
+target_precompile_headers(
+    ${UIPlatformProjectName}
+    PRIVATE
+        "src/UIPlatform/PCH.h"
+)
 
 target_link_libraries(
-    ${PlatformProjectName}
+    ${UIPlatformProjectName}
     PUBLIC
         CommonLibSSE::CommonLibSSE
         Microsoft::DirectXTK
 )
 
 target_compile_definitions(
-    ${PlatformProjectName}
+    ${UIPlatformProjectName}
     PRIVATE
         NL_UI_REL_PATH="${NL_UI_REL_PATH}"
-        NL_UI_SUBPROC_NAME="${PlatformProjectName}"
+        NL_UI_SUBPROC_NAME="${UIPlatformProjectName}"
 )
