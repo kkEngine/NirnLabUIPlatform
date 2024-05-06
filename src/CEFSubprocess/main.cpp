@@ -5,17 +5,17 @@
 #include <include/cef_client.h>
 #include <include/cef_version.h>
 
-#include <mutex>
-#include <condition_variable>
-#include <atomic>
-#include <thread>
-#include <sstream>
-#include <iomanip>
-#include <functional>
-#include <map>
-#include <vector>
-#include <fstream>
 #include <algorithm>
+#include <atomic>
+#include <condition_variable>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <map>
+#include <mutex>
+#include <sstream>
+#include <thread>
+#include <vector>
 
 //
 // helper function to convert a

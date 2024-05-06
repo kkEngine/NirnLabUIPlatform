@@ -1,5 +1,10 @@
 #pragma once
 
+#define NameOf(name) #name
+#define ThrowIfNullptr(type, arg) \
+    if (arg == nullptr)           \
+        throw std::runtime_error(fmt::format("{} has null {}", typeid(type).name(), NameOf(arg)));
+
 #ifndef NL_UI_REL_PATH
     #define NL_UI_REL_PATH ""
 #endif // !NL_UI_REL_PATH
@@ -25,6 +30,7 @@
 
 // Win
 #include <Windows.h>
+#include <d3d11.h>
 
 // spdlog
 #include <spdlog/spdlog.h>

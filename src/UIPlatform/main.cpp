@@ -50,7 +50,7 @@ SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
     try
     {
         SKSE::Init(a_skse);
-        SKSE::AllocTrampoline(2048);
+        SKSE::AllocTrampoline(1024);
     }
     catch (const std::exception& e)
     {
