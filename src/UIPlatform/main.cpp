@@ -39,11 +39,67 @@ extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() {
     return v;
 }();
 
-SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
+#pragma region Tests
+
+#include "PCH.h"
+#include "Providers/ICEFSettingsProvider.h"
+#include "Providers/DefaultCEFSettingsProvider.h"
+#include "Services/UIPlatformService.h"
+#include "Services/CEFService.h"
+#include "Menus/MultiLayerMenu.h"
+
+void BuildTestMenu()
+{
+    const auto cefSettingsProvider = std::make_shared<NL::Providers::DefaultCEFSettingsProvider>();
+    const auto cefService = std::make_shared<NL::Services::CEFService>(spdlog::default_logger(), cefSettingsProvider);
+    NL::Services::g_uiPlatfromService = std::make_shared<NL::Services::UIPlatformService>(spdlog::default_logger(), cefService);
+
+    if (!NL::Services::g_uiPlatfromService->Init())
+    {
+        spdlog::error("Failed to init platform service");
+        return;
+    }
+
+    auto msgQ = RE::UIMessageQueue::GetSingleton();
+    if (msgQ)
+    {
+        msgQ->AddMessage(NL::Menus::MultiLayerMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kShow, NULL);
+    }
+
+    std::this_thread::sleep_for(5s);
+    NL::Services::g_uiPlatfromService->GetBrowserInterface()->LoadURL("https://youtu.be/YPKhOyM1gZ8");
+}
+
+void TestCase()
+{
+    SKSE::GetMessagingInterface()->RegisterListener([](SKSE::MessagingInterface::Message* a_msg) {
+        switch (a_msg->type)
+        {
+        case SKSE::MessagingInterface::kPostLoad:
+            break;
+        case SKSE::MessagingInterface::kPostPostLoad:
+            break;
+        case SKSE::MessagingInterface::kInputLoaded:
+            break;
+        case SKSE::MessagingInterface::kDataLoaded:
+            BuildTestMenu();
+            break;
+        case SKSE::MessagingInterface::kPreLoadGame:
+            break;
+        case SKSE::MessagingInterface::kPostLoadGame:
+            break;
+        default:
+            break;
+        }
+    });
+}
+
+#pragma endregion
+
+extern "C" DLLEXPORT bool SKSEAPI Entry(const SKSE::LoadInterface* a_skse)
 {
     if (a_skse->IsEditor())
     {
-        ShowMessageBox("Editor is not supported");
         return false;
     }
 
@@ -51,6 +107,9 @@ SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
     {
         SKSE::Init(a_skse);
         SKSE::AllocTrampoline(1024);
+        InitLog();
+
+        TestCase();
     }
     catch (const std::exception& e)
     {

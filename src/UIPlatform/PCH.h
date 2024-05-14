@@ -5,13 +5,14 @@
     if (arg == nullptr)           \
         throw std::runtime_error(fmt::format("{} has null {}", typeid(type).name(), NameOf(arg)));
 
-#ifndef NL_UI_REL_PATH
-    #define NL_UI_REL_PATH ""
-#endif // !NL_UI_REL_PATH
+#ifndef NL_UI_SUBPROC_NAME
+    #define NL_UI_SUBPROC_NAME ""
+#endif // !NL_UI_SUBPROC_NAME
 
 /* disable headers in Windows.h */
 #define WIN32_LEAN_AND_MEAN
 #define NOGDI
+#define NOMINMAX
 
 // CommonLibSSE
 #include <RE/Skyrim.h>
@@ -53,6 +54,9 @@ namespace stl
 
 // CEF
 #include <include/cef_app.h>
+#include <include/cef_browser.h>
+#include <include/cef_client.h>
+#include <include/cef_version.h>
 
 #define DLLEXPORT __declspec(dllexport)
 

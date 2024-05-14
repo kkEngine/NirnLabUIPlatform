@@ -17,8 +17,6 @@ set(VCPKG_OVERLAY_PORTS "${CMAKE_CURRENT_LIST_DIR}/overlay_ports")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True FORCE)
 set(CMAKE_CXX_FLAGS "/EHsc /MP /W4")
-#string(REPLACE "/Ob2" "/Ob3" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
-#string(REPLACE "/Ob2" "/Ob3" CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
 add_compile_definitions(WINDOWS)
 
 project(
@@ -28,6 +26,9 @@ project(
 )
 include(${CMAKE_SOURCE_DIR}/cmake/set_compile_options.cmake)
 set(CMAKE_GENERATOR_PLATFORM x64)
+
+string(REPLACE "/Ob2" "/Ob3" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+string(REPLACE "/Ob2" "/Ob3" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
 
 # Configure files
 configure_file(
@@ -65,7 +66,7 @@ set(SKSE_PLUGIN_REL_PATH "Data/SKSE/Plugins")
 set(SKSE_PLUGIN_PATH ${OUTPUT_PATH}/${SKSE_PLUGIN_REL_PATH})
 
 if(NOT DEFINED NL_UI_REL_PATH)
-    set(NL_UI_REL_PATH "UI")
+    set(NL_UI_REL_PATH "Data/UIPlatform")
 endif()
 set(NL_UI_PATH ${OUTPUT_PATH}/${NL_UI_REL_PATH})
 
@@ -99,6 +100,7 @@ add_custom_target(
     COMMAND ${CMAKE_COMMAND} -E make_directory                                                  ${NL_UI_PATH}/CEF
     COMMAND ${CMAKE_COMMAND} -E copy ${cef_files_path}/../Resources/chrome_100_percent.pak      ${NL_UI_PATH}/CEF
     COMMAND ${CMAKE_COMMAND} -E copy ${cef_files_path}/../Resources/chrome_200_percent.pak      ${NL_UI_PATH}/CEF
+    COMMAND ${CMAKE_COMMAND} -E copy ${cef_files_path}/../Resources/icudtl.dat                  ${NL_UI_PATH}/CEF
     COMMAND ${CMAKE_COMMAND} -E copy ${cef_files_path}/../Resources/resources.pak               ${NL_UI_PATH}/CEF
     COMMAND ${CMAKE_COMMAND} -E make_directory                                                  ${NL_UI_PATH}/CEF/locales
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${cef_files_path}/../Resources/locales           ${NL_UI_PATH}/CEF/locales
@@ -171,13 +173,13 @@ if(BUILD_AS_SHARED)
     set_target_properties(
         ${UIPlatformProjectName}
         PROPERTIES
-            RUNTIME_OUTPUT_DIRECTORY_DEBUG ${SKSE_PLUGIN_PATH}
-            RUNTIME_OUTPUT_DIRECTORY_RELEASE ${SKSE_PLUGIN_PATH}
-            LIBRARY_OUTPUT_DIRECTORY_DEBUG ${SKSE_PLUGIN_PATH}
-            LIBRARY_OUTPUT_DIRECTORY_RELEASE ${SKSE_PLUGIN_PATH}
-            #ARCHIVE_OUTPUT_DIRECTORY ${SKSE_PLUGIN_PATH}/archive
-            #PDB_OUTPUT_DIRECTORY ${SKSE_PLUGIN_PATH}/pdb
-)
+            RUNTIME_OUTPUT_DIRECTORY_DEBUG ${NL_UI_PATH}
+            RUNTIME_OUTPUT_DIRECTORY_RELEASE ${NL_UI_PATH}
+            LIBRARY_OUTPUT_DIRECTORY_DEBUG ${NL_UI_PATH}
+            LIBRARY_OUTPUT_DIRECTORY_RELEASE ${NL_UI_PATH}
+            #ARCHIVE_OUTPUT_DIRECTORY ${NL_UI_PATH}/archive
+            #PDB_OUTPUT_DIRECTORY ${NL_UI_PATH}/pdb
+    )
 else()
     add_library(${UIPlatformProjectName} STATIC ${UIPlatformProjectName_src})
 endif()
@@ -201,6 +203,8 @@ target_link_libraries(
     ${UIPlatformProjectName}
     PUBLIC
         CommonLibSSE::CommonLibSSE
+        "d3d11.lib"
+        "dxguid.lib"
         Microsoft::DirectXTK
         cef
 )
@@ -209,5 +213,56 @@ target_compile_definitions(
     ${UIPlatformProjectName}
     PRIVATE
         NL_UI_REL_PATH="${NL_UI_REL_PATH}"
-        NL_UI_SUBPROC_NAME="${UIPlatformProjectName}"
+        NL_UI_SUBPROC_NAME="${CEFSubprocessProjectName}"
 )
+
+# ============================ UIPlugin ============================
+if(BUILD_AS_SHARED)
+    set(UIPluginProjectName "NirnLabUIPlugin")
+
+    file(
+        GLOB_RECURSE
+        UIPluginProjectName_src
+            "src/UIPlugin/**.h"
+            "src/UIPlugin/**.hpp"
+            "src/UIPlugin/**.cpp"
+    )
+    source_group(
+        TREE "${CMAKE_CURRENT_SOURCE_DIR}/src/UIPlugin"
+        FILES ${UIPluginProjectName_src}
+    )
+    list(APPEND UIPluginProjectName_src ${proj_stuff})
+
+    add_library(${UIPluginProjectName} SHARED ${UIPluginProjectName_src})
+    set_target_properties(
+        ${UIPluginProjectName}
+        PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY_DEBUG ${SKSE_PLUGIN_PATH}
+            RUNTIME_OUTPUT_DIRECTORY_RELEASE ${SKSE_PLUGIN_PATH}
+            LIBRARY_OUTPUT_DIRECTORY_DEBUG ${SKSE_PLUGIN_PATH}
+            LIBRARY_OUTPUT_DIRECTORY_RELEASE ${SKSE_PLUGIN_PATH}
+            #ARCHIVE_OUTPUT_DIRECTORY ${SKSE_PLUGIN_PATH}/archive
+            #PDB_OUTPUT_DIRECTORY ${SKSE_PLUGIN_PATH}/pdb
+    )
+
+    target_include_directories(
+        ${UIPluginProjectName}
+        PUBLIC
+            ${CMAKE_CURRENT_BINARY_DIR}/include
+    )
+
+    set_compile_options(${UIPluginProjectName})
+
+    target_link_libraries(
+        ${UIPluginProjectName}
+        PUBLIC
+            CommonLibSSE::CommonLibSSE
+    )
+
+    target_compile_definitions(
+        ${UIPluginProjectName}
+        PRIVATE
+            NL_UI_REL_PATH="${NL_UI_REL_PATH}"
+            NL_UI_LIB_NAME="${UIPlatformProjectName}"
+    )
+endif()

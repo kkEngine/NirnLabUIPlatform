@@ -7,7 +7,8 @@ namespace NL::Render
     class IRenderLayer
     {
       protected:
-        RenderData* renderData = nullptr;
+        bool m_isVisible = true;
+        RenderData* m_renderData = nullptr;
 
       public:
         virtual ~IRenderLayer() = default;
@@ -15,8 +16,18 @@ namespace NL::Render
         virtual void Init(RenderData* a_renderData)
         {
             ThrowIfNullptr(IRenderLayer, a_renderData);
-            renderData = a_renderData;
+            m_renderData = a_renderData;
         };
+
+        virtual void SetVisible(bool a_visible)
+        {
+            m_isVisible = a_visible;
+        }
+
+        virtual bool GetVisible()
+        {
+            return m_isVisible;
+        }
 
         virtual void Draw(){};
     };

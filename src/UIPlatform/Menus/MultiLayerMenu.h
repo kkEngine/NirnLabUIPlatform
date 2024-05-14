@@ -1,7 +1,7 @@
 #pragma once
 
 #include "PCH.h"
-#include "Render/IRenderer.h"
+#include "Render/MultiLayerRenderer.h"
 #include "Render/RenderData.h"
 
 namespace NL::Menus
@@ -11,12 +11,13 @@ namespace NL::Menus
                                  public RE::BSTEventSink<RE::InputEvent*>
     {
       private:
-        NL::Render::RenderData renderData;
-        std::shared_ptr<NL::Render::IRenderLayer> renderer = nullptr;
+        NL::Render::RenderData m_renderData;
+        std::shared_ptr<NL::Render::MultiLayerRenderer> m_renderer = nullptr;
 
       public:
-        MultiLayerMenu(std::shared_ptr<NL::Render::IRenderer> a_renderer);
+        MultiLayerMenu();
         ~MultiLayerMenu() override;
+        std::shared_ptr<NL::Render::MultiLayerRenderer> GetRenderer();
 
       public:
         constexpr static std::string_view MENU_NAME = "NirnLabMultiLayerMenu";

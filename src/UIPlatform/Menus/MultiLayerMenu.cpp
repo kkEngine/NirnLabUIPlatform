@@ -2,10 +2,9 @@
 
 namespace NL::Menus
 {
-    MultiLayerMenu::MultiLayerMenu(std::shared_ptr<NL::Render::IRenderer> a_renderer)
+    MultiLayerMenu::MultiLayerMenu()
     {
-        ThrowIfNullptr(MultiLayerMenu, a_renderer);
-        renderer = a_renderer;
+        m_renderer = std::make_shared<NL::Render::MultiLayerRenderer>();
 
         // Fill render data
         const auto device = reinterpret_cast<ID3D11Device*>(RE::BSGraphics::Renderer::GetDevice());
@@ -15,12 +14,19 @@ namespace NL::Menus
         device->GetImmediateContext(&immediateContext);
         ThrowIfNullptr(MultiLayerMenu, immediateContext);
 
-        renderData.spriteBatch = std::make_shared<::DirectX::SpriteBatch>(immediateContext);
-        renderData.commonStates = std::make_shared<::DirectX::CommonStates>(device);
-        renderData.texture = RE::BSGraphics::Renderer::GetRendererData()->renderTargets[RE::RENDER_TARGETS::kMENUBG].SRV;
+        const auto nativeMenuRenderData = RE::BSGraphics::Renderer::GetRendererData()->renderTargets[RE::RENDER_TARGETS::kMENUBG];
+        D3D11_TEXTURE2D_DESC textDesc;
+        nativeMenuRenderData.texture->GetDesc(&textDesc);
+
+        m_renderData.device = device;
+        m_renderData.spriteBatch = std::make_shared<::DirectX::SpriteBatch>(immediateContext);
+        m_renderData.commonStates = std::make_shared<::DirectX::CommonStates>(device);
+        m_renderData.texture = nativeMenuRenderData.SRV;
+        m_renderData.width = textDesc.Width;
+        m_renderData.height = textDesc.Height;
 
         // Init renderer with this menu data
-        renderer->Init(&renderData);
+        m_renderer->Init(&m_renderData);
 
         // IMenu props
         depthPriority = 8;
@@ -33,9 +39,14 @@ namespace NL::Menus
     {
     }
 
+    std::shared_ptr<NL::Render::MultiLayerRenderer> MultiLayerMenu::GetRenderer()
+    {
+        return m_renderer;
+    }
+
     void MultiLayerMenu::PostDisplay()
     {
-        renderer->Draw();
+        m_renderer->Draw();
     }
 
     RE::UI_MESSAGE_RESULTS MultiLayerMenu::ProcessMessage(RE::UIMessage& a_message)

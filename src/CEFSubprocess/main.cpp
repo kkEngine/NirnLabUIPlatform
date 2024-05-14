@@ -57,11 +57,10 @@ CefRefPtr<CefV8Value> to_v8object(CefRefPtr<CefDictionaryValue> const& dictionar
 
 class NirnLabSubprocessCefApp final : public CefApp
 {
+    IMPLEMENT_REFCOUNTING(NirnLabSubprocessCefApp);
+
   public:
     NirnLabSubprocessCefApp() = default;
-
-  private:
-    IMPLEMENT_REFCOUNTING(NirnLabSubprocessCefApp);
 };
 
 int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nShowCmd)
@@ -75,7 +74,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 #endif
 
     CefMainArgs main_args(hInstance);
-    CefRefPtr<NirnLabSubprocessCefApp> app(new NirnLabSubprocessCefApp());
+    //CefRefPtr<NirnLabSubprocessCefApp> app(new NirnLabSubprocessCefApp());
 
-    return CefExecuteProcess(main_args, app, sandbox_info);
+    return CefExecuteProcess(main_args, nullptr, sandbox_info);
 }
