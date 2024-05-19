@@ -28,29 +28,14 @@ namespace NL::Render
     const ::DirectX::SimpleMath::Vector2 _Cef_Menu_Draw_Vector = {0.f, 0.f};
     void CEFRenderLayer::Draw()
     {
-        if (m_isVisible)
+        if (m_isVisible && m_cefSRV != nullptr)
         {
-            m_drawLock.Lock();
-            if (m_cefSRV == nullptr)
-            {
-                m_drawLock.Unlock();
-                return;
-            }
-
-            try
-            {
-                m_renderData->spriteBatch->Draw(
-                    m_cefSRV,
-                    _Cef_Menu_Draw_Vector,
-                    nullptr,
-                    ::DirectX::Colors::White,
-                    0.f);
-            }
-            catch (...)
-            {
-            }
-
-            m_drawLock.Unlock();
+            m_renderData->spriteBatch->Draw(
+                m_cefSRV,
+                _Cef_Menu_Draw_Vector,
+                nullptr,
+                ::DirectX::Colors::White,
+                0.f);
         }
     }
 
@@ -113,28 +98,20 @@ namespace NL::Render
             }
         }
 
-        m_drawLock.Lock();
+        m_renderData->drawLock.Lock();
 
-        try
+        std::swap(m_cefTexture, tex);
+        std::swap(m_cefSRV, srv);
+
+        m_renderData->drawLock.Unlock();
+
+        if (srv != nullptr)
         {
-            if (m_cefSRV != nullptr)
-            {
-                m_cefSRV->Release();
-                m_cefSRV = nullptr;
-            }
-            if (m_cefTexture != nullptr)
-            {
-                m_cefTexture->Release();
-                m_cefTexture = nullptr;
-            }
+            srv->Release();
         }
-        catch (...)
+        if (tex != nullptr)
         {
+            tex->Release();
         }
-
-        m_cefTexture = tex;
-        m_cefSRV = srv;
-
-        m_drawLock.Unlock();
     }
 }

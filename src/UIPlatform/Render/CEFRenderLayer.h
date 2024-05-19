@@ -15,7 +15,6 @@ namespace NL::Render
         static void release_shared(CEFRenderLayer* a_render);
 
       protected:
-        Common::SpinLock m_drawLock;
         HANDLE m_sharedTextureHandle = nullptr;
         ID3D11Texture2D* m_cefTexture = nullptr;
         ID3D11ShaderResourceView* m_cefSRV = nullptr;

@@ -26,10 +26,18 @@ namespace NL::Render
         }
 
         m_renderData->spriteBatch->Begin(::DirectX::SpriteSortMode_Deferred, m_renderData->commonStates->NonPremultiplied());
-        for (const auto layer : m_layers)
+        m_renderData->drawLock.Lock();
+        try
         {
-            layer->Draw();
+            for (const auto layer : m_layers)
+            {
+                layer->Draw();
+            }
+        }
+        catch (...)
+        {
         }
         m_renderData->spriteBatch->End();
+        m_renderData->drawLock.Unlock();
     }
 }

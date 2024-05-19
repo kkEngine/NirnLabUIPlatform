@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Common/SpinLock.h"
 #include <directxtk/CommonStates.h>
 #include <directxtk/SimpleMath.h>
 #include <directxtk/SpriteBatch.h>
@@ -14,5 +15,6 @@ namespace NL::Render
         ID3D11ShaderResourceView* texture = nullptr;
         std::uint32_t width = 0;
         std::uint32_t height = 0;
+        Common::SpinLock drawLock;
     };
 }
