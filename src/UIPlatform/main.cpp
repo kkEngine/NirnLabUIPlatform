@@ -51,13 +51,13 @@ extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() {
 
 void BuildTestMenu()
 {
+    const auto logger = spdlog::default_logger();
     const auto cefSettingsProvider = std::make_shared<NL::Providers::DefaultCEFSettingsProvider>();
-    const auto cefService = std::make_shared<NL::Services::CEFService>(spdlog::default_logger(), cefSettingsProvider);
-    NL::Services::g_uiPlatfromService = std::make_shared<NL::Services::UIPlatformService>(spdlog::default_logger(), cefService);
+    const auto cefService = std::make_shared<NL::Services::CEFService>(logger, cefSettingsProvider);
 
-    if (!NL::Services::g_uiPlatfromService->Init())
+    if (!NL::Services::UIPlatformService::GetSingleton().Init(logger, cefService))
     {
-        spdlog::error("Failed to init platform service");
+        logger->error("Failed to init platform service");
         return;
     }
 
@@ -68,8 +68,8 @@ void BuildTestMenu()
     }
 
     //const auto cefMenu = std::make_shared<NL::Menus::CEFMenu>(spdlog::default_logger(), cefService, L"https://youtu.be/YPKhOyM1gZ8");
-    const auto cefMenu = std::make_shared<NL::Menus::CEFMenu>(spdlog::default_logger(), cefService, L"https://google.com");
-    NL::Services::g_uiPlatfromService->GetNativeMenu()->AddSubMenu("CEF_DEFAULT", cefMenu);
+    const auto cefMenu = std::make_shared<NL::Menus::CEFMenu>(logger, cefService, L"https://google.com");
+    NL::Services::UIPlatformService::GetSingleton().GetNativeMenu()->AddSubMenu("CEF_DEFAULT", cefMenu);
 }
 
 void TestCase()

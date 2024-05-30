@@ -18,7 +18,7 @@ namespace NL::Services
         std::lock_guard lock(s_cefInitMutex);
         if (s_isCefInited)
         {
-            m_logger->info("{}: CEF already inited", NameOf(CEFService));
+            m_logger->warn("{}: CEF already inited", NameOf(CEFService));
             return false;
         }
 

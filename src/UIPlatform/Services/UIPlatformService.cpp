@@ -2,17 +2,8 @@
 
 namespace NL::Services
 {
-    UIPlatformService::UIPlatformService(
-        std::shared_ptr<spdlog::logger> a_logger,
-        std::shared_ptr<CEFService> a_cefService)
+    UIPlatformService::UIPlatformService()
     {
-        ThrowIfNullptr(UIPlatformService, a_logger);
-        m_logger = a_logger;
-
-        ThrowIfNullptr(UIPlatformService, a_cefService);
-        m_cefService = a_cefService;
-
-        m_mlMenu = std::make_shared<NL::Menus::MultiLayerMenu>(m_logger);
     }
 
     UIPlatformService::~UIPlatformService()
@@ -20,8 +11,25 @@ namespace NL::Services
         Shutdown();
     }
 
-    bool UIPlatformService::Init()
+    bool UIPlatformService::Init(
+        std::shared_ptr<spdlog::logger> a_logger,
+        std::shared_ptr<CEFService> a_cefService)
     {
+        std::lock_guard<std::mutex> lock(s_uipInitMutex);
+        if (s_isUIPInited)
+        {
+            m_logger->warn("{}: already inited", NameOf(UIPlatformService));
+            return false;
+        }
+
+        ThrowIfNullptr(UIPlatformService, a_logger);
+        m_logger = a_logger;
+
+        ThrowIfNullptr(UIPlatformService, a_cefService);
+        m_cefService = a_cefService;
+
+        m_mlMenu = std::make_shared<NL::Menus::MultiLayerMenu>(m_logger);
+
         const auto app = CefRefPtr<NL::CEF::NirnLabCefApp>(new NL::CEF::NirnLabCefApp());
         if (!m_cefService->CEFInitialize(app))
         {
@@ -29,7 +37,7 @@ namespace NL::Services
         }
 
         RE::UI::GetSingleton()->Register(NL::Menus::MultiLayerMenu::MENU_NAME, []() {
-            const auto mlMenu = g_uiPlatfromService->GetNativeMenu();
+            const auto mlMenu = UIPlatformService::GetSingleton().GetNativeMenu();
             mlMenu->AddRef();
             return static_cast<RE::IMenu*>(mlMenu.get());
         });
