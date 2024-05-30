@@ -14,6 +14,18 @@ namespace NL::Render
         a_render->Release();
     }
 
+    CEFRenderLayer::~CEFRenderLayer()
+    {
+        if (m_cefSRV != nullptr)
+        {
+            m_cefSRV->Release();
+        }
+        if (m_cefTexture != nullptr)
+        {
+            m_cefTexture->Release();
+        }
+    }
+
     void CEFRenderLayer::Init(RenderData* a_renderData)
     {
         IRenderLayer::Init(a_renderData);

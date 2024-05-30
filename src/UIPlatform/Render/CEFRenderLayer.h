@@ -21,6 +21,8 @@ namespace NL::Render
         Microsoft::WRL::ComPtr<ID3D11Device1> m_device1 = nullptr;
 
       public:
+        ~CEFRenderLayer() override;
+
         // IRenderLayer
         void Init(RenderData* a_renderData) override;
         void Draw() override;

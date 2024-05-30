@@ -15,7 +15,7 @@ namespace NL::Services
       protected:
         std::shared_ptr<spdlog::logger> m_logger = nullptr;
         std::shared_ptr<CEFService> m_cefService = nullptr;
-        std::shared_ptr<NL::CEF::CEFBrowser> m_defaultCefBrowser = nullptr;
+        std::shared_ptr<NL::Menus::MultiLayerMenu> m_mlMenu = nullptr;
 
       public:
         UIPlatformService(
@@ -34,17 +34,7 @@ namespace NL::Services
         /// </summary>
         void Shutdown();
 
-        /// <summary>
-        /// Get default browser impl
-        /// </summary>
-        /// <returns></returns>
-        std::shared_ptr<NL::CEF::CEFBrowser> GetBrowser();
-
-        /// <summary>
-        /// Get default browser interface
-        /// </summary>
-        /// <returns></returns>
-        std::shared_ptr<NL::CEF::IBrowser> GetBrowserInterface();
+        std::shared_ptr<NL::Menus::MultiLayerMenu> GetNativeMenu();
     };
 
     inline std::shared_ptr<NL::Services::UIPlatformService> g_uiPlatfromService = nullptr;

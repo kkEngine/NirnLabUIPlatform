@@ -58,6 +58,9 @@ namespace stl
 #include <include/cef_client.h>
 #include <include/cef_version.h>
 
+// sigslots (https://github.com/palacaze/sigslot)
+#include "sigslot/signal.hpp"
+
 #define DLLEXPORT __declspec(dllexport)
 
 #include "Version.h"

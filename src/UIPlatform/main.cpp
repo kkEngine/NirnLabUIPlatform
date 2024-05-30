@@ -47,6 +47,7 @@ extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() {
 #include "Services/UIPlatformService.h"
 #include "Services/CEFService.h"
 #include "Menus/MultiLayerMenu.h"
+#include "Menus/CEFMenu.h"
 
 void BuildTestMenu()
 {
@@ -66,8 +67,9 @@ void BuildTestMenu()
         msgQ->AddMessage(NL::Menus::MultiLayerMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kShow, NULL);
     }
 
-    std::this_thread::sleep_for(5s);
-    NL::Services::g_uiPlatfromService->GetBrowserInterface()->LoadURL("https://youtu.be/YPKhOyM1gZ8");
+    //const auto cefMenu = std::make_shared<NL::Menus::CEFMenu>(spdlog::default_logger(), cefService, L"https://youtu.be/YPKhOyM1gZ8");
+    const auto cefMenu = std::make_shared<NL::Menus::CEFMenu>(spdlog::default_logger(), cefService, L"https://google.com");
+    NL::Services::g_uiPlatfromService->GetNativeMenu()->AddSubMenu("CEF_DEFAULT", cefMenu);
 }
 
 void TestCase()
@@ -80,9 +82,11 @@ void TestCase()
         case SKSE::MessagingInterface::kPostPostLoad:
             break;
         case SKSE::MessagingInterface::kInputLoaded:
+            SKSE::GetTaskInterface()->AddTask([]() {
+                BuildTestMenu();
+            });
             break;
         case SKSE::MessagingInterface::kDataLoaded:
-            BuildTestMenu();
             break;
         case SKSE::MessagingInterface::kPreLoadGame:
             break;

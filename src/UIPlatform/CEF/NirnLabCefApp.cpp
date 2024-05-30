@@ -24,4 +24,14 @@ namespace NL::CEF
         // requiring the muted attribute or user interaction
         command_line->AppendSwitchWithValue("autoplay-policy", "no-user-gesture-required");
     }
+
+    CefRefPtr<CefBrowserProcessHandler> CEF::NirnLabCefApp::GetBrowserProcessHandler()
+    {
+        return this;
+    }
+
+    void CEF::NirnLabCefApp::OnBeforeChildProcessLaunch(CefRefPtr<CefCommandLine> command_line)
+    {
+        command_line->AppendSwitchWithValue("main-process-id", std::to_string(::GetCurrentProcessId()).c_str());
+    }
 }

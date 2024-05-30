@@ -61,6 +61,20 @@ class NirnLabSubprocessCefApp final : public CefApp
 
   public:
     NirnLabSubprocessCefApp() = default;
+
+    // CefApp
+    void OnBeforeCommandLineProcessing(CefString const& process_type, CefRefPtr<CefCommandLine> command_line) override
+    {
+        DWORD trackProcessId = std::stoi(command_line->GetSwitchValue("main-process-id").ToWString());
+        if (trackProcessId)
+        {
+            new std::thread([=]() {
+                const auto procHandle = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, trackProcessId);
+                ::WaitForSingleObject(procHandle, INFINITE);
+                ::TerminateProcess(::GetCurrentProcess(), EXIT_SUCCESS);
+            });
+        }
+    }
 };
 
 int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nShowCmd)
@@ -74,7 +88,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 #endif
 
     CefMainArgs main_args(hInstance);
-    //CefRefPtr<NirnLabSubprocessCefApp> app(new NirnLabSubprocessCefApp());
+    CefRefPtr<NirnLabSubprocessCefApp> app(new NirnLabSubprocessCefApp());
 
-    return CefExecuteProcess(main_args, nullptr, sandbox_info);
+    return CefExecuteProcess(main_args, app, sandbox_info);
 }

@@ -55,6 +55,7 @@ source_group(" " FILES ${proj_stuff})
 find_package(CommonLibSSE CONFIG REQUIRED)
 find_package(directxtk CONFIG REQUIRED)
 find_package(directxmath CONFIG REQUIRED)
+find_package(PalSigslot CONFIG REQUIRED)
 
 # Paths
 if (NOT DEFINED OUTPUT_PATH)
@@ -116,7 +117,6 @@ file(
     CEFSubprocessProjectName_src "src/CEFSubprocess/*"
 )
 source_group(" " FILES ${CEFSubprocessProjectName_src})
-list(APPEND CEFSubprocessProjectName_src ${proj_stuff})
 
 add_executable(
     ${CEFSubprocessProjectName}
@@ -213,7 +213,7 @@ target_compile_definitions(
     ${UIPlatformProjectName}
     PRIVATE
         NL_UI_REL_PATH="${NL_UI_REL_PATH}"
-        NL_UI_SUBPROC_NAME="${CEFSubprocessProjectName}"
+        NL_UI_SUBPROC_NAME="${CEFSubprocessProjectName}.exe"
 )
 
 # ============================ UIPlugin ============================

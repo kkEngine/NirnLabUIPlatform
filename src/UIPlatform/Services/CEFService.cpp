@@ -22,10 +22,10 @@ namespace NL::Services
             return false;
         }
 
-        CefMainArgs args;
+        CefMainArgs args(GetModuleHandleA(nullptr));
         if (!CefInitialize(args, m_cefSettingsProvider->GetCefSettings(), a_cefApp, nullptr))
         {
-            m_logger->error("{}: failed to initialize CEF", NameOf(CEFService));
+            m_logger->error("{}: failed to initialize CEF, code {}", NameOf(CEFService), CefGetExitCode());
             return false;
         }
 

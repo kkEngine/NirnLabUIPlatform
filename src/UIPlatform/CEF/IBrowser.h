@@ -7,15 +7,15 @@ namespace NL::CEF
       public:
         virtual ~IBrowser() = default;
 
-        virtual bool __cdecl IsReady() = 0;
+        virtual bool __cdecl IsBrowserReady() = 0;
 
-        virtual void __cdecl SetVisible(bool a_value) = 0;
-        virtual bool __cdecl IsVisible() = 0;
+        virtual void __cdecl SetBrowserVisible(bool a_value) = 0;
+        virtual bool __cdecl IsBrowserVisible() = 0;
 
-        virtual void __cdecl SetFocused(bool a_value) = 0;
-        virtual bool __cdecl IsFocused() = 0;
+        virtual void __cdecl SetBrowserFocused(bool a_value) = 0;
+        virtual bool __cdecl IsBrowserFocused() = 0;
 
-        virtual void __cdecl LoadURL(const char* a_url) = 0;
-        virtual void __cdecl SendMsg() = 0;
+        virtual void __cdecl LoadBrowserURL(const char* a_url) = 0;
+        virtual void __cdecl SendBrowserMsg() = 0;
     };
 }

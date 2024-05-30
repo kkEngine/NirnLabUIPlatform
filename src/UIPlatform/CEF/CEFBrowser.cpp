@@ -4,20 +4,13 @@ namespace NL::CEF
 {
     CEFBrowser::CEFBrowser(
         std::shared_ptr<spdlog::logger> a_logger,
-        std::shared_ptr<NL::Services::CEFService> a_cefService,
-        const std::wstring_view a_startUrl)
+        CefRefPtr<NirnLabCefClient> a_cefClient)
     {
         ThrowIfNullptr(CEFBrowser, a_logger);
         m_logger = a_logger;
 
-        ThrowIfNullptr(CEFBrowser, a_cefService);
-        m_cefService = a_cefService;
-
-        m_cefClient = CefRefPtr<NirnLabCefClient>(new NirnLabCefClient());
-        if (!m_cefService->CreateBrowser(m_cefClient, CefString(a_startUrl.data())))
-        {
-            spdlog::error("{}: failed to create browser", NameOf(CEFBrowser));
-        }
+        ThrowIfNullptr(CEFBrowser, a_cefClient);
+        m_cefClient = a_cefClient;
     }
 
     CefRefPtr<NirnLabCefClient> CEFBrowser::GetCefClient()
@@ -27,7 +20,7 @@ namespace NL::CEF
 
     bool CEFBrowser::IsReadyAndLog()
     {
-        const auto result = IsReady();
+        const auto result = IsBrowserReady();
         if (!result)
         {
             m_logger->info("{}: browser is still loading, try later", NameOf(CEFBrowser));
@@ -35,22 +28,22 @@ namespace NL::CEF
         return result;
     }
 
-    bool __cdecl CEFBrowser::IsReady()
+    bool __cdecl CEFBrowser::IsBrowserReady()
     {
         return m_cefClient && m_cefClient->IsBrowserReady();
     }
 
-    void __cdecl CEFBrowser::SetVisible(bool a_value)
+    void __cdecl CEFBrowser::SetBrowserVisible(bool a_value)
     {
         m_cefClient->GetCefRenderLayer()->SetVisible(a_value);
     }
 
-    bool __cdecl CEFBrowser::IsVisible()
+    bool __cdecl CEFBrowser::IsBrowserVisible()
     {
         return m_cefClient->GetCefRenderLayer()->GetVisible();
     }
 
-    void __cdecl CEFBrowser::SetFocused(bool a_value)
+    void __cdecl CEFBrowser::SetBrowserFocused(bool a_value)
     {
         if (!IsReadyAndLog())
         {
@@ -60,7 +53,7 @@ namespace NL::CEF
         m_cefClient->GetBrowser()->GetHost()->SetFocus(a_value);
     }
 
-    bool __cdecl CEFBrowser::IsFocused()
+    bool __cdecl CEFBrowser::IsBrowserFocused()
     {
         if (!IsReadyAndLog())
         {
@@ -71,7 +64,7 @@ namespace NL::CEF
         return frame != nullptr && frame->IsFocused();
     }
 
-    void __cdecl CEFBrowser::LoadURL(const char* a_url)
+    void __cdecl CEFBrowser::LoadBrowserURL(const char* a_url)
     {
         if (!IsReadyAndLog())
         {
@@ -89,7 +82,7 @@ namespace NL::CEF
         }
     }
 
-    void __cdecl CEFBrowser::SendMsg()
+    void __cdecl CEFBrowser::SendBrowserMsg()
     {
         if (!IsReadyAndLog())
         {

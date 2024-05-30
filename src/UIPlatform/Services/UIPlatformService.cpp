@@ -11,6 +11,8 @@ namespace NL::Services
 
         ThrowIfNullptr(UIPlatformService, a_cefService);
         m_cefService = a_cefService;
+
+        m_mlMenu = std::make_shared<NL::Menus::MultiLayerMenu>(m_logger);
     }
 
     UIPlatformService::~UIPlatformService()
@@ -26,11 +28,10 @@ namespace NL::Services
             return false;
         }
 
-        m_defaultCefBrowser = std::make_shared<NL::CEF::CEFBrowser>(m_logger, m_cefService, L"");
         RE::UI::GetSingleton()->Register(NL::Menus::MultiLayerMenu::MENU_NAME, []() {
-            const auto mlMenu = new NL::Menus::MultiLayerMenu();
-            mlMenu->GetRenderer()->AddLayer(NL::Services::g_uiPlatfromService->GetBrowser()->GetCefClient()->GetCefRenderLayer());
-            return static_cast<RE::IMenu*>(mlMenu);
+            const auto mlMenu = g_uiPlatfromService->GetNativeMenu();
+            mlMenu->AddRef();
+            return static_cast<RE::IMenu*>(mlMenu.get());
         });
 
         return true;
@@ -41,13 +42,8 @@ namespace NL::Services
         m_cefService->CEFShutdown();
     }
 
-    std::shared_ptr<NL::CEF::CEFBrowser> UIPlatformService::GetBrowser()
+    std::shared_ptr<NL::Menus::MultiLayerMenu> UIPlatformService::GetNativeMenu()
     {
-        return m_defaultCefBrowser;
-    }
-
-    std::shared_ptr<NL::CEF::IBrowser> UIPlatformService::GetBrowserInterface()
-    {
-        return m_defaultCefBrowser;
+        return m_mlMenu;
     }
 }
