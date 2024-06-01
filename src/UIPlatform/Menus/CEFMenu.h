@@ -1,7 +1,7 @@
 #pragma once
 
 #include "PCH.h"
-#include "Render/CEFRenderLayer.h"
+#include "Render/IRenderLayer.h"
 #include "Menus/ISubMenu.h"
 #include "CEF/IBrowser.h"
 #include "CEF/CEFBrowser.h"
@@ -15,7 +15,7 @@ namespace NL::Menus
       protected:
         std::shared_ptr<spdlog::logger> m_logger = nullptr;
         std::shared_ptr<NL::Services::CEFService> m_cefService = nullptr;
-        std::shared_ptr<NL::Render::CEFRenderLayer> m_cefRenderLayer = nullptr;
+        std::shared_ptr<NL::Render::IRenderLayer> m_cefRenderLayer = nullptr;
         std::shared_ptr<NL::CEF::CEFBrowser> m_cefBrowser = nullptr;
 
       public:
@@ -35,5 +35,7 @@ namespace NL::Menus
 
         // RE::MenuEventHandler
         bool CanProcess(RE::InputEvent* a_event) override;
+        bool ProcessMouseMove(RE::MouseMoveEvent* a_event) override;
+        bool ProcessButton(RE::ButtonEvent* a_event) override;
     };
 }

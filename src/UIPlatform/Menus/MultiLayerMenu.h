@@ -18,6 +18,8 @@ namespace NL::Menus
         std::mutex m_mapMenuMutex;
         std::unordered_map<std::string, std::shared_ptr<ISubMenu>> m_menuMap;
 
+        bool m_isKeepOpen = true;
+
       public:
         using RE::IMenu::operator new;
         using RE::IMenu::operator delete;

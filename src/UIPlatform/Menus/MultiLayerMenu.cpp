@@ -20,6 +20,7 @@ namespace NL::Menus
         nativeMenuRenderData.texture->GetDesc(&textDesc);
 
         m_renderData.device = device;
+        m_renderData.deviceContext = immediateContext;
         m_renderData.spriteBatch = std::make_shared<::DirectX::SpriteBatch>(immediateContext);
         m_renderData.commonStates = std::make_shared<::DirectX::CommonStates>(device);
         m_renderData.texture = nativeMenuRenderData.SRV;
@@ -33,6 +34,8 @@ namespace NL::Menus
         inputContext = Context::kNone;
 
         RE::UI::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(this));
+        Utils::PushFront<RE::MenuEventHandler>(RE::MenuControls::GetSingleton()->handlers, this);
+        this->registered = true;
         //RE::MenuControls::GetSingleton()->AddHandler(this);
     }
 
@@ -67,6 +70,8 @@ namespace NL::Menus
         m_menuMap.clear();
     }
 
+#pragma region RE::IMenu
+
     void MultiLayerMenu::PostDisplay()
     {
         std::lock_guard<std::mutex> lock(m_mapMenuMutex);
@@ -94,53 +99,80 @@ namespace NL::Menus
 
     RE::UI_MESSAGE_RESULTS MultiLayerMenu::ProcessMessage(RE::UIMessage& a_message)
     {
-        RE::ConsoleLog::GetSingleton()->Print(
-            fmt::format("UI msg \"{}\": {}", a_message.menu.c_str(), a_message.type.underlying()).c_str());
-
-        if (a_message.type.get() == RE::UI_MESSAGE_TYPE::kUserEvent)
-        {
-            const auto msg = static_cast<RE::BSUIMessageData*>(a_message.data);
-            RE::ConsoleLog::GetSingleton()->Print(msg->fixedStr.c_str());
-        }
+        // RE::ConsoleLog::GetSingleton()->Print(
+        //     fmt::format("UI msg \"{}\": {}", a_message.menu.c_str(), a_message.type.underlying()).c_str());
+        //
+        // if (a_message.type.get() == RE::UI_MESSAGE_TYPE::kUserEvent)
+        //{
+        //     const auto msg = static_cast<RE::BSUIMessageData*>(a_message.data);
+        //     RE::ConsoleLog::GetSingleton()->Print(msg->fixedStr.c_str());
+        // }
 
         return RE::UI_MESSAGE_RESULTS::kPassOn;
     }
 
+#pragma endregion
+
+#pragma region RE::MenuEventHandler
+
     bool MultiLayerMenu::CanProcess(RE::InputEvent* a_event)
     {
-        return true;
+        return !m_menuMap.empty();
     }
 
     bool MultiLayerMenu::ProcessMouseMove(RE::MouseMoveEvent* a_event)
     {
-        RE::ConsoleLog::GetSingleton()->Print("mmove");
+        for (const auto& subMenu : m_menuMap)
+        {
+            if (subMenu.second->ProcessMouseMove(a_event))
+            {
+                return true;
+            }
+        }
+
         return false;
     }
 
     bool MultiLayerMenu::ProcessButton(RE::ButtonEvent* a_event)
     {
-        RE::ConsoleLog::GetSingleton()->Print("button");
+        for (const auto& subMenu : m_menuMap)
+        {
+            if (subMenu.second->ProcessButton(a_event))
+            {
+                return true;
+            }
+        }
+
         return false;
     }
 
+#pragma endregion
+
+#pragma region RE::BSTEventSink<RE::MenuOpenCloseEvent>
+
     RE::BSEventNotifyControl MultiLayerMenu::ProcessEvent(const RE::MenuOpenCloseEvent* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource)
     {
-        if (a_event->menuName == MultiLayerMenu::MENU_NAME && !a_event->opening)
+        if (m_isKeepOpen && !a_event->opening && a_event->menuName == MultiLayerMenu::MENU_NAME)
         {
             auto msgQ = RE::UIMessageQueue::GetSingleton();
             if (msgQ)
             {
                 msgQ->AddMessage(NL::Menus::MultiLayerMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kShow, NULL);
             }
-
-            return RE::BSEventNotifyControl::kContinue;
         }
 
         return RE::BSEventNotifyControl::kContinue;
     }
 
+#pragma endregion
+
+#pragma region RE::BSTEventSink<RE::InputEvent*>
+
     RE::BSEventNotifyControl MultiLayerMenu::ProcessEvent(RE::InputEvent* const* a_event, RE::BSTEventSource<RE::InputEvent*>* a_eventSource)
     {
         return RE::BSEventNotifyControl::kContinue;
     }
+
+#pragma endregion
+
 }

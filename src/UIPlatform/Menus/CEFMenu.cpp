@@ -17,7 +17,7 @@ namespace NL::Menus
         if (m_cefService->CreateBrowser(cefClient, CefString(a_startUrl.data())))
         {
             m_cefBrowser = std::make_shared<NL::CEF::CEFBrowser>(m_logger, cefClient);
-            m_cefRenderLayer = m_cefBrowser->GetCefClient()->GetCefRenderLayer();
+            m_cefRenderLayer = m_cefBrowser->GetCefClient()->GetRenderLayer();
         }
         else
         {
@@ -61,8 +61,19 @@ namespace NL::Menus
 
     bool CEFMenu::CanProcess(RE::InputEvent* a_event)
     {
-        return false;
+        return m_cefBrowser->CanProcess(a_event);
+    }
+
+    bool CEFMenu::ProcessMouseMove(RE::MouseMoveEvent* a_event)
+    {
+        return m_cefBrowser->ProcessMouseMove(a_event);
+    }
+
+    bool CEFMenu::ProcessButton(RE::ButtonEvent* a_event)
+    {
+        return m_cefBrowser->ProcessButton(a_event);
     }
 
 #pragma endregion
+
 }

@@ -6,27 +6,24 @@
 
 namespace NL::Render
 {
-    /// <summary>
-    /// OBSOLETE
-    /// Using this class may cause CTD
-    /// </summary>
-    class CEFRenderLayer : public IRenderLayer,
-                           public CefRenderHandler
+    class CEFCopyRenderLayer : public IRenderLayer,
+                               public CefRenderHandler
     {
-        IMPLEMENT_REFCOUNTING(CEFRenderLayer);
+        IMPLEMENT_REFCOUNTING(CEFCopyRenderLayer);
 
       public:
-        static std::shared_ptr<CEFRenderLayer> make_shared();
-        static void release_shared(CEFRenderLayer* a_render);
+        static std::shared_ptr<CEFCopyRenderLayer> make_shared();
+        static void release_shared(CEFCopyRenderLayer* a_render);
 
       protected:
         HANDLE m_sharedTextureHandle = nullptr;
-        ID3D11Texture2D* m_cefTexture = nullptr;
-        ID3D11ShaderResourceView* m_cefSRV = nullptr;
+        Microsoft::WRL::ComPtr<ID3D11Texture2D> m_cefTexture;
+        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_cefSRV;
         Microsoft::WRL::ComPtr<ID3D11Device1> m_device1 = nullptr;
+        Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_deferredContext;
 
       public:
-        ~CEFRenderLayer() override;
+        ~CEFCopyRenderLayer() override = default;
 
         // IRenderLayer
         void Init(RenderData* a_renderData) override;

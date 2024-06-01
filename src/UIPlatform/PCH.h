@@ -62,5 +62,10 @@ namespace stl
 #include "sigslot/signal.hpp"
 
 #define DLLEXPORT __declspec(dllexport)
+inline constexpr int MOUSE_WHEEL_DELTA = 120;
+inline constexpr float KEY_FIRST_CHAR_DELAY = 0.45f;
+inline constexpr float KEY_CHAR_REPEAT_DELAY = 0.06f;
 
 #include "Version.h"
+#include "Utils/PathUtils.h"
+#include "Utils/BSTArrayExtension.h"

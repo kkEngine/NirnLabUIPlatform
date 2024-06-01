@@ -65,12 +65,20 @@ class NirnLabSubprocessCefApp final : public CefApp
     // CefApp
     void OnBeforeCommandLineProcessing(CefString const& process_type, CefRefPtr<CefCommandLine> command_line) override
     {
-        DWORD trackProcessId = std::stoi(command_line->GetSwitchValue("main-process-id").ToWString());
-        if (trackProcessId)
+        DWORD mainProcessId = std::stoi(command_line->GetSwitchValue("main-process-id").ToWString());
+        if (mainProcessId)
         {
             new std::thread([=]() {
-                const auto procHandle = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, trackProcessId);
+                const auto procHandle = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, mainProcessId);
                 ::WaitForSingleObject(procHandle, INFINITE);
+
+                // Commented for possible future use
+                // DWORD mainProcessExitCode = 0;
+                // if (::GetExitCodeProcess(procHandle, &mainProcessExitCode))
+                // {
+                //     // log or email to sportloto?
+                // }
+
                 ::TerminateProcess(::GetCurrentProcess(), EXIT_SUCCESS);
             });
         }

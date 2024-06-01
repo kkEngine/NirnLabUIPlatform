@@ -9,7 +9,7 @@ vcpkg_from_github(
 vcpkg_configure_cmake(
         SOURCE_PATH "${SOURCE_PATH}"
         PREFER_NINJA
-        OPTIONS -DBUILD_TESTS=off -DSKSE_SUPPORT_XBYAK=on
+        OPTIONS -DBUILD_TESTS=off -DSKSE_SUPPORT_XBYAK=on -DENABLE_SKYRIM_SE=on -DENABLE_SKYRIM_AE=on -DENABLE_SKYRIM_VR=off
 )
 
 vcpkg_install_cmake()

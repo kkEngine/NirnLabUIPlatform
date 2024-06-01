@@ -4,10 +4,10 @@ namespace NL::CEF
 {
     NirnLabCefClient::NirnLabCefClient()
     {
-        m_cefRenderLayer = NL::Render::CEFRenderLayer::make_shared();
+        m_cefRenderLayer = NL::Render::CEFCopyRenderLayer::make_shared();
     }
 
-    std::shared_ptr<NL::Render::CEFRenderLayer> NirnLabCefClient::GetCefRenderLayer()
+    std::shared_ptr<NL::Render::IRenderLayer> NirnLabCefClient::GetRenderLayer()
     {
         return m_cefRenderLayer;
     }
