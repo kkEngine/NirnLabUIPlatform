@@ -34,9 +34,15 @@ namespace NL::Menus
         inputContext = Context::kNone;
 
         RE::UI::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(this));
-        Utils::PushFront<RE::MenuEventHandler>(RE::MenuControls::GetSingleton()->handlers, this);
-        this->registered = true;
-        //RE::MenuControls::GetSingleton()->AddHandler(this);
+
+        const auto inputEventSource = RE::BSInputDeviceManager::GetSingleton();
+        inputEventSource->lock.Lock();
+        Utils::PushFront<RE::BSTEventSink<RE::InputEvent*>>(RE::BSInputDeviceManager::GetSingleton()->sinks, this);
+        inputEventSource->lock.Unlock();
+
+        // Utils::PushFront<RE::MenuEventHandler>(RE::MenuControls::GetSingleton()->handlers, this);
+        // this->registered = true;
+        // RE::MenuControls::GetSingleton()->AddHandler(this);
     }
 
     MultiLayerMenu::~MultiLayerMenu()
@@ -122,6 +128,7 @@ namespace NL::Menus
 
     bool MultiLayerMenu::ProcessMouseMove(RE::MouseMoveEvent* a_event)
     {
+        std::lock_guard<std::mutex> lock(m_mapMenuMutex);
         for (const auto& subMenu : m_menuMap)
         {
             if (subMenu.second->ProcessMouseMove(a_event))
@@ -135,6 +142,7 @@ namespace NL::Menus
 
     bool MultiLayerMenu::ProcessButton(RE::ButtonEvent* a_event)
     {
+        std::lock_guard<std::mutex> lock(m_mapMenuMutex);
         for (const auto& subMenu : m_menuMap)
         {
             if (subMenu.second->ProcessButton(a_event))
@@ -170,7 +178,53 @@ namespace NL::Menus
 
     RE::BSEventNotifyControl MultiLayerMenu::ProcessEvent(RE::InputEvent* const* a_event, RE::BSTEventSource<RE::InputEvent*>* a_eventSource)
     {
-        return RE::BSEventNotifyControl::kContinue;
+        if (a_event == nullptr || *a_event == nullptr)
+        {
+            return RE::BSEventNotifyControl::kContinue;
+        }
+
+        auto inputEvent = *a_event;
+        RE::InputEvent* nextEvent = nullptr;
+        auto result = RE::BSEventNotifyControl::kContinue;
+        if (!CanProcess(inputEvent)) [[unlikely]]
+        {
+            return RE::BSEventNotifyControl::kContinue;
+        }
+
+        std::lock_guard<std::mutex> lock(m_mapMenuMutex);
+        while (inputEvent != nullptr)
+        {
+            nextEvent = inputEvent->next;
+            inputEvent->next = nullptr;
+
+            for (const auto& subMenu : m_menuMap)
+            {
+                switch (inputEvent->GetEventType())
+                {
+                case RE::INPUT_EVENT_TYPE::kMouseMove:
+                    if (subMenu.second->ProcessMouseMove(inputEvent->AsMouseMoveEvent()))
+                    {
+                        result = RE::BSEventNotifyControl::kStop;
+                        continue;
+                    }
+                    break;
+                case RE::INPUT_EVENT_TYPE::kButton:
+                    if (subMenu.second->ProcessButton(inputEvent->AsButtonEvent()))
+                    {
+                        result = RE::BSEventNotifyControl::kStop;
+                        continue;
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
+
+            inputEvent->next = nextEvent;
+            inputEvent = inputEvent->next;
+        }
+
+        return result;
     }
 
 #pragma endregion

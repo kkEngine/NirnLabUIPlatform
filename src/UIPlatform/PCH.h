@@ -69,3 +69,4 @@ inline constexpr float KEY_CHAR_REPEAT_DELAY = 0.06f;
 #include "Version.h"
 #include "Utils/PathUtils.h"
 #include "Utils/BSTArrayExtension.h"
+#include "Utils/InputConverter.h"

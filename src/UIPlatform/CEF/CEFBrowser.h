@@ -6,16 +6,8 @@
 #include "CEF/NirnLabCefClient.h"
 #include "Services/CEFService.h"
 
-#define UPDATE_MODIFIER_FLAG(eventParam, modifierParam, flagName) \
-    if (eventParam->IsDown())                                      \
-        modifierParam |= flagName;                                \
-    else if (eventParam->IsUp())                                   \
-        modifierParam &= ~flagName;
-
 namespace NL::CEF
 {
-
-
     class CEFBrowser : public IBrowser,
                        public RE::MenuEventHandler
     {
@@ -32,10 +24,17 @@ namespace NL::CEF
         bool m_isFocused = false;
 
         RE::CursorMenu* m_cursorMenu = nullptr;
-        float& m_CurrentMousePosX = RE::MenuCursor::GetSingleton()->cursorPosX;
-        float& m_CurrentMousePosY = RE::MenuCursor::GetSingleton()->cursorPosY;
-        CefMouseEvent m_LastCefMouseEvent;
-        std::uint32_t m_CefKeyModifiers = 0;
+        float& m_currentMousePosX = RE::MenuCursor::GetSingleton()->cursorPosX;
+        float& m_currentMousePosY = RE::MenuCursor::GetSingleton()->cursorPosY;
+        CefMouseEvent m_lastCefMouseEvent;
+        CefKeyEvent m_lastCharCefKeyEvent;
+        std::uint32_t m_cefKeyModifiers = 0;
+        std::uint32_t m_lastScanCode = 0;
+        float m_keyHeldDuration = 0;
+
+        void UpdateCefKeyModifiers(const RE::ButtonEvent* a_event, const cef_event_flags_t a_flags);
+        void ClearCefKeyModifiers();
+        void UpdateCefKeyModifiersFromVK(const RE::ButtonEvent* a_event, const std::uint32_t a_vkCode);
 
         CefRefPtr<NirnLabCefClient> GetCefClient();
         bool IsReadyAndLog();
