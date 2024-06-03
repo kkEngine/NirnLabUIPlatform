@@ -69,6 +69,7 @@ void BuildTestMenu()
 
     //const auto cefMenu = std::make_shared<NL::Menus::CEFMenu>(spdlog::default_logger(), cefService, L"https://youtu.be/YPKhOyM1gZ8");
     const auto cefMenu = std::make_shared<NL::Menus::CEFMenu>(logger, cefService, L"https://google.com");
+    cefMenu->GetBrowser()->ToggleBrowserFocusedByKeys(RE::BSKeyboardDevice::Keys::kF6, 0);
     NL::Services::UIPlatformService::GetSingleton().GetNativeMenu()->AddSubMenu("CEF_DEFAULT", cefMenu);
 }
 

@@ -78,6 +78,24 @@ namespace NL::CEF
         }
     }
 
+    void CEFBrowser::CheckToggleFocusKeys(RE::ButtonEvent* a_event)
+    {
+        if (!a_event->IsDown() || m_toggleFocusKeyCode1 == 0 && m_toggleFocusKeyCode2 == 0)
+        {
+            return;
+        }
+
+        const auto keyboard = RE::BSInputDeviceManager::GetSingleton()->GetKeyboard();
+        const std::uint8_t* keyboardState = keyboard == nullptr ? nullptr : keyboard->curState;
+        if (
+            keyboardState != nullptr &&
+            (m_toggleFocusKeyCode1 == 0 || (keyboardState[m_toggleFocusKeyCode1] & 0x80) != 0) &&
+            (m_toggleFocusKeyCode2 == 0 || (keyboardState[m_toggleFocusKeyCode2] & 0x80) != 0))
+        {
+            SetBrowserFocused(!IsBrowserFocused());
+        }
+    }
+
     CefRefPtr<NirnLabCefClient> CEFBrowser::GetCefClient()
     {
         return m_cefClient;
@@ -128,6 +146,12 @@ namespace NL::CEF
     bool __cdecl CEFBrowser::IsBrowserFocused()
     {
         return m_isFocused;
+    }
+
+    void __cdecl CEFBrowser::ToggleBrowserFocusedByKeys(const std::uint32_t a_keyCode1, const std::uint32_t a_keyCode2)
+    {
+        m_toggleFocusKeyCode1 = a_keyCode1 < sizeof(RE::BSInputDeviceManager::GetSingleton()->GetKeyboard()->curState) ? a_keyCode1 : 0;
+        m_toggleFocusKeyCode2 = a_keyCode2 < sizeof(RE::BSInputDeviceManager::GetSingleton()->GetKeyboard()->curState) ? a_keyCode2 : 0;
     }
 
     void __cdecl CEFBrowser::LoadBrowserURL(const char* a_url)
@@ -183,13 +207,15 @@ namespace NL::CEF
 
     bool CEFBrowser::ProcessButton(RE::ButtonEvent* a_event)
     {
+        CheckToggleFocusKeys(a_event);
+
         if (!IsBrowserFocused())
         {
             return false;
         }
 
-        const auto browserHost = m_cefClient->GetBrowser()->GetHost();
         const auto scanCode = a_event->GetIDCode();
+        const auto browserHost = m_cefClient->GetBrowser()->GetHost();
         switch (a_event->GetDevice())
         {
         case RE::INPUT_DEVICE::kMouse:

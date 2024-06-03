@@ -47,7 +47,7 @@ namespace Utils
         return unicodeChar;
     }
 
-    void InputConverter::SetNextKeyboardLayout()
+    void InputConverter::NextKeyboardLayout()
     {
         ActivateKeyboardLayout((HKL)HKL_NEXT, KLF_SETFORPROCESS);
     }
