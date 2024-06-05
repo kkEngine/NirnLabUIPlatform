@@ -35,10 +35,14 @@ namespace NL::CEF
         std::uint32_t m_toggleFocusKeyCode1 = 0;
         std::uint32_t m_toggleFocusKeyCode2 = 0;
 
+        std::uint32_t m_toggleVisibleKeyCode1 = 0;
+        std::uint32_t m_toggleVisibleKeyCode2 = 0;
+
         void UpdateCefKeyModifiers(const RE::ButtonEvent* a_event, const cef_event_flags_t a_flags);
         void ClearCefKeyModifiers();
         void UpdateCefKeyModifiersFromVK(const RE::ButtonEvent* a_event, const std::uint32_t a_vkCode);
-        void CheckToggleFocusKeys(RE::ButtonEvent* a_event);
+        void CheckToggleFocusKeys(const RE::ButtonEvent* a_event);
+        void CheckToggleVisibleKeys(const RE::ButtonEvent* a_event);
 
         CefRefPtr<NirnLabCefClient> GetCefClient();
         bool IsReadyAndLog();
@@ -48,10 +52,11 @@ namespace NL::CEF
 
         void __cdecl SetBrowserVisible(bool a_value) override;
         bool __cdecl IsBrowserVisible() override;
+        void __cdecl ToggleBrowserVisibleByKeys(const std::uint32_t a_keyCode1, const std::uint32_t a_keyCode2) override;
 
         void __cdecl SetBrowserFocused(bool a_value) override;
         bool __cdecl IsBrowserFocused() override;
-        void __cdecl ToggleBrowserFocusedByKeys(const std::uint32_t a_keyCode1, const std::uint32_t a_keyCode2) override;
+        void __cdecl ToggleBrowserFocusByKeys(const std::uint32_t a_keyCode1, const std::uint32_t a_keyCode2) override;
 
         void __cdecl LoadBrowserURL(const char* a_url) override;
         void __cdecl SendBrowserMsg() override;

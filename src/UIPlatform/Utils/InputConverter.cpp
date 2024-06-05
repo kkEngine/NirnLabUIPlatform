@@ -9,7 +9,7 @@ namespace Utils
         return vkCode;
     }
 
-    bool InputConverter::shouldConvertToChar(const std::uint32_t a_scanCode, const std::uint32_t a_vkCode)
+    bool InputConverter::ShouldConvertToChar(const std::uint32_t a_scanCode, const std::uint32_t a_vkCode)
     {
         if (a_vkCode >= VK_F1 && a_vkCode <= VK_F24)
         {

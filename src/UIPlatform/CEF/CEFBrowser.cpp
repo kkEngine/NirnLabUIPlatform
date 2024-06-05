@@ -78,7 +78,7 @@ namespace NL::CEF
         }
     }
 
-    void CEFBrowser::CheckToggleFocusKeys(RE::ButtonEvent* a_event)
+    void CEFBrowser::CheckToggleFocusKeys(const RE::ButtonEvent* a_event)
     {
         if (!a_event->IsDown() || m_toggleFocusKeyCode1 == 0 && m_toggleFocusKeyCode2 == 0)
         {
@@ -93,6 +93,24 @@ namespace NL::CEF
             (m_toggleFocusKeyCode2 == 0 || (keyboardState[m_toggleFocusKeyCode2] & 0x80) != 0))
         {
             SetBrowserFocused(!IsBrowserFocused());
+        }
+    }
+
+    void CEFBrowser::CheckToggleVisibleKeys(const RE::ButtonEvent* a_event)
+    {
+        if (!a_event->IsDown() || m_toggleVisibleKeyCode1 == 0 && m_toggleVisibleKeyCode2 == 0)
+        {
+            return;
+        }
+
+        const auto keyboard = RE::BSInputDeviceManager::GetSingleton()->GetKeyboard();
+        const std::uint8_t* keyboardState = keyboard == nullptr ? nullptr : keyboard->curState;
+        if (
+            keyboardState != nullptr &&
+            (m_toggleVisibleKeyCode1 == 0 || (keyboardState[m_toggleVisibleKeyCode1] & 0x80) != 0) &&
+            (m_toggleVisibleKeyCode2 == 0 || (keyboardState[m_toggleVisibleKeyCode2] & 0x80) != 0))
+        {
+            SetBrowserVisible(!IsBrowserVisible());
         }
     }
 
@@ -132,6 +150,12 @@ namespace NL::CEF
         return m_cefClient->GetRenderLayer()->GetVisible();
     }
 
+    void __cdecl CEFBrowser::ToggleBrowserVisibleByKeys(const std::uint32_t a_keyCode1, const std::uint32_t a_keyCode2)
+    {
+        m_toggleVisibleKeyCode1 = a_keyCode1 < sizeof(RE::BSInputDeviceManager::GetSingleton()->GetKeyboard()->curState) ? a_keyCode1 : 0;
+        m_toggleVisibleKeyCode2 = a_keyCode2 < sizeof(RE::BSInputDeviceManager::GetSingleton()->GetKeyboard()->curState) ? a_keyCode2 : 0;
+    }
+
     void __cdecl CEFBrowser::SetBrowserFocused(bool a_value)
     {
         if (!IsReadyAndLog())
@@ -148,7 +172,7 @@ namespace NL::CEF
         return m_isFocused;
     }
 
-    void __cdecl CEFBrowser::ToggleBrowserFocusedByKeys(const std::uint32_t a_keyCode1, const std::uint32_t a_keyCode2)
+    void __cdecl CEFBrowser::ToggleBrowserFocusByKeys(const std::uint32_t a_keyCode1, const std::uint32_t a_keyCode2)
     {
         m_toggleFocusKeyCode1 = a_keyCode1 < sizeof(RE::BSInputDeviceManager::GetSingleton()->GetKeyboard()->curState) ? a_keyCode1 : 0;
         m_toggleFocusKeyCode2 = a_keyCode2 < sizeof(RE::BSInputDeviceManager::GetSingleton()->GetKeyboard()->curState) ? a_keyCode2 : 0;
@@ -208,6 +232,7 @@ namespace NL::CEF
     bool CEFBrowser::ProcessButton(RE::ButtonEvent* a_event)
     {
         CheckToggleFocusKeys(a_event);
+        CheckToggleVisibleKeys(a_event);
 
         if (!IsBrowserFocused())
         {
@@ -265,7 +290,7 @@ namespace NL::CEF
                     m_keyHeldDuration = KEY_FIRST_CHAR_DELAY;
                     browserHost->SendKeyEvent(m_lastCharCefKeyEvent);
 
-                    if (Utils::InputConverter::shouldConvertToChar(scanCode, vkCode))
+                    if (Utils::InputConverter::ShouldConvertToChar(scanCode, vkCode))
                     {
                         m_lastCharCefKeyEvent.type = cef_key_event_type_t::KEYEVENT_CHAR;
                         m_lastCharCefKeyEvent.windows_key_code = Utils::InputConverter::VkCodeToChar(scanCode, vkCode, m_cefKeyModifiers & (EVENTFLAG_SHIFT_DOWN | EVENTFLAG_CAPS_LOCK_ON));
@@ -317,7 +342,7 @@ namespace NL::CEF
                 m_lastCharCefKeyEvent.windows_key_code = vkCode;
                 browserHost->SendKeyEvent(m_lastCharCefKeyEvent);
 
-                if (Utils::InputConverter::shouldConvertToChar(scanCode, vkCode))
+                if (Utils::InputConverter::ShouldConvertToChar(scanCode, vkCode))
                 {
                     m_lastCharCefKeyEvent.type = cef_key_event_type_t::KEYEVENT_CHAR;
                     m_lastCharCefKeyEvent.windows_key_code = Utils::InputConverter::VkCodeToChar(scanCode, vkCode, m_cefKeyModifiers & (EVENTFLAG_SHIFT_DOWN | EVENTFLAG_CAPS_LOCK_ON));
