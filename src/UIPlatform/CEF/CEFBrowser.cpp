@@ -14,6 +14,10 @@ namespace NL::CEF
 
         ZeroMemory(&m_lastCefMouseEvent, sizeof(CefMouseEvent));
         ZeroMemory(&m_lastCharCefKeyEvent, sizeof(CefKeyEvent));
+
+        onWndInactiveConnection = NL::Hooks::WinProcHook::OnWndInactive.connect([&]() {
+            ClearCefKeyModifiers();
+        });
     }
 
     void CEFBrowser::UpdateCefKeyModifiers(const RE::ButtonEvent* a_event, const cef_event_flags_t a_flags)
@@ -278,7 +282,7 @@ namespace NL::CEF
             const auto isKeyStateChanged = a_event->IsDown() || a_event->IsUp();
             if (isKeyStateChanged)
             {
-                const auto vkCode = Utils::InputConverter::GetVirtualKey(scanCode);
+                const auto vkCode = NL::Utils::InputConverter::GetVirtualKey(scanCode);
                 UpdateCefKeyModifiersFromVK(a_event, vkCode);
                 m_lastCharCefKeyEvent.native_key_code = scanCode;
 
@@ -290,10 +294,10 @@ namespace NL::CEF
                     m_keyHeldDuration = KEY_FIRST_CHAR_DELAY;
                     browserHost->SendKeyEvent(m_lastCharCefKeyEvent);
 
-                    if (Utils::InputConverter::ShouldConvertToChar(scanCode, vkCode))
+                    if (NL::Utils::InputConverter::ShouldConvertToChar(scanCode, vkCode))
                     {
                         m_lastCharCefKeyEvent.type = cef_key_event_type_t::KEYEVENT_CHAR;
-                        m_lastCharCefKeyEvent.windows_key_code = Utils::InputConverter::VkCodeToChar(scanCode, vkCode, m_cefKeyModifiers & (EVENTFLAG_SHIFT_DOWN | EVENTFLAG_CAPS_LOCK_ON));
+                        m_lastCharCefKeyEvent.windows_key_code = NL::Utils::InputConverter::VkCodeToChar(scanCode, vkCode, m_cefKeyModifiers & (EVENTFLAG_SHIFT_DOWN | EVENTFLAG_CAPS_LOCK_ON));
                         browserHost->SendKeyEvent(m_lastCharCefKeyEvent);
                     }
 
@@ -336,16 +340,16 @@ namespace NL::CEF
             {
                 m_keyHeldDuration = a_event->HeldDuration();
 
-                const auto vkCode = Utils::InputConverter::GetVirtualKey(scanCode);
+                const auto vkCode = NL::Utils::InputConverter::GetVirtualKey(scanCode);
                 m_lastScanCode = scanCode;
                 m_lastCharCefKeyEvent.type = cef_key_event_type_t::KEYEVENT_KEYDOWN;
                 m_lastCharCefKeyEvent.windows_key_code = vkCode;
                 browserHost->SendKeyEvent(m_lastCharCefKeyEvent);
 
-                if (Utils::InputConverter::ShouldConvertToChar(scanCode, vkCode))
+                if (NL::Utils::InputConverter::ShouldConvertToChar(scanCode, vkCode))
                 {
                     m_lastCharCefKeyEvent.type = cef_key_event_type_t::KEYEVENT_CHAR;
-                    m_lastCharCefKeyEvent.windows_key_code = Utils::InputConverter::VkCodeToChar(scanCode, vkCode, m_cefKeyModifiers & (EVENTFLAG_SHIFT_DOWN | EVENTFLAG_CAPS_LOCK_ON));
+                    m_lastCharCefKeyEvent.windows_key_code = NL::Utils::InputConverter::VkCodeToChar(scanCode, vkCode, m_cefKeyModifiers & (EVENTFLAG_SHIFT_DOWN | EVENTFLAG_CAPS_LOCK_ON));
                     browserHost->SendKeyEvent(m_lastCharCefKeyEvent);
                 }
             }

@@ -7,7 +7,7 @@
 
 #include "Version.h"
 
-namespace Utils
+namespace NL::Utils
 {
     static inline std::filesystem::path GetTempAppDataPath()
     {

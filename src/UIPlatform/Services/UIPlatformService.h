@@ -11,10 +11,10 @@
 
 namespace NL::Services
 {
-    class UIPlatformService : public Common::Singleton<UIPlatformService>
+    class UIPlatformService : public NL::Common::Singleton<UIPlatformService>
     {
       protected:
-        friend class Common::Singleton<UIPlatformService>;
+        friend class NL::Common::Singleton<UIPlatformService>;
 
         static inline std::mutex s_uipInitMutex;
         static inline bool s_isUIPInited = false;

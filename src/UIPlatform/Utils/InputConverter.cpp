@@ -1,6 +1,6 @@
 #include "InputConverter.h"
 
-namespace Utils
+namespace NL::Utils
 {
     std::uint32_t InputConverter::GetVirtualKey(const std::uint32_t a_scanCode)
     {

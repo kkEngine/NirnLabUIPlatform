@@ -42,12 +42,14 @@ extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() {
 #pragma region Tests
 
 #include "PCH.h"
+#include "Utils/InputConverter.h"
 #include "Providers/ICEFSettingsProvider.h"
 #include "Providers/DefaultCEFSettingsProvider.h"
 #include "Services/UIPlatformService.h"
 #include "Services/CEFService.h"
 #include "Menus/MultiLayerMenu.h"
 #include "Menus/CEFMenu.h"
+#include "Hooks/WinProcHook.h"
 
 void BuildTestMenu()
 {
@@ -111,9 +113,13 @@ extern "C" DLLEXPORT bool SKSEAPI Entry(const SKSE::LoadInterface* a_skse)
 
     try
     {
+        // SKSE
         SKSE::Init(a_skse);
         SKSE::AllocTrampoline(1024);
         InitLog();
+
+        // Hooks
+        NL::Hooks::WinProcHook::Install();
 
         TestCase();
     }

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Utils
+namespace NL::Utils
 {
     template<typename T>
     void PushFront(RE::BSTArray<T*>& arr, T* newItem)

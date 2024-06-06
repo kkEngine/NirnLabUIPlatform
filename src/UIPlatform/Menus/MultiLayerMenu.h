@@ -3,6 +3,7 @@
 #include "PCH.h"
 #include "Menus/ISubMenu.h"
 #include "Render/RenderData.h"
+#include "Services/InputLangSwitchService.h"
 
 namespace NL::Menus
 {

@@ -5,6 +5,7 @@
 #include "Render/CEFRenderLayer.h"
 #include "CEF/NirnLabCefClient.h"
 #include "Services/CEFService.h"
+#include "Hooks/WinProcHook.h"
 
 namespace NL::CEF
 {
@@ -43,6 +44,8 @@ namespace NL::CEF
         void UpdateCefKeyModifiersFromVK(const RE::ButtonEvent* a_event, const std::uint32_t a_vkCode);
         void CheckToggleFocusKeys(const RE::ButtonEvent* a_event);
         void CheckToggleVisibleKeys(const RE::ButtonEvent* a_event);
+
+        sigslot::connection onWndInactiveConnection;
 
         CefRefPtr<NirnLabCefClient> GetCefClient();
         bool IsReadyAndLog();

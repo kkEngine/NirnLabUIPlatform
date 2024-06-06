@@ -17,7 +17,7 @@ namespace NL::Providers
 #endif
 
         const auto currentPath = std::filesystem::current_path();
-        const auto cefAppDataPath = Utils::GetLocalAppDataPath() / L"CEF";
+        const auto cefAppDataPath = NL::Utils::GetLocalAppDataPath() / L"CEF";
         const auto cefLogFilePath = cefAppDataPath / L"cef.log";
         const auto cefFilesRoot = currentPath / NL_UI_REL_PATH;
         const auto subprocPath = cefFilesRoot / NL_UI_SUBPROC_NAME;

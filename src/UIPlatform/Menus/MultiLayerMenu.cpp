@@ -37,12 +37,10 @@ namespace NL::Menus
 
         const auto inputEventSource = RE::BSInputDeviceManager::GetSingleton();
         inputEventSource->lock.Lock();
-        Utils::PushFront<RE::BSTEventSink<RE::InputEvent*>>(RE::BSInputDeviceManager::GetSingleton()->sinks, this);
+        NL::Utils::PushFront<RE::BSTEventSink<RE::InputEvent*>>(RE::BSInputDeviceManager::GetSingleton()->sinks, this);
         inputEventSource->lock.Unlock();
 
-        // Utils::PushFront<RE::MenuEventHandler>(RE::MenuControls::GetSingleton()->handlers, this);
-        // this->registered = true;
-        // RE::MenuControls::GetSingleton()->AddHandler(this);
+        NL::Services::InputLangSwitchService::GetSingleton().SetActive(true);
     }
 
     MultiLayerMenu::~MultiLayerMenu()
@@ -105,15 +103,6 @@ namespace NL::Menus
 
     RE::UI_MESSAGE_RESULTS MultiLayerMenu::ProcessMessage(RE::UIMessage& a_message)
     {
-        // RE::ConsoleLog::GetSingleton()->Print(
-        //     fmt::format("UI msg \"{}\": {}", a_message.menu.c_str(), a_message.type.underlying()).c_str());
-        //
-        // if (a_message.type.get() == RE::UI_MESSAGE_TYPE::kUserEvent)
-        //{
-        //     const auto msg = static_cast<RE::BSUIMessageData*>(a_message.data);
-        //     RE::ConsoleLog::GetSingleton()->Print(msg->fixedStr.c_str());
-        // }
-
         return RE::UI_MESSAGE_RESULTS::kPassOn;
     }
 

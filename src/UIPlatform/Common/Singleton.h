@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Common
+namespace NL::Common
 {
     template<class T>
     class Singleton
