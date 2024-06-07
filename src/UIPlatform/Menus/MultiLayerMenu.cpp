@@ -31,8 +31,10 @@ namespace NL::Menus
         depthPriority = 8;
         menuFlags.set(RE::UI_MENU_FLAGS::kAlwaysOpen);
         menuFlags.set(RE::UI_MENU_FLAGS::kCustomRendering);
+        menuFlags.set(RE::UI_MENU_FLAGS::kAssignCursorToRenderer);
         inputContext = Context::kNone;
 
+        RE::UI::GetSingleton()->pad17D = false;
         RE::UI::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(this));
 
         const auto inputEventSource = RE::BSInputDeviceManager::GetSingleton();
@@ -149,7 +151,11 @@ namespace NL::Menus
 
     RE::BSEventNotifyControl MultiLayerMenu::ProcessEvent(const RE::MenuOpenCloseEvent* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>* a_eventSource)
     {
-        if (m_isKeepOpen && !a_event->opening && a_event->menuName == MultiLayerMenu::MENU_NAME)
+        if (a_event->menuName == RE::CursorMenu::MENU_NAME)
+        {
+            RE::UI::GetSingleton()->pad17D = a_event->opening;
+        }
+        else if (m_isKeepOpen && !a_event->opening && a_event->menuName == MultiLayerMenu::MENU_NAME)
         {
             auto msgQ = RE::UIMessageQueue::GetSingleton();
             if (msgQ)

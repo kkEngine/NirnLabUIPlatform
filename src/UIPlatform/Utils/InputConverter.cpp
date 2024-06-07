@@ -38,7 +38,7 @@ namespace NL::Utils
         state[VK_SHIFT] = a_isShift << 7;
 
         wchar_t unicodeChar;
-        if (ToUnicodeEx(a_vkCode, a_scanCode, state, &unicodeChar, 1, 0, GetKeyboardLayout(0)) != 1)
+        if (ToUnicodeEx(a_vkCode, a_scanCode, state, &unicodeChar, 1, 0, m_currentHKL) != 1)
             return L'\0';
 
         if (!std::iswprint(unicodeChar))
@@ -49,6 +49,6 @@ namespace NL::Utils
 
     void InputConverter::NextKeyboardLayout()
     {
-        ActivateKeyboardLayout((HKL)HKL_NEXT, KLF_SETFORPROCESS);
+        m_currentHKL = ActivateKeyboardLayout((HKL)HKL_NEXT, 0);
     }
 }

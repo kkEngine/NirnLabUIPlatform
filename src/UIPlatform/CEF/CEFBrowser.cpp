@@ -162,9 +162,26 @@ namespace NL::CEF
 
     void __cdecl CEFBrowser::SetBrowserFocused(bool a_value)
     {
-        if (!IsReadyAndLog())
+        if (!IsReadyAndLog() || a_value == m_isFocused)
         {
             return;
+        }
+
+        const auto uiMsgQ = RE::UIMessageQueue::GetSingleton();
+        if (a_value)
+        {
+            m_wasCursorOpen = RE::UI::GetSingleton()->pad17D;
+            if (uiMsgQ != nullptr)
+            {
+                uiMsgQ->AddMessage(RE::CursorMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kShow, NULL);
+            }
+        }
+        else
+        {
+            if (uiMsgQ != nullptr && !m_wasCursorOpen)
+            {
+                uiMsgQ->AddMessage(RE::CursorMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kHide, NULL);
+            }
         }
 
         m_cefClient->GetBrowser()->GetHost()->SetFocus(a_value);

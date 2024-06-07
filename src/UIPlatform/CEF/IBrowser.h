@@ -8,7 +8,7 @@ namespace NL::CEF
         virtual ~IBrowser() = default;
 
         /// <summary>
-        /// Browser takes time to load. You can check if browser ready using this method.
+        /// Browser takes time to load, so you can check if browser is ready using this method.
         /// </summary>
         /// <returns></returns>
         virtual bool __cdecl IsBrowserReady() = 0;
@@ -16,7 +16,8 @@ namespace NL::CEF
         virtual void __cdecl SetBrowserVisible(bool a_value) = 0;
         virtual bool __cdecl IsBrowserVisible() = 0;
         /// <summary>
-        /// Sets browser visibility keys. See RE::BSKeyboardDevice::Keys
+        /// Sets browser visibility keys (see RE::BSKeyboardDevice::Keys)
+        /// Pass zeros to disable
         /// </summary>
         /// <param name="a_keyCode1"></param>
         /// <param name="a_keyCode2"></param>
@@ -26,7 +27,8 @@ namespace NL::CEF
         virtual void __cdecl SetBrowserFocused(bool a_value) = 0;
         virtual bool __cdecl IsBrowserFocused() = 0;
         /// <summary>
-        /// Sets browser autofocus keys. See RE::BSKeyboardDevice::Keys
+        /// Sets browser autofocus keys (see RE::BSKeyboardDevice::Keys)
+        /// Pass zeros to disable
         /// Pass 0 to key(s) if key is not needed
         /// </summary>
         /// <param name="a_keyCode1"></param>

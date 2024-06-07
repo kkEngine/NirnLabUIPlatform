@@ -39,13 +39,14 @@ namespace NL::CEF
         std::uint32_t m_toggleVisibleKeyCode1 = 0;
         std::uint32_t m_toggleVisibleKeyCode2 = 0;
 
+        sigslot::connection onWndInactiveConnection;
+        bool m_wasCursorOpen = false;
+
         void UpdateCefKeyModifiers(const RE::ButtonEvent* a_event, const cef_event_flags_t a_flags);
         void ClearCefKeyModifiers();
         void UpdateCefKeyModifiersFromVK(const RE::ButtonEvent* a_event, const std::uint32_t a_vkCode);
         void CheckToggleFocusKeys(const RE::ButtonEvent* a_event);
         void CheckToggleVisibleKeys(const RE::ButtonEvent* a_event);
-
-        sigslot::connection onWndInactiveConnection;
 
         CefRefPtr<NirnLabCefClient> GetCefClient();
         bool IsReadyAndLog();
