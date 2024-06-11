@@ -13,10 +13,10 @@ namespace NL::Services
         m_cefSettingsProvider = a_cefSettingsProvider;
     }
 
-    bool CEFService::CEFInitialize(const CefRefPtr<CefApp> a_cefApp)
+    bool CEFService::CEFInitialize(CefRefPtr<CefApp> a_cefApp)
     {
         std::lock_guard lock(s_cefInitMutex);
-        if (s_isCefInited)
+        if (s_cefApp != nullptr)
         {
             m_logger->warn("{}: CEF already inited", NameOf(CEFService));
             return false;
@@ -29,20 +29,20 @@ namespace NL::Services
             return false;
         }
 
-        s_isCefInited = true;
+        s_cefApp = a_cefApp;
         return true;
     }
 
     void CEFService::CEFShutdown()
     {
         std::lock_guard lock(s_cefInitMutex);
-        if (!s_isCefInited)
+        if (s_cefApp == nullptr)
         {
             return;
         }
 
         CefShutdown();
-        s_isCefInited = false;
+        s_cefApp = nullptr;
     }
 
     bool CEFService::CreateBrowser(const CefRefPtr<CefClient> a_client, const CefString a_url)

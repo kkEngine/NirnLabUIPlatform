@@ -53,6 +53,7 @@ source_group(" " FILES ${proj_stuff})
 
 # Deps
 find_package(CommonLibSSE CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
 find_package(directxtk CONFIG REQUIRED)
 find_package(directxmath CONFIG REQUIRED)
 find_package(PalSigslot CONFIG REQUIRED)
@@ -67,7 +68,7 @@ set(SKSE_PLUGIN_REL_PATH "Data/SKSE/Plugins")
 set(SKSE_PLUGIN_PATH ${OUTPUT_PATH}/${SKSE_PLUGIN_REL_PATH})
 
 if(NOT DEFINED NL_UI_REL_PATH)
-    set(NL_UI_REL_PATH "Data/UIPlatform")
+    set(NL_UI_REL_PATH "Data/NirnLabUIPlatform")
 endif()
 set(NL_UI_PATH ${OUTPUT_PATH}/${NL_UI_REL_PATH})
 
@@ -114,9 +115,15 @@ set(CEFSubprocessProjectName "CEFSubprocess")
 
 file(
     GLOB_RECURSE
-    CEFSubprocessProjectName_src "src/CEFSubprocess/*"
+    CEFSubprocessProjectName_src 
+        "src/CEFSubprocess/**.h"
+        "src/CEFSubprocess/**.hpp"
+        "src/CEFSubprocess/**.cpp"
 )
-source_group(" " FILES ${CEFSubprocessProjectName_src})
+source_group(
+    TREE "${CMAKE_CURRENT_SOURCE_DIR}/src/CEFSubprocess"
+    FILES ${CEFSubprocessProjectName_src}
+)
 
 add_executable(
     ${CEFSubprocessProjectName}
@@ -128,15 +135,23 @@ target_include_directories(
     ${CEFSubprocessProjectName}
     PRIVATE
         ${CMAKE_CURRENT_BINARY_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/CEFSubprocess
 )
 
 target_link_libraries(
     ${CEFSubprocessProjectName}
     PUBLIC
         cef
+        spdlog::spdlog
 )
 
 set_compile_options(${CEFSubprocessProjectName})
+
+target_precompile_headers(
+    ${CEFSubprocessProjectName}
+    PRIVATE
+        "src/CEFSubprocess/PCH.h"
+)
 
 set_target_properties(
     ${CEFSubprocessProjectName}
@@ -147,6 +162,12 @@ set_target_properties(
         LIBRARY_OUTPUT_DIRECTORY_RELEASE ${NL_UI_PATH}
         #ARCHIVE_OUTPUT_DIRECTORY ${NL_UI_PATH}/archive
         #PDB_OUTPUT_DIRECTORY ${NL_UI_PATH}/pdb
+)
+
+target_compile_definitions(
+    ${CEFSubprocessProjectName}
+    PRIVATE
+        CEF_SUBPROCESS_PROJECT_NAME="${CEFSubprocessProjectName}"
 )
 
 add_dependencies(${CEFSubprocessProjectName} CefLibraryFiles)
@@ -188,6 +209,7 @@ target_include_directories(
     ${UIPlatformProjectName}
     PUBLIC
         ${CMAKE_CURRENT_BINARY_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/CEFSubprocess
         ${CMAKE_CURRENT_SOURCE_DIR}/src/UIPlatform
 )
 

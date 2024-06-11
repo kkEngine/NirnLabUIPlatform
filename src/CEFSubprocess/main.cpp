@@ -1,89 +1,4 @@
-#pragma warning(disable : 4100)
-
-#include <include/cef_app.h>
-#include <include/cef_browser.h>
-#include <include/cef_client.h>
-#include <include/cef_version.h>
-
-#include <algorithm>
-#include <atomic>
-#include <condition_variable>
-#include <fstream>
-#include <functional>
-#include <iomanip>
-#include <map>
-#include <mutex>
-#include <sstream>
-#include <thread>
-#include <vector>
-
-//
-// helper function to convert a
-// CefDictionaryValue to a CefV8Object
-//
-CefRefPtr<CefV8Value> to_v8object(CefRefPtr<CefDictionaryValue> const& dictionary)
-{
-    auto const obj = CefV8Value::CreateObject(nullptr, nullptr);
-    if (dictionary)
-    {
-        auto const attrib = V8_PROPERTY_ATTRIBUTE_READONLY;
-        CefDictionaryValue::KeyList keys;
-        dictionary->GetKeys(keys);
-        for (auto const& k : keys)
-        {
-            auto const type = dictionary->GetType(k);
-            switch (type)
-            {
-            case VTYPE_BOOL:
-                obj->SetValue(k, CefV8Value::CreateBool(dictionary->GetBool(k)), attrib);
-                break;
-            case VTYPE_INT:
-                obj->SetValue(k, CefV8Value::CreateInt(dictionary->GetInt(k)), attrib);
-                break;
-            case VTYPE_DOUBLE:
-                obj->SetValue(k, CefV8Value::CreateDouble(dictionary->GetDouble(k)), attrib);
-                break;
-            case VTYPE_STRING:
-                obj->SetValue(k, CefV8Value::CreateString(dictionary->GetString(k)), attrib);
-                break;
-
-            default:
-                break;
-            }
-        }
-    }
-    return obj;
-}
-
-class NirnLabSubprocessCefApp final : public CefApp
-{
-    IMPLEMENT_REFCOUNTING(NirnLabSubprocessCefApp);
-
-  public:
-    NirnLabSubprocessCefApp() = default;
-
-    // CefApp
-    void OnBeforeCommandLineProcessing(CefString const& process_type, CefRefPtr<CefCommandLine> command_line) override
-    {
-        DWORD mainProcessId = std::stoi(command_line->GetSwitchValue("main-process-id").ToWString());
-        if (mainProcessId)
-        {
-            new std::thread([=]() {
-                const auto procHandle = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, mainProcessId);
-                ::WaitForSingleObject(procHandle, INFINITE);
-
-                // Commented for possible future use
-                // DWORD mainProcessExitCode = 0;
-                // if (::GetExitCodeProcess(procHandle, &mainProcessExitCode))
-                // {
-                //     // log or email to sportloto?
-                // }
-
-                ::TerminateProcess(::GetCurrentProcess(), EXIT_SUCCESS);
-            });
-        }
-    }
-};
+#include "CEF/NirnLabSubprocessCefApp.h"
 
 int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nShowCmd)
 {
@@ -96,7 +11,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 #endif
 
     CefMainArgs main_args(hInstance);
-    CefRefPtr<NirnLabSubprocessCefApp> app(new NirnLabSubprocessCefApp());
+    CefRefPtr<NL::CEF::NirnLabSubprocessCefApp> app(new NL::CEF::NirnLabSubprocessCefApp());
 
     return CefExecuteProcess(main_args, app, sandbox_info);
 }

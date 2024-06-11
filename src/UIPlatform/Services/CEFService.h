@@ -12,7 +12,7 @@ namespace NL::Services
         std::shared_ptr<NL::Providers::ICEFSettingsProvider> m_cefSettingsProvider = nullptr;
 
         static inline std::mutex s_cefInitMutex;
-        static inline bool s_isCefInited = false;
+        static inline CefRefPtr<CefApp> s_cefApp = nullptr;
 
       public:
         CEFService(
@@ -20,7 +20,7 @@ namespace NL::Services
             const std::shared_ptr<NL::Providers::ICEFSettingsProvider> a_cefSettingsProvider);
         virtual ~CEFService() = default;
 
-        bool CEFInitialize(const CefRefPtr<CefApp> a_cefApp);
+        bool CEFInitialize(CefRefPtr<CefApp> a_cefApp);
         void CEFShutdown();
         bool CreateBrowser(const CefRefPtr<CefClient> a_client, const CefString a_url);
         bool CreateBrowser(const CefRefPtr<CefClient> a_client, const CefString a_url, const std::shared_ptr<NL::Providers::ICEFSettingsProvider> a_cefSettingsProvider);

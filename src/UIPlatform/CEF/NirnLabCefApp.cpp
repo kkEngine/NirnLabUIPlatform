@@ -33,5 +33,9 @@ namespace NL::CEF
     void CEF::NirnLabCefApp::OnBeforeChildProcessLaunch(CefRefPtr<CefCommandLine> command_line)
     {
         command_line->AppendSwitchWithValue("main-process-id", std::to_string(::GetCurrentProcessId()).c_str());
+        if (SKSE::log::log_directory().has_value())
+        {
+            command_line->AppendSwitchWithValue("log-directory", SKSE::log::log_directory().value().c_str());
+        }
     }
 }
