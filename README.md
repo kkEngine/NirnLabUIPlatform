@@ -12,6 +12,7 @@ todo
 
 ## Dev and build requirements
 - CMake 3.23+
+- Vcpkg
 - Microsoft Visual Studio 2022
     - C++ desktop dev
 - Microsoft Visual C++ 2015-2022 Redistributable (x64)

@@ -217,12 +217,19 @@ namespace NL::CEF
         }
     }
 
-    void __cdecl CEFBrowser::SendBrowserMsg()
+    void __cdecl CEFBrowser::ExecuteJavaScript(const char* a_script, const char* a_scriptUrl)
     {
         if (!IsReadyAndLog())
         {
             return;
         }
+
+        m_cefClient->GetBrowser()->GetMainFrame()->ExecuteJavaScript(a_script, a_scriptUrl, 0);
+    }
+
+    void __cdecl CEFBrowser::AddFunctionCallback(const std::string& a_objectName, const std::string& a_funcName, NL::JS::JSFuncCallback a_callback)
+    {
+
     }
 
 #pragma endregion

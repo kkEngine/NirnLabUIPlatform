@@ -4,16 +4,16 @@ namespace NL::CEF
 {
     void NirnLabSubprocessCefApp::InitLog(std::filesystem::path a_logDirPath)
     {
-        const auto level = spdlog::level::info;
+        auto level = spdlog::level::info;
         a_logDirPath /= fmt::format("{}.log"sv, CEF_SUBPROCESS_PROJECT_NAME);
         auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(a_logDirPath.string(), true);
+        auto log = std::make_shared<spdlog::logger>("global log"s, std::move(sink));
 
 #ifdef _DEBUG
-        const auto level = spdlog::level::trace;
-        auto sink = std::make_shared<spdlog::sinks::msvc_sink_mt>();
+        level = spdlog::level::trace;
+        log->sinks().push_back(std::make_shared<spdlog::sinks::msvc_sink_mt>());
 #endif
 
-        auto log = std::make_shared<spdlog::logger>("global log"s, std::move(sink));
         log->set_level(level);
         log->flush_on(level);
 
@@ -24,6 +24,12 @@ namespace NL::CEF
     void NirnLabSubprocessCefApp::OnBeforeCommandLineProcessing(CefString const& process_type,
                                                                 CefRefPtr<CefCommandLine> command_line)
     {
+        const auto logDir = command_line->GetSwitchValue("log-directory");
+        if (!logDir.empty())
+        {
+            InitLog(logDir.ToWString());
+        }
+
         DWORD mainProcessId = std::stoi(command_line->GetSwitchValue("main-process-id").ToWString());
         if (mainProcessId)
         {
@@ -40,12 +46,6 @@ namespace NL::CEF
 
                 ::TerminateProcess(::GetCurrentProcess(), EXIT_SUCCESS);
             });
-        }
-
-        const auto logDir = command_line->GetSwitchValue("log-directory");
-        if (!logDir.empty())
-        {
-            InitLog(logDir.ToWString());
         }
     }
 
@@ -97,7 +97,7 @@ namespace NL::CEF
         while (addFuncInfo != nullptr)
         {
             ++functionsCount;
-            if (!addFuncInfo->objectName.empty())
+            if (!addFuncInfo->objectName.empty() || addFuncInfo->objectName != IPC_JS_WINDOW_OBJECT_NAME)
             {
                 auto objectValue = currentObjectValue->GetValue(addFuncInfo->objectName);
                 if (objectValue == nullptr || objectValue->IsNull() || objectValue->IsUndefined())

@@ -1,5 +1,9 @@
 #pragma once
 
+#define JS_EXECUTE_URL "Skyrim"
+
+#include "JS/Types.h"
+
 namespace NL::CEF
 {
     class IBrowser
@@ -37,6 +41,7 @@ namespace NL::CEF
         virtual void __cdecl ToggleBrowserFocusByKeys(const std::uint32_t a_keyCode1, const std::uint32_t a_keyCode2) = 0;
 
         virtual void __cdecl LoadBrowserURL(const char* a_url) = 0;
-        virtual void __cdecl SendBrowserMsg() = 0;
+        virtual void __cdecl ExecuteJavaScript(const char* a_script, const char* a_scriptUrl = JS_EXECUTE_URL) = 0;
+        virtual void __cdecl AddFunctionCallback(const std::string& a_objectName, const std::string& a_funcName, NL::JS::JSFuncCallback a_callback) = 0;
     };
 }

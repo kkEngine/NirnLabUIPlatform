@@ -14,12 +14,12 @@ namespace NL::CEF
 
     CefRefPtr<CefBrowser> NirnLabCefClient::GetBrowser()
     {
-        return m_pCefBrowser;
+        return m_cefBrowser;
     }
 
     bool NirnLabCefClient::IsBrowserReady()
     {
-        return m_pCefBrowser != nullptr;
+        return m_cefBrowser != nullptr;
     }
 
     CefRefPtr<CefLifeSpanHandler> NirnLabCefClient::GetLifeSpanHandler()
@@ -34,6 +34,6 @@ namespace NL::CEF
 
     void NirnLabCefClient::OnAfterCreated(CefRefPtr<CefBrowser> browser)
     {
-        m_pCefBrowser = browser;
+        m_cefBrowser = browser;
     }
 }

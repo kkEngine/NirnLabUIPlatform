@@ -9,6 +9,8 @@
 
 namespace NL::CEF
 {
+    class NirnLabCefClient;
+
     class CEFBrowser : public IBrowser,
                        public RE::MenuEventHandler
     {
@@ -63,7 +65,8 @@ namespace NL::CEF
         void __cdecl ToggleBrowserFocusByKeys(const std::uint32_t a_keyCode1, const std::uint32_t a_keyCode2) override;
 
         void __cdecl LoadBrowserURL(const char* a_url) override;
-        void __cdecl SendBrowserMsg() override;
+        void __cdecl ExecuteJavaScript(const char* a_script, const char* a_scriptUrl = JS_EXECUTE_URL) override;
+        void __cdecl AddFunctionCallback(const std::string& a_objectName, const std::string& a_funcName, NL::JS::JSFuncCallback a_callback) override;
 
         // RE::MenuEventHandler
         bool CanProcess(RE::InputEvent* a_event) override;

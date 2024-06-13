@@ -50,6 +50,7 @@ extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() {
 #include "Menus/MultiLayerMenu.h"
 #include "Menus/CEFMenu.h"
 #include "Hooks/WinProcHook.h"
+#include "JS/JSFunctionStorage.h"
 
 void BuildTestMenu()
 {
@@ -70,7 +71,11 @@ void BuildTestMenu()
     }
 
     //const auto cefMenu = std::make_shared<NL::Menus::CEFMenu>(spdlog::default_logger(), cefService, L"https://youtu.be/YPKhOyM1gZ8");
-    const auto cefMenu = std::make_shared<NL::Menus::CEFMenu>(logger, cefService, L"https://google.com");
+    //const auto cefMenu = std::make_shared<NL::Menus::CEFMenu>(logger, cefService, L"https://google.com");
+    auto jsFuncStorage = std::make_shared<NL::JS::JSFunctionStorage>();
+    jsFuncStorage->AddFunctionCallback(IPC_JS_WINDOW_OBJECT_NAME, "myval", nullptr);
+
+    const auto cefMenu = std::make_shared<NL::Menus::CEFMenu>(logger, cefService, jsFuncStorage, L"file:///123.html");
     cefMenu->GetBrowser()->ToggleBrowserFocusByKeys(RE::BSKeyboardDevice::Keys::kF6, 0);
     cefMenu->GetBrowser()->ToggleBrowserVisibleByKeys(RE::BSKeyboardDevice::Keys::kF7, 0);
     NL::Services::UIPlatformService::GetSingleton().GetNativeMenu()->AddSubMenu("CEF_DEFAULT", cefMenu);

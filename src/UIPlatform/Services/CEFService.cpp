@@ -45,12 +45,17 @@ namespace NL::Services
         s_cefApp = nullptr;
     }
 
-    bool CEFService::CreateBrowser(const CefRefPtr<CefClient> a_client, const CefString a_url)
+    bool CEFService::CreateBrowser(const CefRefPtr<CefClient> a_client,
+                                   const CefRefPtr<CefDictionaryValue> a_jsFuncInfo,
+                                   const CefString a_url)
     {
-        return CreateBrowser(a_client, a_url, m_cefSettingsProvider);
+        return CreateBrowser(a_client, a_jsFuncInfo, a_url, m_cefSettingsProvider);
     }
 
-    bool CEFService::CreateBrowser(const CefRefPtr<CefClient> a_client, const CefString a_url, const std::shared_ptr<NL::Providers::ICEFSettingsProvider> a_cefSettingsProvider)
+    bool CEFService::CreateBrowser(const CefRefPtr<CefClient> a_client,
+                                   const CefRefPtr<CefDictionaryValue> a_jsFuncInfo,
+                                   const CefString a_url,
+                                   const std::shared_ptr<NL::Providers::ICEFSettingsProvider> a_cefSettingsProvider)
     {
         if (a_cefSettingsProvider == nullptr)
         {
@@ -63,7 +68,7 @@ namespace NL::Services
             a_client,
             a_url,
             a_cefSettingsProvider->GetCefBrowserSettings(),
-            nullptr,
+            a_jsFuncInfo,
             nullptr);
 
         if (!result)

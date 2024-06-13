@@ -5,6 +5,7 @@ namespace NL::Menus
     CEFMenu::CEFMenu(
         std::shared_ptr<spdlog::logger> a_logger,
         std::shared_ptr<NL::Services::CEFService> a_cefService,
+        std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage,
         std::wstring_view a_startUrl)
     {
         ThrowIfNullptr(CEFMenu, a_logger);
@@ -13,8 +14,11 @@ namespace NL::Menus
         ThrowIfNullptr(CEFMenu, a_cefService);
         m_cefService = a_cefService;
 
+        ThrowIfNullptr(CEFMenu, a_jsFuncStorage);
+        m_jsFuncStorage = a_jsFuncStorage;
+
         const auto cefClient = CefRefPtr<NL::CEF::NirnLabCefClient>(new NL::CEF::NirnLabCefClient());
-        if (m_cefService->CreateBrowser(cefClient, CefString(a_startUrl.data())))
+        if (m_cefService->CreateBrowser(cefClient, m_jsFuncStorage->ConvertToCefDictionary(), CefString(a_startUrl.data())))
         {
             m_cefBrowser = std::make_shared<NL::CEF::CEFBrowser>(m_logger, cefClient);
             m_cefRenderLayer = m_cefBrowser->GetCefClient()->GetRenderLayer();

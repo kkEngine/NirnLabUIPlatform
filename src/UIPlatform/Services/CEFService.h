@@ -22,7 +22,12 @@ namespace NL::Services
 
         bool CEFInitialize(CefRefPtr<CefApp> a_cefApp);
         void CEFShutdown();
-        bool CreateBrowser(const CefRefPtr<CefClient> a_client, const CefString a_url);
-        bool CreateBrowser(const CefRefPtr<CefClient> a_client, const CefString a_url, const std::shared_ptr<NL::Providers::ICEFSettingsProvider> a_cefSettingsProvider);
+        bool CreateBrowser(const CefRefPtr<CefClient> a_client,
+                           const CefRefPtr<CefDictionaryValue> a_jsFuncInfo,
+                           const CefString a_url);
+        bool CreateBrowser(const CefRefPtr<CefClient> a_client,
+                           const CefRefPtr<CefDictionaryValue> a_jsFuncInfo,
+                           const CefString a_url,
+                           const std::shared_ptr<NL::Providers::ICEFSettingsProvider> a_cefSettingsProvider);
     };
 }

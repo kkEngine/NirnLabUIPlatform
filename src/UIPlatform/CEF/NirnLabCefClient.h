@@ -13,7 +13,7 @@ namespace NL::CEF
 
       protected:
         std::shared_ptr<NL::Render::CEFCopyRenderLayer> m_cefRenderLayer = nullptr;
-        CefRefPtr<CefBrowser> m_pCefBrowser = nullptr;
+        CefRefPtr<CefBrowser> m_cefBrowser = nullptr;
 
       public:
         NirnLabCefClient();
