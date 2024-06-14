@@ -20,5 +20,10 @@ namespace NL::Converters
         /// <param name="dictionary"></param>
         /// <returns></returns>
         static CefRefPtr<CefV8Value> to_v8object(CefRefPtr<CefDictionaryValue> const& dictionary);
+
+      public:
+        static CefRefPtr<CefValue> ConvertValue(const CefRefPtr<CefV8Value>& a_v8Value,
+                                                std::vector<CefRefPtr<CefV8Value>>& a_objectRefs,
+                                                CefString& a_exception);
     };
 }

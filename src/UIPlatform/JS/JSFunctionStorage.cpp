@@ -2,11 +2,11 @@
 
 namespace NL::JS
 {
-    void JSFunctionStorage::QueueAddFunctionCallback(const std::string& a_objectName, const std::string& a_funcName, JSFuncCallback a_callback)
+    void JSFunctionStorage::QueueAddFunctionCallback(const std::string& a_objectName, const std::string& a_funcName, JSFuncCallbackData a_callbackData)
     {
         {
             std::lock_guard<std::mutex> lock(m_dequeMutex);
-            const auto newItem = std::make_shared<QueueItem>(QueueItem::OpCodes::AddOrReplace, a_objectName, a_funcName, a_callback);
+            const auto newItem = std::make_shared<QueueItem>(QueueItem::OpCodes::AddOrReplace, a_objectName, a_funcName, a_callbackData);
             m_deque.push_back(newItem);
         }
         OnQueueItemAdded();
@@ -48,7 +48,7 @@ namespace NL::JS
             switch (qItem->opCode)
             {
             case QueueItem::OpCodes::AddOrReplace:
-                AddFunctionCallback(qItem->objectName, qItem->functionName, qItem->functionCallback);
+                AddFunctionCallback(qItem->objectName, qItem->functionName, qItem->functionCallbackData);
                 break;
             case QueueItem::OpCodes::Remove:
                 RemoveFunctionCallback(qItem->objectName, qItem->functionName);
@@ -64,24 +64,24 @@ namespace NL::JS
         }
     }
 
-    bool JSFunctionStorage::AddFunctionCallback(const std::string& a_objectName, const std::string& a_funcName, JSFuncCallback a_callback)
+    bool JSFunctionStorage::AddFunctionCallback(const std::string& a_objectName, const std::string& a_funcName, JSFuncCallbackData a_callbackData)
     {
         std::lock_guard<std::mutex> lock(m_funcCallbackMapMutex);
         const auto objIt = m_funcCallbackMap.find(a_objectName);
         if (objIt == m_funcCallbackMap.end())
         {
-            m_funcCallbackMap.insert({a_objectName, {{a_funcName, a_callback}}});
+            m_funcCallbackMap.insert({a_objectName, {{a_funcName, a_callbackData}}});
             return true;
         }
 
         const auto funcIt = objIt->second.find(a_funcName);
         if (funcIt == objIt->second.end())
         {
-            objIt->second.insert({a_funcName, a_callback});
+            objIt->second.insert({a_funcName, a_callbackData});
             return true;
         }
 
-        funcIt->second = a_callback;
+        funcIt->second = a_callbackData;
         return false;
     }
 
@@ -110,50 +110,50 @@ namespace NL::JS
         m_funcCallbackMap.clear();
     }
 
-    JSFuncCallback JSFunctionStorage::GetFunctionCallback(const std::string& a_objectName, const std::string& a_funcName)
+    JSFuncCallbackData JSFunctionStorage::GetFunctionCallbackData(const std::string& a_objectName, const std::string& a_funcName)
     {
         std::lock_guard<std::mutex> lock(m_funcCallbackMapMutex);
         const auto objIt = m_funcCallbackMap.find(a_objectName);
         if (objIt == m_funcCallbackMap.end())
         {
-            return nullptr;
+            return {};
         }
 
         const auto funcIt = objIt->second.find(a_funcName);
         if (funcIt == objIt->second.end())
         {
-            return nullptr;
+            return {};
         }
 
         return funcIt->second;
     }
 
-    void JSFunctionStorage::ExecuteFunctionCallback(const std::string& a_objectName, const std::string& a_funcName, bool a_executeInGameThread, const char** a_args, int a_argsCount)
+    void JSFunctionStorage::ExecuteFunctionCallback(const std::string& a_objectName, const std::string& a_funcName, const std::shared_ptr<char*[]> a_args, const size_t a_argsCount)
     {
-        const auto callback = GetFunctionCallback(a_objectName, a_funcName);
-        if (callback == nullptr)
+        const auto callbackData = GetFunctionCallbackData(a_objectName, a_funcName);
+        if (callbackData.callback == nullptr)
         {
             spdlog::error("{}: function callback is nullptr for {}.{}", NameOf(JSFunctionStorage), a_objectName.c_str(), a_funcName.c_str());
             return;
         }
 
-        if (a_executeInGameThread)
+        if (callbackData.executeInGameThread)
         {
             SKSE::GetTaskInterface()->AddTask([=]() {
-                callback(a_args, a_argsCount);
+                callbackData.callback(a_args.get(), a_argsCount);
             });
         }
         else
         {
             std::lock_guard<std::mutex> lock(m_funcCallbackMapMutex);
-            callback(a_args, a_argsCount);
+            callbackData.callback(a_args.get(), a_argsCount);
         }
     }
 
     CefRefPtr<CefDictionaryValue> JSFunctionStorage::ConvertToCefDictionary()
     {
         std::lock_guard<std::mutex> lock(m_funcCallbackMapMutex);
-        const auto result = CefRefPtr<CefDictionaryValue>(CefDictionaryValue::Create());
+        const auto result = CefDictionaryValue::Create();
 
         for (const auto& obj : m_funcCallbackMap)
         {

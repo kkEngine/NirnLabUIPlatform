@@ -3,6 +3,7 @@
 #include "PCH.h"
 #include "Render/CEFCopyRenderLayer.h"
 #include "Render/CEFRenderLayer.h"
+#include "CEF/IPCEventMediator.h"
 
 namespace NL::CEF
 {
@@ -23,9 +24,15 @@ namespace NL::CEF
         CefRefPtr<CefBrowser> GetBrowser();
         bool IsBrowserReady();
 
+        sigslot::signal<CefRefPtr<CefProcessMessage>> onIPCMessageReceived;
+
         // CefClient
         CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() override;
         CefRefPtr<CefRenderHandler> GetRenderHandler() override;
+        bool OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
+                                      CefRefPtr<CefFrame> frame,
+                                      CefProcessId source_process,
+                                      CefRefPtr<CefProcessMessage> message) override;
 
         // CefLifeSpanHandler
         void OnAfterCreated(CefRefPtr<CefBrowser> browser) override;

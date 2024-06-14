@@ -20,6 +20,17 @@ namespace NL::JS
                                      CefString& exception)
     {
         auto message = CefProcessMessage::Create(IPC_JS_FUNCTION_CALL_EVENT);
+        auto messageArgs = message->GetArgumentList();
+        auto funcArgs = CefListValue::Create();
+
+        std::vector<CefRefPtr<CefV8Value>> objectRefs;
+        for (size_t i = 0; i < arguments.size(); ++i)
+        {
+            funcArgs->SetValue(static_cast<int32_t>(i), NL::Converters::CEFValueConverter::ConvertValue(arguments[i], objectRefs, exception));
+        }
+        messageArgs->SetString(0, m_objectName);
+        messageArgs->SetString(1, name);
+        messageArgs->SetList(2, funcArgs);
         m_browser->GetMainFrame()->SendProcessMessage(PID_BROWSER, message);
 
         return true;

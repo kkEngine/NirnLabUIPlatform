@@ -5,8 +5,7 @@ namespace NL::Menus
     CEFMenu::CEFMenu(
         std::shared_ptr<spdlog::logger> a_logger,
         std::shared_ptr<NL::Services::CEFService> a_cefService,
-        std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage,
-        std::wstring_view a_startUrl)
+        std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage)
     {
         ThrowIfNullptr(CEFMenu, a_logger);
         m_logger = a_logger;
@@ -16,17 +15,33 @@ namespace NL::Menus
 
         ThrowIfNullptr(CEFMenu, a_jsFuncStorage);
         m_jsFuncStorage = a_jsFuncStorage;
+    }
 
-        const auto cefClient = CefRefPtr<NL::CEF::NirnLabCefClient>(new NL::CEF::NirnLabCefClient());
-        if (m_cefService->CreateBrowser(cefClient, m_jsFuncStorage->ConvertToCefDictionary(), CefString(a_startUrl.data())))
+    bool CEFMenu::StartBrowser(std::string_view a_url)
+    {
+        std::lock_guard<std::mutex> lock(m_startBrowserMutex);
+
+        bool result = true;
+        if (m_cefBrowser == nullptr)
         {
-            m_cefBrowser = std::make_shared<NL::CEF::CEFBrowser>(m_logger, cefClient);
-            m_cefRenderLayer = m_cefBrowser->GetCefClient()->GetRenderLayer();
+            const auto cefClient = CefRefPtr<NL::CEF::NirnLabCefClient>(new NL::CEF::NirnLabCefClient());
+            result = m_cefService->CreateBrowser(cefClient, m_jsFuncStorage->ConvertToCefDictionary(), CefString(a_url.data()));
+            if (result)
+            {
+                m_cefBrowser = std::make_shared<NL::CEF::CEFBrowser>(m_logger, cefClient);
+                m_cefRenderLayer = m_cefBrowser->GetCefClient()->GetRenderLayer();
+            }
+            else
+            {
+                m_logger->error("{}: failed to create browser", NameOf(CEFBrowser));
+            }
         }
         else
         {
-            m_logger->error("{}: failed to create browser", NameOf(CEFBrowser));
+            m_cefBrowser->LoadBrowserURL(a_url.data());
         }
+
+        return result;
     }
 
     std::shared_ptr<NL::CEF::IBrowser> CEFMenu::GetBrowser()

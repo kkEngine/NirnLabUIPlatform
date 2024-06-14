@@ -247,4 +247,93 @@ namespace NL::Converters
         }
         return obj;
     }
+
+    CefRefPtr<CefValue> CEFValueConverter::ConvertValue(const CefRefPtr<CefV8Value>& a_v8Value,
+                                                        std::vector<CefRefPtr<CefV8Value>>& a_objectRefs,
+                                                        CefString& a_exception)
+    {
+        auto result = CefValue::Create();
+        const auto repCount = std::count_if(
+            a_objectRefs.begin(),
+            a_objectRefs.end(),
+            [&](const CefRefPtr<CefV8Value>& a_value) {
+                return a_value->IsSame(a_v8Value);
+            });
+
+        if (repCount > 0)
+        {
+            a_exception = fmt::format("{}: trying to serialize circular reference", NameOf(CEFValueConverter::ConvertValue));
+            result->SetNull();
+            return result;
+        }
+
+        if (a_v8Value->IsArrayBuffer())
+        {
+            spdlog::warn("{}: can't serialize array buffer", NameOf(CEFValueConverter::ConvertValue));
+            result->SetNull();
+            return result;
+        }
+        else if (a_v8Value->IsPromise())
+        {
+            spdlog::warn("{}: can't serialize promise", NameOf(CEFValueConverter::ConvertValue));
+            result->SetNull();
+            return result;
+        }
+        else if (a_v8Value->IsFunction())
+        {
+            spdlog::warn("{}: can't serialize function", NameOf(CEFValueConverter::ConvertValue));
+            result->SetNull();
+            return result;
+        }
+        else if (a_v8Value->IsBool())
+        {
+            result->SetBool(a_v8Value->GetBoolValue());
+        }
+        else if (a_v8Value->IsInt() || a_v8Value->IsUInt())
+        {
+            result->SetInt(a_v8Value->GetIntValue());
+        }
+        else if (a_v8Value->IsDouble())
+        {
+            result->SetDouble(a_v8Value->GetDoubleValue());
+        }
+        else if (a_v8Value->IsNull())
+        {
+            result->SetNull();
+        }
+        else if (a_v8Value->IsString() || a_v8Value->IsDate())
+        {
+            result->SetString(a_v8Value->GetStringValue());
+        }
+        else if (a_v8Value->IsArray())
+        {
+            auto list = CefListValue::Create();
+
+            a_objectRefs.push_back(a_v8Value);
+            for (int i = 0; i < a_v8Value->GetArrayLength(); ++i)
+            {
+                list->SetValue(i, ConvertValue(a_v8Value->GetValue(i), a_objectRefs, a_exception));
+            }
+            a_objectRefs.pop_back();
+
+            result->SetList(list);
+        }
+        else if (a_v8Value->IsObject())
+        {
+            auto dict = CefDictionaryValue::Create();
+            CefDictionaryValue::KeyList keys;
+            a_v8Value->GetKeys(keys);
+
+            a_objectRefs.push_back(a_v8Value);
+            for (const auto& key : keys)
+            {
+                dict->SetValue(key, ConvertValue(a_v8Value->GetValue(key), a_objectRefs, a_exception));
+            }
+            a_objectRefs.pop_back();
+
+            result->SetDictionary(dict);
+        }
+
+        return result;
+    }
 }

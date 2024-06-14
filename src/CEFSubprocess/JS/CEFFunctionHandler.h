@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PCH.h"
+#include "Converters/CEFValueConverter.h"
 
 namespace NL::JS
 {

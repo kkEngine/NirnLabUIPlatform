@@ -32,6 +32,15 @@ namespace NL::CEF
         return m_cefRenderLayer.get();
     }
 
+    bool NirnLabCefClient::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
+                                                    CefRefPtr<CefFrame> frame,
+                                                    CefProcessId source_process,
+                                                    CefRefPtr<CefProcessMessage> message)
+    {
+        onIPCMessageReceived(message);
+        return true;
+    }
+
     void NirnLabCefClient::OnAfterCreated(CefRefPtr<CefBrowser> browser)
     {
         m_cefBrowser = browser;

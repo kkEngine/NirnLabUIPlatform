@@ -70,15 +70,22 @@ void BuildTestMenu()
         msgQ->AddMessage(NL::Menus::MultiLayerMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kShow, NULL);
     }
 
-    //const auto cefMenu = std::make_shared<NL::Menus::CEFMenu>(spdlog::default_logger(), cefService, L"https://youtu.be/YPKhOyM1gZ8");
-    //const auto cefMenu = std::make_shared<NL::Menus::CEFMenu>(logger, cefService, L"https://google.com");
+    // const auto cefMenu = std::make_shared<NL::Menus::CEFMenu>(spdlog::default_logger(), cefService, L"https://youtu.be/YPKhOyM1gZ8");
+    // const auto cefMenu = std::make_shared<NL::Menus::CEFMenu>(logger, cefService, L"https://google.com");
     auto jsFuncStorage = std::make_shared<NL::JS::JSFunctionStorage>();
-    jsFuncStorage->AddFunctionCallback(IPC_JS_WINDOW_OBJECT_NAME, "myval", nullptr);
+    jsFuncStorage->AddFunctionCallback(IPC_JS_WINDOW_OBJECT_NAME, "func", [](const char** arr, int argCount) {
+        spdlog::info("func");
+    });
+    jsFuncStorage->AddFunctionCallback(IPC_JS_WINDOW_OBJECT_NAME, "func2", [](const char** arr, int argCount) {
+        spdlog::info("func2");
+    });
 
-    const auto cefMenu = std::make_shared<NL::Menus::CEFMenu>(logger, cefService, jsFuncStorage, L"file:///123.html");
+    const auto cefMenu = std::make_shared<NL::Menus::CEFMenu>(logger, cefService, jsFuncStorage);
     cefMenu->GetBrowser()->ToggleBrowserFocusByKeys(RE::BSKeyboardDevice::Keys::kF6, 0);
     cefMenu->GetBrowser()->ToggleBrowserVisibleByKeys(RE::BSKeyboardDevice::Keys::kF7, 0);
     NL::Services::UIPlatformService::GetSingleton().GetNativeMenu()->AddSubMenu("CEF_DEFAULT", cefMenu);
+
+    cefMenu->StartBrowser("file:///123.html");
 }
 
 void TestCase()

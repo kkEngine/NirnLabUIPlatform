@@ -6,6 +6,7 @@
 #include "CEF/NirnLabCefClient.h"
 #include "Services/CEFService.h"
 #include "Hooks/WinProcHook.h"
+#include "JS/JSFunctionStorage.h"
 
 namespace NL::CEF
 {
@@ -17,11 +18,13 @@ namespace NL::CEF
       protected:
         std::shared_ptr<spdlog::logger> m_logger = nullptr;
         CefRefPtr<NirnLabCefClient> m_cefClient = nullptr;
+        std::shared_ptr<NL::JS::JSFunctionStorage> m_jsFuncStorage = nullptr;
 
       public:
         CEFBrowser(
             std::shared_ptr<spdlog::logger> a_logger,
-            CefRefPtr<NirnLabCefClient> a_cefClient);
+            CefRefPtr<NirnLabCefClient> a_cefClient,
+            std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage);
         ~CEFBrowser() override = default;
 
         bool m_isFocused = false;
@@ -66,7 +69,7 @@ namespace NL::CEF
 
         void __cdecl LoadBrowserURL(const char* a_url) override;
         void __cdecl ExecuteJavaScript(const char* a_script, const char* a_scriptUrl = JS_EXECUTE_URL) override;
-        void __cdecl AddFunctionCallback(const std::string& a_objectName, const std::string& a_funcName, NL::JS::JSFuncCallback a_callback) override;
+        void __cdecl AddFunctionCallback(const char* a_objectName, const char* a_funcName, NL::JS::JSFuncCallbackData a_callbackData) override;
 
         // RE::MenuEventHandler
         bool CanProcess(RE::InputEvent* a_event) override;

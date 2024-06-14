@@ -4,7 +4,8 @@ namespace NL::CEF
 {
     CEFBrowser::CEFBrowser(
         std::shared_ptr<spdlog::logger> a_logger,
-        CefRefPtr<NirnLabCefClient> a_cefClient)
+        CefRefPtr<NirnLabCefClient> a_cefClient,
+        std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage)
     {
         ThrowIfNullptr(CEFBrowser, a_logger);
         m_logger = a_logger;
@@ -12,11 +13,23 @@ namespace NL::CEF
         ThrowIfNullptr(CEFBrowser, a_cefClient);
         m_cefClient = a_cefClient;
 
+        ThrowIfNullptr(CEFBrowser, a_jsFuncStorage);
+        m_jsFuncStorage = a_jsFuncStorage;
+
         ZeroMemory(&m_lastCefMouseEvent, sizeof(CefMouseEvent));
         ZeroMemory(&m_lastCharCefKeyEvent, sizeof(CefKeyEvent));
 
         onWndInactiveConnection = NL::Hooks::WinProcHook::OnWndInactive.connect([&]() {
             ClearCefKeyModifiers();
+        });
+
+        m_cefClient->onIPCMessageReceived.connect([&](CefRefPtr<CefProcessMessage> a_message) {
+            const auto ipcArgs = a_message->GetArgumentList();
+            const auto objName = ipcArgs->GetString(0).ToString();
+            const auto funcName = ipcArgs->GetString(1).ToString();
+            const auto argList = ipcArgs->GetList(2);
+
+            // m_jsFuncStorage->ExecuteFunctionCallback(objName, funcName, funcArgs, argList->GetSize());
         });
     }
 
@@ -227,9 +240,10 @@ namespace NL::CEF
         m_cefClient->GetBrowser()->GetMainFrame()->ExecuteJavaScript(a_script, a_scriptUrl, 0);
     }
 
-    void __cdecl CEFBrowser::AddFunctionCallback(const std::string& a_objectName, const std::string& a_funcName, NL::JS::JSFuncCallback a_callback)
+    void __cdecl CEFBrowser::AddFunctionCallback(const char* a_objectName, const char* a_funcName, NL::JS::JSFuncCallbackData a_callbackData)
     {
-
+        m_jsFuncStorage->AddFunctionCallback(a_objectName, a_funcName, a_callbackData);
+        // send IPC message to RenderProcess if started
     }
 
 #pragma endregion

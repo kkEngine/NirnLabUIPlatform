@@ -115,6 +115,7 @@ namespace NL::CEF
             addFuncInfo = m_funcQueue.GetNext();
         }
 
+        // Sometimes this line doesn't print info. I don't know why (wrong thread?).
         spdlog::info("{}: registered {} functions for the browser with id {}", NameOf(OnContextCreated), functionsCount, browser->GetIdentifier());
     }
 
