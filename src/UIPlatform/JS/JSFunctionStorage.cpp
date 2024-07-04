@@ -2,7 +2,9 @@
 
 namespace NL::JS
 {
-    void JSFunctionStorage::QueueAddFunctionCallback(const std::string& a_objectName, const std::string& a_funcName, JSFuncCallbackData a_callbackData)
+    void JSFunctionStorage::QueueAddFunctionCallback(const std::string& a_objectName,
+                                                     const std::string& a_funcName,
+                                                     JSFuncCallbackData a_callbackData)
     {
         {
             std::lock_guard<std::mutex> lock(m_dequeMutex);
@@ -64,9 +66,11 @@ namespace NL::JS
         }
     }
 
-    bool JSFunctionStorage::AddFunctionCallback(const std::string& a_objectName, const std::string& a_funcName, JSFuncCallbackData a_callbackData)
+    bool JSFunctionStorage::AddFunctionCallback(const std::string& a_objectName,
+                                                const std::string& a_funcName,
+                                                JSFuncCallbackData a_callbackData)
     {
-        std::lock_guard<std::mutex> lock(m_funcCallbackMapMutex);
+        std::lock_guard lock(m_funcCallbackMapMutex);
         const auto objIt = m_funcCallbackMap.find(a_objectName);
         if (objIt == m_funcCallbackMap.end())
         {
@@ -87,7 +91,7 @@ namespace NL::JS
 
     bool JSFunctionStorage::RemoveFunctionCallback(const std::string& a_objectName, const std::string& a_funcName)
     {
-        std::lock_guard<std::mutex> lock(m_funcCallbackMapMutex);
+        std::lock_guard lock(m_funcCallbackMapMutex);
         const auto objIt = m_funcCallbackMap.find(a_objectName);
         if (objIt == m_funcCallbackMap.end())
         {
@@ -106,13 +110,13 @@ namespace NL::JS
 
     void JSFunctionStorage::ClearFunctionCallback()
     {
-        std::lock_guard<std::mutex> lock(m_funcCallbackMapMutex);
+        std::lock_guard lock(m_funcCallbackMapMutex);
         m_funcCallbackMap.clear();
     }
 
     JSFuncCallbackData JSFunctionStorage::GetFunctionCallbackData(const std::string& a_objectName, const std::string& a_funcName)
     {
-        std::lock_guard<std::mutex> lock(m_funcCallbackMapMutex);
+        std::lock_guard lock(m_funcCallbackMapMutex);
         const auto objIt = m_funcCallbackMap.find(a_objectName);
         if (objIt == m_funcCallbackMap.end())
         {
@@ -128,8 +132,11 @@ namespace NL::JS
         return funcIt->second;
     }
 
-    void JSFunctionStorage::ExecuteFunctionCallback(const std::string& a_objectName, const std::string& a_funcName, const std::shared_ptr<char*[]> a_args, const size_t a_argsCount)
+    void JSFunctionStorage::ExecuteFunctionCallback(const std::string& a_objectName,
+                                                    const std::string& a_funcName,
+                                                    std::shared_ptr<std::vector<std::string>> a_funcArgs)
     {
+        std::lock_guard lock(m_funcCallbackMapMutex);
         const auto callbackData = GetFunctionCallbackData(a_objectName, a_funcName);
         if (callbackData.callback == nullptr)
         {
@@ -140,19 +147,23 @@ namespace NL::JS
         if (callbackData.executeInGameThread)
         {
             SKSE::GetTaskInterface()->AddTask([=]() {
-                callbackData.callback(a_args.get(), a_argsCount);
+                std::lock_guard lock(m_funcCallbackMapMutex);
+                const auto innerCallbackData = GetFunctionCallbackData(a_objectName, a_funcName);
+
+                auto argsCharArray = NL::Converters::CefValueToJSONConverter::ConvertToCharArray(a_funcArgs);
+                innerCallbackData.callback(argsCharArray.data(), static_cast<int>(argsCharArray.size()));
             });
         }
         else
         {
-            std::lock_guard<std::mutex> lock(m_funcCallbackMapMutex);
-            callbackData.callback(a_args.get(), a_argsCount);
+            auto argsCharArray = NL::Converters::CefValueToJSONConverter::ConvertToCharArray(a_funcArgs);
+            callbackData.callback(argsCharArray.data(), static_cast<int>(argsCharArray.size()));
         }
     }
 
     CefRefPtr<CefDictionaryValue> JSFunctionStorage::ConvertToCefDictionary()
     {
-        std::lock_guard<std::mutex> lock(m_funcCallbackMapMutex);
+        std::lock_guard lock(m_funcCallbackMapMutex);
         const auto result = CefDictionaryValue::Create();
 
         for (const auto& obj : m_funcCallbackMap)

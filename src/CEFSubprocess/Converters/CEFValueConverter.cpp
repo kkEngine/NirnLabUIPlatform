@@ -250,6 +250,7 @@ namespace NL::Converters
 
     CefRefPtr<CefValue> CEFValueConverter::ConvertValue(const CefRefPtr<CefV8Value>& a_v8Value,
                                                         std::vector<CefRefPtr<CefV8Value>>& a_objectRefs,
+                                                        std::unordered_map<std::string, std::uint32_t>& a_warnMap,
                                                         CefString& a_exception)
     {
         auto result = CefValue::Create();
@@ -269,19 +270,19 @@ namespace NL::Converters
 
         if (a_v8Value->IsArrayBuffer())
         {
-            spdlog::warn("{}: can't serialize array buffer", NameOf(CEFValueConverter::ConvertValue));
+            a_warnMap.emplace(fmt::format("{}: can't serialize array buffer", NameOf(CEFValueConverter::ConvertValue)), 0).first->second++;
             result->SetNull();
             return result;
         }
         else if (a_v8Value->IsPromise())
         {
-            spdlog::warn("{}: can't serialize promise", NameOf(CEFValueConverter::ConvertValue));
+            a_warnMap.emplace(fmt::format("{}: can't serialize promise", NameOf(CEFValueConverter::ConvertValue)), 0).first->second++;
             result->SetNull();
             return result;
         }
         else if (a_v8Value->IsFunction())
         {
-            spdlog::warn("{}: can't serialize function", NameOf(CEFValueConverter::ConvertValue));
+            a_warnMap.emplace(fmt::format("{}: can't serialize function", NameOf(CEFValueConverter::ConvertValue)), 0).first->second++;
             result->SetNull();
             return result;
         }
@@ -312,7 +313,7 @@ namespace NL::Converters
             a_objectRefs.push_back(a_v8Value);
             for (int i = 0; i < a_v8Value->GetArrayLength(); ++i)
             {
-                list->SetValue(i, ConvertValue(a_v8Value->GetValue(i), a_objectRefs, a_exception));
+                list->SetValue(i, ConvertValue(a_v8Value->GetValue(i), a_objectRefs, a_warnMap, a_exception));
             }
             a_objectRefs.pop_back();
 
@@ -327,7 +328,7 @@ namespace NL::Converters
             a_objectRefs.push_back(a_v8Value);
             for (const auto& key : keys)
             {
-                dict->SetValue(key, ConvertValue(a_v8Value->GetValue(key), a_objectRefs, a_exception));
+                dict->SetValue(key, ConvertValue(a_v8Value->GetValue(key), a_objectRefs, a_warnMap, a_exception));
             }
             a_objectRefs.pop_back();
 

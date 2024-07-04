@@ -7,6 +7,7 @@
 #include "Services/CEFService.h"
 #include "Hooks/WinProcHook.h"
 #include "JS/JSFunctionStorage.h"
+#include "Converters/CefValueToJSONConverter.h"
 
 namespace NL::CEF
 {

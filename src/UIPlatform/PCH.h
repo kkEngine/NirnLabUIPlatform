@@ -58,6 +58,9 @@ namespace stl
 #include <include/cef_client.h>
 #include <include/cef_version.h>
 
+// nlohmann-json (https://github.com/nlohmann/json)
+#include "nlohmann/json.hpp"
+
 // sigslots (https://github.com/palacaze/sigslot)
 #include "sigslot/signal.hpp"
 

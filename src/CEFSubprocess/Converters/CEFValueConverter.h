@@ -24,6 +24,7 @@ namespace NL::Converters
       public:
         static CefRefPtr<CefValue> ConvertValue(const CefRefPtr<CefV8Value>& a_v8Value,
                                                 std::vector<CefRefPtr<CefV8Value>>& a_objectRefs,
+                                                std::unordered_map<std::string, std::uint32_t>& a_warnMap,
                                                 CefString& a_exception);
     };
 }

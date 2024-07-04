@@ -29,7 +29,8 @@ namespace NL::CEF
             const auto funcName = ipcArgs->GetString(1).ToString();
             const auto argList = ipcArgs->GetList(2);
 
-            // m_jsFuncStorage->ExecuteFunctionCallback(objName, funcName, funcArgs, argList->GetSize());
+            const auto params = NL::Converters::CefValueToJSONConverter::ConvertToJSONStringArgs(argList);
+            m_jsFuncStorage->ExecuteFunctionCallback(objName, funcName, params);
         });
     }
 
