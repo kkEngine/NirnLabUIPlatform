@@ -1,7 +1,6 @@
 #pragma once
 
 #include "PCH.h"
-#include "IBrowser.h"
 #include "Render/CEFRenderLayer.h"
 #include "CEF/NirnLabCefClient.h"
 #include "Services/CEFService.h"
@@ -69,7 +68,7 @@ namespace NL::CEF
         void __cdecl ToggleBrowserFocusByKeys(const std::uint32_t a_keyCode1, const std::uint32_t a_keyCode2) override;
 
         void __cdecl LoadBrowserURL(const char* a_url) override;
-        void __cdecl ExecuteJavaScript(const char* a_script, const char* a_scriptUrl = JS_EXECUTE_URL) override;
+        void __cdecl ExecuteJavaScript(const char* a_script, const char* a_scriptUrl = JS_EXECUTE_SCRIPT_URL) override;
         void __cdecl AddFunctionCallback(const char* a_objectName, const char* a_funcName, NL::JS::JSFuncCallbackData a_callbackData) override;
 
         // RE::MenuEventHandler

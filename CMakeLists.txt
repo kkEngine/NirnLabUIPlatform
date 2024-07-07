@@ -1,8 +1,12 @@
 cmake_minimum_required(VERSION 3.23)
 
 option(BUILD_AS_SHARED "Build as dll skse plugin else build as static lib" ON)
-set(MAJOR_VERSION 0)
-set(MINOR_VERSION 1)
+
+# Version
+set(LIB_MAJOR_VERSION 0)
+set(LIB_MINOR_VERSION 1)
+set(API_MAJOR_VERSION 0)
+set(API_MINOR_VERSION 1)
 
 # VCPKG config
 string(REPLACE "\\" "/" ENV_VCPKG_ROOT "$ENV{VCPKG_ROOT}")
@@ -22,7 +26,7 @@ add_compile_definitions(WINDOWS)
 project(
     NirnLabUIPlatform
     LANGUAGES CXX
-    VERSION ${MAJOR_VERSION}.${MINOR_VERSION}.0
+    VERSION ${LIB_MAJOR_VERSION}.${LIB_MINOR_VERSION}
 )
 include(${CMAKE_SOURCE_DIR}/cmake/set_compile_options.cmake)
 set(CMAKE_GENERATOR_PLATFORM x64)
@@ -46,7 +50,6 @@ file(
     GLOB 
     proj_stuff
         ${CMAKE_SOURCE_DIR}/.clang-format
-        ${CMAKE_CURRENT_BINARY_DIR}/include/Version.h
         ${CMAKE_CURRENT_BINARY_DIR}/version.rc
 )
 source_group(" " FILES ${proj_stuff})
@@ -177,6 +180,13 @@ add_dependencies(${CEFSubprocessProjectName} CefLibraryFiles)
 set(UIPlatformProjectName "NirnLabUIPlatform")
 
 file(
+    COPY
+        ${CMAKE_CURRENT_BINARY_DIR}/include/Version.h
+    DESTINATION
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/UIPlatform/NirnLabUIPlatformAPI
+)
+
+file(
     GLOB_RECURSE
     UIPlatformProjectName_src
         "src/UIPlatform/**.h"
@@ -255,7 +265,12 @@ if(BUILD_AS_SHARED)
         TREE "${CMAKE_CURRENT_SOURCE_DIR}/src/UIPlugin"
         FILES ${UIPluginProjectName_src}
     )
-    list(APPEND UIPluginProjectName_src ${proj_stuff})
+    list(
+        APPEND
+        UIPluginProjectName_src
+            ${proj_stuff}
+            ${CMAKE_CURRENT_BINARY_DIR}/include/Version.h
+    )
 
     add_library(${UIPluginProjectName} SHARED ${UIPluginProjectName_src})
     set_target_properties(

@@ -1,12 +1,22 @@
 #pragma once
 
-namespace Version {
-    inline constexpr std::size_t MAJOR = @PROJECT_VERSION_MAJOR@;
-    inline constexpr std::size_t MINOR = @PROJECT_VERSION_MINOR@;
-    inline constexpr std::size_t PATCH = @PROJECT_VERSION_PATCH@;
-    inline constexpr std::size_t BETA = 0;    
-    inline constexpr auto PROJECT_NAME = "@PROJECT_NAME@"sv;
+#include <cstdint>
 
-    inline constexpr auto AS_STRING = "@PROJECT_VERSION@"sv;
-    inline constexpr std::uint32_t AS_INT = (static_cast<std::uint32_t>((MAJOR * 1000000) + (MINOR * 10000) + (PATCH * 100) + (BETA)));
+namespace LibVersion
+{
+    inline constexpr std::uint32_t MAJOR = @PROJECT_VERSION_MAJOR@;
+    inline constexpr std::uint32_t MINOR = @PROJECT_VERSION_MINOR@;   
+    inline constexpr auto PROJECT_NAME = "@PROJECT_NAME@";
+
+    inline constexpr auto AS_STRING = "@PROJECT_VERSION@";
+    inline constexpr std::uint32_t AS_INT = (static_cast<std::uint32_t>(MAJOR * 100000 + MINOR));
+}
+
+namespace APIVersion
+{
+    inline constexpr std::uint32_t MAJOR = @API_MAJOR_VERSION@;
+    inline constexpr std::uint32_t MINOR = @API_MINOR_VERSION@;
+
+    inline constexpr auto AS_STRING = "@API_MAJOR_VERSION@.@API_MINOR_VERSION@";
+    inline constexpr std::uint32_t AS_INT = (static_cast<std::uint32_t>(MAJOR * 100000 + MINOR));
 }

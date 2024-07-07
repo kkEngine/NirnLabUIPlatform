@@ -1,7 +1,6 @@
 #pragma once
 
 #include "PCH.h"
-#include "JS/Types.h"
 #include "Converters/CefValueToJSONConverter.h"
 
 namespace NL::JS

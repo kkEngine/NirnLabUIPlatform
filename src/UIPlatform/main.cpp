@@ -16,7 +16,7 @@ void InitLog()
         SKSE::stl::report_and_fail("Failed to find standard logging directory"sv);
     }
 
-    *path /= fmt::format("{}.log"sv, Version::PROJECT_NAME);
+    *path /= fmt::format("{}.log"sv, LibVersion::PROJECT_NAME);
     auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true);
 #endif
 
@@ -30,8 +30,8 @@ void InitLog()
 
 extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() {
     SKSE::PluginVersionData v{};
-    v.pluginVersion = Version::AS_INT;
-    v.PluginName(Version::PROJECT_NAME);
+    v.pluginVersion = LibVersion::AS_INT;
+    v.PluginName(LibVersion::PROJECT_NAME);
     v.AuthorName("kkEngine"sv);
     v.CompatibleVersions({SKSE::RUNTIME_SSE_1_6_640});
     v.UsesAddressLibrary(true);

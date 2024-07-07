@@ -5,7 +5,6 @@
 #include "Common/Singleton.h"
 #include "Render/IRenderLayer.h"
 #include "CEF/NirnLabCefApp.h"
-#include "CEF/IBrowser.h"
 #include "CEF/CEFBrowser.h"
 #include "Menus/MultiLayerMenu.h"
 

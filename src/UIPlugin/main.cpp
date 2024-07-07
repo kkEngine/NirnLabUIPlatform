@@ -153,8 +153,8 @@ static inline TFunc ExecLibFunc(const char* a_funcName)
 
 extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() {
     SKSE::PluginVersionData v{};
-    v.pluginVersion = Version::AS_INT;
-    v.PluginName(Version::PROJECT_NAME);
+    v.pluginVersion = LibVersion::AS_INT;
+    v.PluginName(LibVersion::PROJECT_NAME);
     v.AuthorName("kkEngine"sv);
     v.CompatibleVersions({SKSE::RUNTIME_SSE_1_6_640});
     v.UsesAddressLibrary(true);

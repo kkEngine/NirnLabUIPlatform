@@ -5,13 +5,11 @@
 #include <shlobj.h>
 #include <iostream>
 
-#include "Version.h"
-
 namespace NL::Utils
 {
     static inline std::filesystem::path GetTempAppDataPath()
     {
-        auto appPath = std::filesystem::temp_directory_path() / Version::PROJECT_NAME;
+        auto appPath = std::filesystem::temp_directory_path() / LibVersion::PROJECT_NAME;
         CreateDirectoryW(appPath.wstring().c_str(), 0);
         return appPath;
     }
@@ -23,7 +21,7 @@ namespace NL::Utils
 
         if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &pwStr)))
         {
-            fsPath = std::filesystem::path(pwStr) / Version::PROJECT_NAME;
+            fsPath = std::filesystem::path(pwStr) / LibVersion::PROJECT_NAME;
         }
         CoTaskMemFree(pwStr);
         return fsPath;
