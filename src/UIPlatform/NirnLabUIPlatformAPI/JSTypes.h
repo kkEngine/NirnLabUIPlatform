@@ -9,4 +9,11 @@ namespace NL::JS
         JSFuncCallback callback = nullptr;
         bool executeInGameThread = true;
     };
+
+    struct JSFuncInfo
+    {
+        const char* objectName = nullptr;
+        const char* funcName = nullptr;
+        JSFuncCallbackData callbackData;
+    };
 }

@@ -42,5 +42,8 @@ namespace NL::Menus
         bool CanProcess(RE::InputEvent* a_event) override;
         bool ProcessMouseMove(RE::MouseMoveEvent* a_event) override;
         bool ProcessButton(RE::ButtonEvent* a_event) override;
+
+        // NL::Menus::ISubMenu
+        SubMenuType GetMenuType() override;
     };
 }

@@ -53,21 +53,40 @@ namespace NL::Menus
     bool MultiLayerMenu::AddSubMenu(std::string_view a_menuName, std::shared_ptr<ISubMenu> a_subMenu)
     {
         std::lock_guard<std::mutex> lock(m_mapMenuMutex);
-        if (m_menuMap.contains(a_menuName.data()))
+        const std::string menuName = a_menuName.data();
+        if (m_menuMap.contains(menuName))
         {
             return false;
         }
 
-        m_menuMap.insert({a_menuName.data(), a_subMenu});
+        m_menuMap.insert({menuName, a_subMenu});
         a_subMenu->Init(&m_renderData);
         return true;
     }
 
-    bool MultiLayerMenu::RemoveSubMenu(std::string_view a_menuName)
+    std::shared_ptr<ISubMenu> MultiLayerMenu::GetSubMenu(const std::string& a_menuName)
     {
         std::lock_guard<std::mutex> lock(m_mapMenuMutex);
-        const auto menuIt = m_menuMap.find(a_menuName.data());
-        return m_menuMap.erase(a_menuName.data()) > 0;
+        const auto menuIt = m_menuMap.find(a_menuName);
+        if (menuIt != m_menuMap.end())
+        {
+            return menuIt->second;
+        }
+
+        return nullptr;
+    }
+
+    bool MultiLayerMenu::IsSubMenuExist(const std::string& a_menuName)
+    {
+        std::lock_guard<std::mutex> lock(m_mapMenuMutex);
+        return m_menuMap.find(a_menuName) != m_menuMap.end();
+    }
+
+    bool MultiLayerMenu::RemoveSubMenu(const std::string& a_menuName)
+    {
+        std::lock_guard<std::mutex> lock(m_mapMenuMutex);
+        const auto menuIt = m_menuMap.find(a_menuName);
+        return m_menuMap.erase(a_menuName) > 0;
     }
 
     void MultiLayerMenu::ClearAllSubMenu()

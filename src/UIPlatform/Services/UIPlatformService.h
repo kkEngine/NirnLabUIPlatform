@@ -7,6 +7,9 @@
 #include "CEF/NirnLabCefApp.h"
 #include "CEF/CEFBrowser.h"
 #include "Menus/MultiLayerMenu.h"
+#include "Menus/CEFMenu.h"
+#include "Providers/DefaultCEFSettingsProvider.h"
+#include "JS/JSFunctionStorage.h"
 
 namespace NL::Services
 {
@@ -26,19 +29,26 @@ namespace NL::Services
         UIPlatformService();
         ~UIPlatformService() override;
 
+        bool IsInited();
+
         /// <summary>
         /// Init ui service and it's dependencies
         /// </summary>
         /// <returns></returns>
-        bool Init(
-            std::shared_ptr<spdlog::logger> a_logger,
-            std::shared_ptr<CEFService> a_cefService);
+        bool Init(std::shared_ptr<spdlog::logger> a_logger, std::shared_ptr<CEFService> a_cefService);
+
+        /// <summary>
+        /// Init ui service with default params
+        /// </summary>
+        /// <returns></returns>
+        bool InitWithDefaultParams();
 
         /// <summary>
         /// Close ui service and it's dependencies
         /// </summary>
         void Shutdown();
 
-        std::shared_ptr<NL::Menus::MultiLayerMenu> GetNativeMenu();
+        std::shared_ptr<NL::Menus::MultiLayerMenu> GetMultiLayerMenu();
+        std::shared_ptr<NL::Menus::CEFMenu> CreateCefMenu(std::shared_ptr<NL::JS::JSFunctionStorage> a_funcStorage);
     };
 }

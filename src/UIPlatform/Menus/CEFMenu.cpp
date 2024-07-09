@@ -13,8 +13,7 @@ namespace NL::Menus
         ThrowIfNullptr(CEFMenu, a_cefService);
         m_cefService = a_cefService;
 
-        ThrowIfNullptr(CEFMenu, a_jsFuncStorage);
-        m_jsFuncStorage = a_jsFuncStorage;
+        m_jsFuncStorage = a_jsFuncStorage == nullptr ? std::make_shared<NL::JS::JSFunctionStorage>() : a_jsFuncStorage;
 
         const auto cefClient = CefRefPtr<NL::CEF::NirnLabCefClient>(new NL::CEF::NirnLabCefClient());
         m_cefBrowser = std::make_shared<NL::CEF::CEFBrowser>(m_logger, cefClient, m_jsFuncStorage);
@@ -92,4 +91,8 @@ namespace NL::Menus
 
 #pragma endregion
 
+    SubMenuType CEFMenu::GetMenuType()
+    {
+        return SubMenuType::CEFMenu;
+    }
 }

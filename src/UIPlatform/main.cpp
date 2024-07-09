@@ -1,3 +1,5 @@
+#include "Controllers/PublicAPIController.h"
+
 inline void ShowMessageBox(const char* a_msg)
 {
     MessageBoxA(0, a_msg, "ERROR", MB_ICONERROR);
@@ -95,7 +97,7 @@ void BuildTestMenu()
     const auto cefMenu = std::make_shared<NL::Menus::CEFMenu>(logger, cefService, jsFuncStorage);
     cefMenu->GetBrowser()->ToggleBrowserFocusByKeys(RE::BSKeyboardDevice::Keys::kF6, 0);
     cefMenu->GetBrowser()->ToggleBrowserVisibleByKeys(RE::BSKeyboardDevice::Keys::kF7, 0);
-    NL::Services::UIPlatformService::GetSingleton().GetNativeMenu()->AddSubMenu("CEF_DEFAULT", cefMenu);
+    NL::Services::UIPlatformService::GetSingleton().GetMultiLayerMenu()->AddSubMenu("CEF_DEFAULT", cefMenu);
     cefMenu->StartBrowser("file:///123.html");
 }
 
@@ -144,7 +146,8 @@ extern "C" DLLEXPORT bool SKSEAPI Entry(const SKSE::LoadInterface* a_skse)
         // Hooks
         NL::Hooks::WinProcHook::Install();
 
-        TestCase();
+        // API controller
+        NL::Controllers::PublicAPIController::GetSingleton().Init();
     }
     catch (const std::exception& e)
     {

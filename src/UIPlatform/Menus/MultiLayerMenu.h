@@ -28,7 +28,9 @@ namespace NL::Menus
         ~MultiLayerMenu() override;
 
         bool AddSubMenu(std::string_view a_menuName, std::shared_ptr<ISubMenu> a_subMenu);
-        bool RemoveSubMenu(std::string_view a_menuName);
+        std::shared_ptr<ISubMenu> GetSubMenu(const std::string& a_menuName);
+        bool IsSubMenuExist(const std::string& a_menuName);
+        bool RemoveSubMenu(const std::string& a_menuName);
         void ClearAllSubMenu();
 
       public:

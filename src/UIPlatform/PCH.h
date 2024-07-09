@@ -28,6 +28,7 @@
 #include <cassert>
 #include <filesystem>
 #include <span>
+#include <unordered_set>
 
 // Win
 #include <Windows.h>

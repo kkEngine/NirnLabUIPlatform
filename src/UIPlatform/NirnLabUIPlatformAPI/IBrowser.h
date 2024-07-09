@@ -33,7 +33,6 @@ namespace NL::CEF
         /// <summary>
         /// Sets browser autofocus keys (see RE::BSKeyboardDevice::Keys)
         /// Pass zeros to disable
-        /// Pass 0 to key(s) if key is not needed
         /// </summary>
         /// <param name="a_keyCode1"></param>
         /// <param name="a_keyCode2"></param>

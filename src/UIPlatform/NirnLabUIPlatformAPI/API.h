@@ -6,16 +6,78 @@
 
 namespace NL::UI
 {
-    enum class APIMessageType : std::uint32_t
+    class IUIPlatformAPI
     {
-        kPreload = 2048,
+      public:
+        using BrowserRefHandle = std::uint32_t;
+        static inline BrowserRefHandle InvalidBrowserRefHandle = 0;
 
+      public:
+        virtual ~IUIPlatformAPI() = default;
+
+        /// <summary>
+        /// Add or get browser
+        /// </summary>
+        /// <param name="a_browserName">Unique name, returns the same browser for the same name</param>
+        /// <param name="a_funcInfoArr">Function info array for binding to the browser's js. Pass nullptr for no bindings</param>
+        /// <param name="a_funcInfoArrSize"></param>
+        /// <param name="a_outBrowser">Browser interface</param>
+        /// <returns>A handle to release when you no longer need the browser</returns>
+        virtual BrowserRefHandle __cdecl AddOrGetBrowser(const char* a_browserName,
+                                                         const NL::JS::JSFuncInfo** a_funcInfoArr,
+                                                         const std::uint32_t a_funcInfoArrSize,
+                                                         NL::CEF::IBrowser* a_outBrowser) = 0;
+
+        /// <summary>
+        /// Releases browser if no one has the handle
+        /// </summary>
+        /// <param name="a_handle"></param>
+        /// <returns></returns>
+        virtual void __cdecl ReleaseBrowserHandle(BrowserRefHandle a_handle) = 0;
     };
 
-    struct PreloadMessage
+    enum APIMessageType : std::uint32_t
     {
+        /// <summary>
+        /// Request library and api version. No data is needed.
+        /// Call after SKSE::MessagingInterface::kPostPostLoad
+        /// </summary>
+        RequestVersion = 2250,
+
+        /// <summary>
+        /// Response with version info. See ResponseVersionMessage struct.
+        /// You should check current API version (APIVersion::AS_INT) and version in response.
+        /// It is not guaranteed that the major versions are compatible. In this case, I recommend not using the library.
+        /// </summary>
+        ResponseVersion,
+
+        /// <summary>
+        /// Request API. First request initializes library. No data is needed.
+        /// Call after SKSE::MessagingInterface::kInputLoaded
+        /// </summary>
+        RequestAPI,
+
+        /// <summary>
+        /// Response with API info. See ResponseAPIMessage struct.
+        /// </summary>
+        ResponseAPI,
+    };
+
+    struct ResponseVersionMessage
+    {
+        /// <summary>
+        /// NirnLabUIPlatform version
+        /// </summary>
         std::uint32_t libVersion = LibVersion::AS_INT;
+
+        /// <summary>
+        /// NirnLabUIPlatform API version
+        /// </summary>
         std::uint32_t apiVersion = APIVersion::AS_INT;
-        bool stopLoad = false;
+    };
+
+    struct ResponseAPIMessage
+    {
+        IUIPlatformAPI* API = nullptr;
     };
 }
