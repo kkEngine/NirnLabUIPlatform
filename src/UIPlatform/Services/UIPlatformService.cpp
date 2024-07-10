@@ -32,7 +32,7 @@ namespace NL::Services
         }
         m_logger = a_logger;
 
-        if (a_cefService = nullptr)
+        if (a_cefService == nullptr)
         {
             m_logger->error("{}: has null {}", NameOf(UIPlatformService), NameOf(a_cefService));
             return false;
@@ -53,6 +53,7 @@ namespace NL::Services
             return static_cast<RE::IMenu*>(mlMenu.get());
         });
 
+        s_isUIPInited = true;
         return true;
     }
 
@@ -64,11 +65,13 @@ namespace NL::Services
 
         if (Init(logger, cefService))
         {
-            auto msgQ = RE::UIMessageQueue::GetSingleton();
-            if (msgQ)
-            {
-                msgQ->AddMessage(NL::Menus::MultiLayerMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kShow, NULL);
-            }
+            SKSE::GetTaskInterface()->AddTask([]() {
+                auto msgQ = RE::UIMessageQueue::GetSingleton();
+                if (msgQ)
+                {
+                    msgQ->AddMessage(NL::Menus::MultiLayerMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kShow, NULL);
+                }
+            });
             return true;
         }
 

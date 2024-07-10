@@ -151,7 +151,7 @@ namespace NL::CEF
 
     bool __cdecl CEFBrowser::IsBrowserReady()
     {
-        return m_cefClient && m_cefClient->IsBrowserReady();
+        return m_cefClient != nullptr && m_cefClient->IsBrowserReady();
     }
 
     void __cdecl CEFBrowser::SetBrowserVisible(bool a_value)

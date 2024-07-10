@@ -5,11 +5,22 @@
 namespace LibVersion
 {
     inline constexpr std::uint32_t MAJOR = @PROJECT_VERSION_MAJOR@;
-    inline constexpr std::uint32_t MINOR = @PROJECT_VERSION_MINOR@;   
+    inline constexpr std::uint32_t MINOR = @PROJECT_VERSION_MINOR@;
     inline constexpr auto PROJECT_NAME = "@PROJECT_NAME@";
 
+	inline constexpr auto MAJOR_MULT = 100000;
     inline constexpr auto AS_STRING = "@PROJECT_VERSION@";
-    inline constexpr std::uint32_t AS_INT = (static_cast<std::uint32_t>(MAJOR * 100000 + MINOR));
+    inline constexpr std::uint32_t AS_INT = (static_cast<std::uint32_t>(MAJOR * MAJOR_MULT + MINOR));
+	
+	inline std::uint32_t GetMajorVersion(std::uint32_t a_version)
+    {
+        return a_version / MAJOR_MULT;
+    }
+
+    inline std::uint32_t GetMinorVersion(std::uint32_t a_version)
+    {
+        return a_version - MAJOR * MAJOR_MULT;
+    }
 }
 
 namespace APIVersion
@@ -17,6 +28,17 @@ namespace APIVersion
     inline constexpr std::uint32_t MAJOR = @API_MAJOR_VERSION@;
     inline constexpr std::uint32_t MINOR = @API_MINOR_VERSION@;
 
+	inline constexpr auto MAJOR_MULT = 100000;
     inline constexpr auto AS_STRING = "@API_MAJOR_VERSION@.@API_MINOR_VERSION@";
-    inline constexpr std::uint32_t AS_INT = (static_cast<std::uint32_t>(MAJOR * 100000 + MINOR));
+    inline constexpr std::uint32_t AS_INT = (static_cast<std::uint32_t>(MAJOR * MAJOR_MULT + MINOR));
+	
+	inline std::uint32_t GetMajorVersion(std::uint32_t a_version)
+    {
+        return a_version / MAJOR_MULT;
+    }
+
+    inline std::uint32_t GetMinorVersion(std::uint32_t a_version)
+    {
+        return a_version - MAJOR * MAJOR_MULT;
+    }
 }

@@ -63,10 +63,13 @@ find_package(PalSigslot CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
 # Paths
+set(API_FOLDER_PATH ${CMAKE_CURRENT_SOURCE_DIR}/src/UIPlatform/NirnLabUIPlatformAPI)
+if (NOT EXISTS ${API_FOLDER_PATH})
+    message(FATAL_ERROR "API folder not found \"${API_FOLDER_PATH}\"")
+endif()
 if (NOT DEFINED OUTPUT_PATH)
     set(OUTPUT_PATH ${CMAKE_BINARY_DIR}/dist/$<CONFIG>)
 endif()
-#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_PATH})
 
 set(SKSE_PLUGIN_REL_PATH "Data/SKSE/Plugins")
 set(SKSE_PLUGIN_PATH ${OUTPUT_PATH}/${SKSE_PLUGIN_REL_PATH})
@@ -303,5 +306,60 @@ if(BUILD_AS_SHARED)
         PRIVATE
             NL_UI_REL_PATH="${NL_UI_REL_PATH}"
             NL_UI_LIB_NAME="${UIPlatformProjectName}"
+    )
+endif()
+
+# ============================ UIPlatformTest ============================
+if(BUILD_AS_SHARED)
+    set(UIPlatformTestName "NirnLabUIPlatformTest")
+
+    file(
+        COPY ${API_FOLDER_PATH}
+        DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/src/UIPlatformTest/
+    )
+
+    file(
+        GLOB_RECURSE
+        UIPlatformTestName_src
+            "src/UIPlatformTest/**.h"
+            "src/UIPlatformTest/**.hpp"
+            "src/UIPlatformTest/**.cpp"
+    )
+    source_group(
+        TREE "${CMAKE_CURRENT_SOURCE_DIR}/src/UIPlatformTest"
+        FILES ${UIPlatformTestName_src}
+    )
+
+    add_library(${UIPlatformTestName} SHARED ${UIPlatformTestName_src})
+    set_target_properties(
+        ${UIPlatformTestName}
+        PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY_DEBUG ${SKSE_PLUGIN_PATH}
+            RUNTIME_OUTPUT_DIRECTORY_RELEASE ${SKSE_PLUGIN_PATH}
+            LIBRARY_OUTPUT_DIRECTORY_DEBUG ${SKSE_PLUGIN_PATH}
+            LIBRARY_OUTPUT_DIRECTORY_RELEASE ${SKSE_PLUGIN_PATH}
+            #ARCHIVE_OUTPUT_DIRECTORY ${SKSE_PLUGIN_PATH}/archive
+            #PDB_OUTPUT_DIRECTORY ${SKSE_PLUGIN_PATH}/pdb
+    )
+
+    target_include_directories(
+        ${UIPlatformTestName}
+        PUBLIC
+            ${CMAKE_CURRENT_BINARY_DIR}/include
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/UIPlatformTest
+    )
+
+    set_compile_options(${UIPlatformTestName})
+
+    target_precompile_headers(
+        ${UIPlatformTestName}
+        PRIVATE
+            "src/UIPlatformTest/PCH.h"
+    )
+
+    target_link_libraries(
+        ${UIPlatformTestName}
+        PUBLIC
+            CommonLibSSE::CommonLibSSE
     )
 endif()

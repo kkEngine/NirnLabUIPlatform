@@ -33,7 +33,7 @@ namespace NL::Controllers
 
     void PublicAPIController::Init()
     {
-        SKSE::GetMessagingInterface()->RegisterListener([](SKSE::MessagingInterface::Message* a_msg) {
+        SKSE::GetMessagingInterface()->RegisterListener(nullptr, [](SKSE::MessagingInterface::Message* a_msg) {
             if (std::strcmp(a_msg->sender, "SKSE") == 0)
             {
                 return;
@@ -51,7 +51,8 @@ namespace NL::Controllers
                 break;
             case NL::UI::APIMessageType::RequestAPI: {
                 spdlog::info("{}: Request api from \"{}\"", NameOf(PublicAPIController), a_msg->sender);
-                if (!NL::Services::UIPlatformService::GetSingleton().IsInited() && !NL::Services::UIPlatformService::GetSingleton().InitWithDefaultParams())
+                auto& platformService = NL::Services::UIPlatformService::GetSingleton();
+                if (!platformService.IsInited() && !platformService.InitWithDefaultParams())
                 {
                     spdlog::error("{}: Can't response API because ui platform failed to init", NameOf(PublicAPIController));
                     break;
@@ -73,7 +74,8 @@ namespace NL::Controllers
     BrowserRefHandle __cdecl PublicAPIController::AddOrGetBrowser(const char* a_browserName,
                                                                   const NL::JS::JSFuncInfo** a_funcInfoArr,
                                                                   const std::uint32_t a_funcInfoArrSize,
-                                                                  NL::CEF::IBrowser* a_outBrowser)
+                                                                  const char* a_startUrl,
+                                                                  NL::CEF::IBrowser*& a_outBrowser)
     {
         const auto mlMenu = GetMultiLayerMenu();
         if (mlMenu == nullptr)
@@ -117,6 +119,7 @@ namespace NL::Controllers
             }
 
             auto newCefMenu = NL::Services::UIPlatformService::GetSingleton().CreateCefMenu(jsFuncStorage);
+            newCefMenu->StartBrowser(a_startUrl);
             if (!mlMenu->AddSubMenu(a_browserName, newCefMenu))
             {
                 spdlog::error("{}: failed to add cef menu with name \"\"", NameOf(PublicAPIController), a_browserName);
