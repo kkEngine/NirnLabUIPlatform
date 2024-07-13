@@ -12,8 +12,8 @@ namespace NL::CEF
 {
     class NirnLabCefClient;
 
-    class CEFBrowser : public IBrowser,
-                       public RE::MenuEventHandler
+    class DefaultBrowser : public IBrowser,
+                           public RE::MenuEventHandler
     {
       protected:
         std::shared_ptr<spdlog::logger> m_logger = nullptr;
@@ -21,11 +21,11 @@ namespace NL::CEF
         std::shared_ptr<NL::JS::JSFunctionStorage> m_jsFuncStorage = nullptr;
 
       public:
-        CEFBrowser(
+        DefaultBrowser(
             std::shared_ptr<spdlog::logger> a_logger,
             CefRefPtr<NirnLabCefClient> a_cefClient,
             std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage);
-        ~CEFBrowser() override = default;
+        ~DefaultBrowser() override = default;
 
         bool m_isFocused = false;
 

@@ -3,7 +3,7 @@
 #include "PCH.h"
 #include "Render/IRenderLayer.h"
 #include "Menus/ISubMenu.h"
-#include "CEF/CEFBrowser.h"
+#include "CEF/DefaultBrowser.h"
 #include "CEF/NirnLabCefClient.h"
 #include "JS/JSFunctionStorage.h"
 #include "Services/CEFService.h"
@@ -20,7 +20,7 @@ namespace NL::Menus
         std::shared_ptr<NL::Services::CEFService> m_cefService = nullptr;
         std::shared_ptr<NL::JS::JSFunctionStorage> m_jsFuncStorage = nullptr;
         std::shared_ptr<NL::Render::IRenderLayer> m_cefRenderLayer = nullptr;
-        std::shared_ptr<NL::CEF::CEFBrowser> m_cefBrowser = nullptr;
+        std::shared_ptr<NL::CEF::DefaultBrowser> m_cefBrowser = nullptr;
 
       public:
         CEFMenu(

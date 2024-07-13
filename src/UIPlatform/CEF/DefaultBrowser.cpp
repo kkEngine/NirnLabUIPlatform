@@ -1,19 +1,19 @@
-#include "CEFBrowser.h"
+#include "DefaultBrowser.h"
 
 namespace NL::CEF
 {
-    CEFBrowser::CEFBrowser(
+    DefaultBrowser::DefaultBrowser(
         std::shared_ptr<spdlog::logger> a_logger,
         CefRefPtr<NirnLabCefClient> a_cefClient,
         std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage)
     {
-        ThrowIfNullptr(CEFBrowser, a_logger);
+        ThrowIfNullptr(DefaultBrowser, a_logger);
         m_logger = a_logger;
 
-        ThrowIfNullptr(CEFBrowser, a_cefClient);
+        ThrowIfNullptr(DefaultBrowser, a_cefClient);
         m_cefClient = a_cefClient;
 
-        ThrowIfNullptr(CEFBrowser, a_jsFuncStorage);
+        ThrowIfNullptr(DefaultBrowser, a_jsFuncStorage);
         m_jsFuncStorage = a_jsFuncStorage;
 
         ZeroMemory(&m_lastCefMouseEvent, sizeof(CefMouseEvent));
@@ -34,7 +34,7 @@ namespace NL::CEF
         });
     }
 
-    void CEFBrowser::UpdateCefKeyModifiers(const RE::ButtonEvent* a_event, const cef_event_flags_t a_flags)
+    void DefaultBrowser::UpdateCefKeyModifiers(const RE::ButtonEvent* a_event, const cef_event_flags_t a_flags)
     {
         if (a_event->IsDown())
         {
@@ -48,14 +48,14 @@ namespace NL::CEF
         m_lastCharCefKeyEvent.modifiers = m_cefKeyModifiers;
     }
 
-    void CEFBrowser::ClearCefKeyModifiers()
+    void DefaultBrowser::ClearCefKeyModifiers()
     {
         m_cefKeyModifiers = 0;
         m_lastCefMouseEvent.modifiers = 0;
         m_lastCharCefKeyEvent.modifiers = 0;
     }
 
-    void CEFBrowser::UpdateCefKeyModifiersFromVK(const RE::ButtonEvent* a_event, const std::uint32_t a_vkCode)
+    void DefaultBrowser::UpdateCefKeyModifiersFromVK(const RE::ButtonEvent* a_event, const std::uint32_t a_vkCode)
     {
         if (a_vkCode >= VK_NUMPAD0 && a_vkCode <= VK_DIVIDE)
         {
@@ -96,7 +96,7 @@ namespace NL::CEF
         }
     }
 
-    void CEFBrowser::CheckToggleFocusKeys(const RE::ButtonEvent* a_event)
+    void DefaultBrowser::CheckToggleFocusKeys(const RE::ButtonEvent* a_event)
     {
         if (!a_event->IsDown() || m_toggleFocusKeyCode1 == 0 && m_toggleFocusKeyCode2 == 0)
         {
@@ -114,7 +114,7 @@ namespace NL::CEF
         }
     }
 
-    void CEFBrowser::CheckToggleVisibleKeys(const RE::ButtonEvent* a_event)
+    void DefaultBrowser::CheckToggleVisibleKeys(const RE::ButtonEvent* a_event)
     {
         if (!a_event->IsDown() || m_toggleVisibleKeyCode1 == 0 && m_toggleVisibleKeyCode2 == 0)
         {
@@ -132,29 +132,29 @@ namespace NL::CEF
         }
     }
 
-    CefRefPtr<NirnLabCefClient> CEFBrowser::GetCefClient()
+    CefRefPtr<NirnLabCefClient> DefaultBrowser::GetCefClient()
     {
         return m_cefClient;
     }
 
-    bool CEFBrowser::IsReadyAndLog()
+    bool DefaultBrowser::IsReadyAndLog()
     {
         const auto result = IsBrowserReady();
         if (!result)
         {
-            m_logger->info("{}: browser is still loading, try later", NameOf(CEFBrowser));
+            m_logger->info("{}: browser is still loading, try later", NameOf(DefaultBrowser));
         }
         return result;
     }
 
 #pragma region IBrowser
 
-    bool __cdecl CEFBrowser::IsBrowserReady()
+    bool __cdecl DefaultBrowser::IsBrowserReady()
     {
         return m_cefClient != nullptr && m_cefClient->IsBrowserReady();
     }
 
-    void __cdecl CEFBrowser::SetBrowserVisible(bool a_value)
+    void __cdecl DefaultBrowser::SetBrowserVisible(bool a_value)
     {
         m_cefClient->GetRenderLayer()->SetVisible(a_value);
         if (!a_value)
@@ -163,18 +163,18 @@ namespace NL::CEF
         }
     }
 
-    bool __cdecl CEFBrowser::IsBrowserVisible()
+    bool __cdecl DefaultBrowser::IsBrowserVisible()
     {
         return m_cefClient->GetRenderLayer()->GetVisible();
     }
 
-    void __cdecl CEFBrowser::ToggleBrowserVisibleByKeys(const std::uint32_t a_keyCode1, const std::uint32_t a_keyCode2)
+    void __cdecl DefaultBrowser::ToggleBrowserVisibleByKeys(const std::uint32_t a_keyCode1, const std::uint32_t a_keyCode2)
     {
         m_toggleVisibleKeyCode1 = a_keyCode1 < sizeof(RE::BSInputDeviceManager::GetSingleton()->GetKeyboard()->curState) ? a_keyCode1 : 0;
         m_toggleVisibleKeyCode2 = a_keyCode2 < sizeof(RE::BSInputDeviceManager::GetSingleton()->GetKeyboard()->curState) ? a_keyCode2 : 0;
     }
 
-    void __cdecl CEFBrowser::SetBrowserFocused(bool a_value)
+    void __cdecl DefaultBrowser::SetBrowserFocused(bool a_value)
     {
         if (!IsReadyAndLog() || a_value == m_isFocused)
         {
@@ -202,18 +202,18 @@ namespace NL::CEF
         m_isFocused = a_value;
     }
 
-    bool __cdecl CEFBrowser::IsBrowserFocused()
+    bool __cdecl DefaultBrowser::IsBrowserFocused()
     {
         return m_isFocused;
     }
 
-    void __cdecl CEFBrowser::ToggleBrowserFocusByKeys(const std::uint32_t a_keyCode1, const std::uint32_t a_keyCode2)
+    void __cdecl DefaultBrowser::ToggleBrowserFocusByKeys(const std::uint32_t a_keyCode1, const std::uint32_t a_keyCode2)
     {
         m_toggleFocusKeyCode1 = a_keyCode1 < sizeof(RE::BSInputDeviceManager::GetSingleton()->GetKeyboard()->curState) ? a_keyCode1 : 0;
         m_toggleFocusKeyCode2 = a_keyCode2 < sizeof(RE::BSInputDeviceManager::GetSingleton()->GetKeyboard()->curState) ? a_keyCode2 : 0;
     }
 
-    void __cdecl CEFBrowser::LoadBrowserURL(const char* a_url)
+    void __cdecl DefaultBrowser::LoadBrowserURL(const char* a_url)
     {
         if (!IsReadyAndLog())
         {
@@ -227,11 +227,11 @@ namespace NL::CEF
         }
         else
         {
-            m_logger->error("{}: can't get main frame to load url \"{}\"", NameOf(CEFBrowser), a_url);
+            m_logger->error("{}: can't get main frame to load url \"{}\"", NameOf(DefaultBrowser), a_url);
         }
     }
 
-    void __cdecl CEFBrowser::ExecuteJavaScript(const char* a_script, const char* a_scriptUrl)
+    void __cdecl DefaultBrowser::ExecuteJavaScript(const char* a_script, const char* a_scriptUrl)
     {
         if (!IsReadyAndLog())
         {
@@ -241,7 +241,7 @@ namespace NL::CEF
         m_cefClient->GetBrowser()->GetMainFrame()->ExecuteJavaScript(a_script, a_scriptUrl, 0);
     }
 
-    void __cdecl CEFBrowser::AddFunctionCallback(const char* a_objectName, const char* a_funcName, NL::JS::JSFuncCallbackData a_callbackData)
+    void __cdecl DefaultBrowser::AddFunctionCallback(const char* a_objectName, const char* a_funcName, NL::JS::JSFuncCallbackData a_callbackData)
     {
         m_jsFuncStorage->AddFunctionCallback(a_objectName, a_funcName, a_callbackData);
         // send IPC message to RenderProcess if started
@@ -251,12 +251,12 @@ namespace NL::CEF
 
 #pragma region RE::MenuEventHandler
 
-    bool CEFBrowser::CanProcess(RE::InputEvent* a_event)
+    bool DefaultBrowser::CanProcess(RE::InputEvent* a_event)
     {
         return IsBrowserFocused();
     }
 
-    bool CEFBrowser::ProcessMouseMove(RE::MouseMoveEvent* a_event)
+    bool DefaultBrowser::ProcessMouseMove(RE::MouseMoveEvent* a_event)
     {
         if (!IsBrowserFocused())
         {
@@ -272,7 +272,7 @@ namespace NL::CEF
         return true;
     }
 
-    bool CEFBrowser::ProcessButton(RE::ButtonEvent* a_event)
+    bool DefaultBrowser::ProcessButton(RE::ButtonEvent* a_event)
     {
         CheckToggleFocusKeys(a_event);
         CheckToggleVisibleKeys(a_event);

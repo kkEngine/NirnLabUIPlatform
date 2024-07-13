@@ -16,7 +16,7 @@ namespace NL::Menus
         m_jsFuncStorage = a_jsFuncStorage == nullptr ? std::make_shared<NL::JS::JSFunctionStorage>() : a_jsFuncStorage;
 
         const auto cefClient = CefRefPtr<NL::CEF::NirnLabCefClient>(new NL::CEF::NirnLabCefClient());
-        m_cefBrowser = std::make_shared<NL::CEF::CEFBrowser>(m_logger, cefClient, m_jsFuncStorage);
+        m_cefBrowser = std::make_shared<NL::CEF::DefaultBrowser>(m_logger, cefClient, m_jsFuncStorage);
         m_cefRenderLayer = m_cefBrowser->GetCefClient()->GetRenderLayer();
     }
 
@@ -27,7 +27,7 @@ namespace NL::Menus
         {
             if (!m_cefService->CreateBrowser(m_cefBrowser->GetCefClient(), m_jsFuncStorage->ConvertToCefDictionary(), CefString(a_url.data())))
             {
-                m_logger->error("{}: failed to create browser", NameOf(CEFBrowser));
+                m_logger->error("{}: failed to create browser", NameOf(DefaultBrowser));
                 return false;
             }
             m_started = true;
