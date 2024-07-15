@@ -16,9 +16,9 @@ namespace NL::CEF
 
         log->set_level(level);
         log->flush_on(level);
+        log->set_pattern("[%T.%e] [%^%l%$] : %v"s);
 
         spdlog::set_default_logger(std::move(log));
-        spdlog::set_pattern("[%T.%e] [%^%l%$] : %v"s);
     }
 
     void NirnLabSubprocessCefApp::OnBeforeCommandLineProcessing(CefString const& process_type,

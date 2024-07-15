@@ -1,6 +1,8 @@
 #define DLLEXPORT __declspec(dllexport)
 #define PLUGIN_NAME "NirnLabUIPlatformTest"
 
+#define NameOf(name) #name
+
 // std
 #include <string>
 #include <filesystem>

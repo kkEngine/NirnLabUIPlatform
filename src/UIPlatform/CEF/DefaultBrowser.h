@@ -20,14 +20,19 @@ namespace NL::CEF
         CefRefPtr<NirnLabCefClient> m_cefClient = nullptr;
         std::shared_ptr<NL::JS::JSFunctionStorage> m_jsFuncStorage = nullptr;
 
-      public:
-        DefaultBrowser(
-            std::shared_ptr<spdlog::logger> a_logger,
-            CefRefPtr<NirnLabCefClient> a_cefClient,
-            std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage);
-        ~DefaultBrowser() override = default;
-
+        // Focus
+        std::mutex m_isFocusedMutex;
         bool m_isFocused = false;
+        bool m_isFocusedCached = false;
+
+        // Url
+        std::mutex m_urlMutex;
+        bool m_isUrlCached = false;
+        std::string m_urlCache = "";
+
+        // Execution js
+        std::mutex m_jsCacheMutex;
+        std::vector<std::tuple<std::string, std::string>> m_jsExecCache;
 
         RE::CursorMenu* m_cursorMenu = nullptr;
         float& m_currentMousePosX = RE::MenuCursor::GetSingleton()->cursorPosX;
@@ -46,6 +51,13 @@ namespace NL::CEF
 
         sigslot::connection onWndInactiveConnection;
         bool m_wasCursorOpen = false;
+
+      public:
+        DefaultBrowser(
+            std::shared_ptr<spdlog::logger> a_logger,
+            CefRefPtr<NirnLabCefClient> a_cefClient,
+            std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage);
+        ~DefaultBrowser() override = default;
 
         void UpdateCefKeyModifiers(const RE::ButtonEvent* a_event, const cef_event_flags_t a_flags);
         void ClearCefKeyModifiers();

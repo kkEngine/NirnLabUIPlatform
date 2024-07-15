@@ -24,7 +24,7 @@ namespace NL::UI
         /// <param name="a_outBrowser">Browser interface</param>
         /// <returns>A handle to release when you no longer need the browser</returns>
         virtual BrowserRefHandle __cdecl AddOrGetBrowser(const char* a_browserName,
-                                                         const NL::JS::JSFuncInfo** a_funcInfoArr,
+                                                         NL::JS::JSFuncInfo* const* a_funcInfoArr,
                                                          const std::uint32_t a_funcInfoArrSize,
                                                          const char* a_startUrl,
                                                          NL::CEF::IBrowser*& a_outBrowser) = 0;

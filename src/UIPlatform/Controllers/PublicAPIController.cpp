@@ -72,7 +72,7 @@ namespace NL::Controllers
 #pragma region NL::UI::IUIPlatformAPI
 
     BrowserRefHandle __cdecl PublicAPIController::AddOrGetBrowser(const char* a_browserName,
-                                                                  const NL::JS::JSFuncInfo** a_funcInfoArr,
+                                                                  NL::JS::JSFuncInfo* const* a_funcInfoArr,
                                                                   const std::uint32_t a_funcInfoArrSize,
                                                                   const char* a_startUrl,
                                                                   NL::CEF::IBrowser*& a_outBrowser)
@@ -98,7 +98,7 @@ namespace NL::Controllers
                 for (std::uint32_t i = 0; i < a_funcInfoArrSize; ++i)
                 {
                     auto funcInfo = a_funcInfoArr[i];
-                    a_outBrowser->AddFunctionCallback(funcInfo->objectName, funcInfo->objectName, funcInfo->callbackData);
+                    a_outBrowser->AddFunctionCallback(funcInfo->objectName, funcInfo->funcName, funcInfo->callbackData);
                 }
             }
 
@@ -114,12 +114,12 @@ namespace NL::Controllers
                 for (std::uint32_t i = 0; i < a_funcInfoArrSize; ++i)
                 {
                     auto funcInfo = a_funcInfoArr[i];
-                    jsFuncStorage->AddFunctionCallback(funcInfo->objectName, funcInfo->objectName, funcInfo->callbackData);
+                    jsFuncStorage->AddFunctionCallback(funcInfo->objectName, funcInfo->funcName, funcInfo->callbackData);
                 }
             }
 
             auto newCefMenu = NL::Services::UIPlatformService::GetSingleton().CreateCefMenu(jsFuncStorage);
-            newCefMenu->StartBrowser(a_startUrl);
+            newCefMenu->LoadBrowser(a_startUrl);
             if (!mlMenu->AddSubMenu(a_browserName, newCefMenu))
             {
                 spdlog::error("{}: failed to add cef menu with name \"\"", NameOf(PublicAPIController), a_browserName);
@@ -144,7 +144,7 @@ namespace NL::Controllers
                 for (std::uint32_t i = 0; i < a_funcInfoArrSize; ++i)
                 {
                     auto funcInfo = a_funcInfoArr[i];
-                    a_outBrowser->AddFunctionCallback(funcInfo->objectName, funcInfo->objectName, funcInfo->callbackData);
+                    a_outBrowser->AddFunctionCallback(funcInfo->objectName, funcInfo->funcName, funcInfo->callbackData);
                 }
             }
         }

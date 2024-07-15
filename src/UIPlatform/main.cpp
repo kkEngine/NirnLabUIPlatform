@@ -98,7 +98,7 @@ void BuildTestMenu()
     cefMenu->GetBrowser()->ToggleBrowserFocusByKeys(RE::BSKeyboardDevice::Keys::kF6, 0);
     cefMenu->GetBrowser()->ToggleBrowserVisibleByKeys(RE::BSKeyboardDevice::Keys::kF7, 0);
     NL::Services::UIPlatformService::GetSingleton().GetMultiLayerMenu()->AddSubMenu("CEF_DEFAULT", cefMenu);
-    cefMenu->StartBrowser("file:///123.html");
+    cefMenu->LoadBrowser("file:///123.html");
 }
 
 void TestCase()

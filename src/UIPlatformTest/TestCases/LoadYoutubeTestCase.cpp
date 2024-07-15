@@ -8,13 +8,13 @@ namespace NL::UI::TestCase
 
         if (m_browserHandle == NL::UI::IUIPlatformAPI::InvalidBrowserRefHandle)
         {
-            spdlog::error("LoadYoutubeTestCase: browser handle is invalid");
+            spdlog::error("{}: browser handle is invalid", NameOf(LoadYoutubeTestCase));
             return;
         }
 
         if (m_browser == nullptr)
         {
-            spdlog::error("LoadYoutubeTestCase: browser is nullptr");
+            spdlog::error("{}: browser is nullptr", NameOf(LoadYoutubeTestCase));
             return;
         }
     }

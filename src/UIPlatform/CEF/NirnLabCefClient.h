@@ -24,6 +24,7 @@ namespace NL::CEF
         bool IsBrowserReady();
 
         sigslot::signal<CefRefPtr<CefProcessMessage>> onIPCMessageReceived;
+        sigslot::signal<CefRefPtr<CefBrowser>> onAfterBrowserCreated;
 
         // CefClient
         CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() override;

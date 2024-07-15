@@ -44,5 +44,6 @@ namespace NL::CEF
     void NirnLabCefClient::OnAfterCreated(CefRefPtr<CefBrowser> browser)
     {
         m_cefBrowser = browser;
+        onAfterBrowserCreated(browser);
     }
 }

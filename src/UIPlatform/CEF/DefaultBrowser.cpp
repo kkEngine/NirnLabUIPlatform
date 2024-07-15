@@ -32,6 +32,39 @@ namespace NL::CEF
             const auto params = NL::Converters::CefValueToJSONConverter::ConvertToJSONStringArgs(argList);
             m_jsFuncStorage->ExecuteFunctionCallback(objName, funcName, params);
         });
+        m_cefClient->onAfterBrowserCreated.connect([&](CefRefPtr<CefBrowser> a_cefBrowser) {
+            // Focus
+            {
+                std::lock_guard locker(m_isFocusedMutex);
+                if (m_isFocusedCached)
+                {
+                    SetBrowserFocused(m_isFocused);
+                }
+            }
+
+            // load url
+            {
+                std::lock_guard locker(m_urlMutex);
+                if (m_isUrlCached)
+                {
+                    LoadBrowserURL(m_urlCache.c_str());
+                }
+            }
+
+            // JS exec scripts
+            {
+                std::lock_guard locker(m_jsCacheMutex);
+                if (!m_jsExecCache.empty())
+                {
+                    for (auto& jsScript : m_jsExecCache)
+                    {
+                        ExecuteJavaScript(std::get<0>(jsScript).c_str(), std::get<1>(jsScript).c_str());
+                    }
+                    m_jsExecCache.clear();
+                    m_jsExecCache.shrink_to_fit();
+                }
+            }
+        });
     }
 
     void DefaultBrowser::UpdateCefKeyModifiers(const RE::ButtonEvent* a_event, const cef_event_flags_t a_flags)
@@ -151,7 +184,7 @@ namespace NL::CEF
 
     bool __cdecl DefaultBrowser::IsBrowserReady()
     {
-        return m_cefClient != nullptr && m_cefClient->IsBrowserReady();
+        return m_cefClient->IsBrowserReady();
     }
 
     void __cdecl DefaultBrowser::SetBrowserVisible(bool a_value)
@@ -176,8 +209,18 @@ namespace NL::CEF
 
     void __cdecl DefaultBrowser::SetBrowserFocused(bool a_value)
     {
-        if (!IsReadyAndLog() || a_value == m_isFocused)
+        std::lock_guard locker(m_isFocusedMutex);
+        if (!IsBrowserReady())
         {
+            m_isFocusedCached = true;
+            m_isFocused = a_value;
+            return;
+        }
+
+        const auto isContinue = (m_isFocusedCached && a_value) || (m_isFocused != a_value);
+        if (!isContinue)
+        {
+            m_isFocusedCached = false;
             return;
         }
 
@@ -199,6 +242,7 @@ namespace NL::CEF
         }
 
         m_cefClient->GetBrowser()->GetHost()->SetFocus(a_value);
+        m_isFocusedCached = false;
         m_isFocused = a_value;
     }
 
@@ -215,8 +259,11 @@ namespace NL::CEF
 
     void __cdecl DefaultBrowser::LoadBrowserURL(const char* a_url)
     {
-        if (!IsReadyAndLog())
+        std::lock_guard locker(m_urlMutex);
+        if (!IsBrowserReady())
         {
+            m_isUrlCached = true;
+            m_urlCache = a_url;
             return;
         }
 
@@ -229,13 +276,26 @@ namespace NL::CEF
         {
             m_logger->error("{}: can't get main frame to load url \"{}\"", NameOf(DefaultBrowser), a_url);
         }
+        m_isUrlCached = false;
     }
 
     void __cdecl DefaultBrowser::ExecuteJavaScript(const char* a_script, const char* a_scriptUrl)
     {
-        if (!IsReadyAndLog())
+        std::lock_guard locker(m_jsCacheMutex);
+        if (!IsBrowserReady())
         {
+            m_jsExecCache.push_back({a_script, a_scriptUrl});
             return;
+        }
+
+        if (!m_jsExecCache.empty())
+        {
+            for (auto& jsScript : m_jsExecCache)
+            {
+                m_cefClient->GetBrowser()->GetMainFrame()->ExecuteJavaScript(std::get<0>(jsScript).c_str(), std::get<1>(jsScript).c_str(), 0);
+            }
+            m_jsExecCache.clear();
+            m_jsExecCache.shrink_to_fit();
         }
 
         m_cefClient->GetBrowser()->GetMainFrame()->ExecuteJavaScript(a_script, a_scriptUrl, 0);

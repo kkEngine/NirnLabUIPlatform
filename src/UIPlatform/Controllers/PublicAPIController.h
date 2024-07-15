@@ -12,11 +12,11 @@ namespace NL::Controllers
                                 public NL::UI::IUIPlatformAPI
     {
       protected:
-          struct BrowserHandleData
-          {
-              NL::CEF::IBrowser* browser = nullptr;
-              std::unordered_set<BrowserRefHandle> refHandles;
-          };
+        struct BrowserHandleData
+        {
+            NL::CEF::IBrowser* browser = nullptr;
+            std::unordered_set<BrowserRefHandle> refHandles;
+        };
 
       protected:
         NL::UI::ResponseVersionMessage m_rvMessage{LibVersion::AS_INT, APIVersion::AS_INT};
@@ -38,7 +38,7 @@ namespace NL::Controllers
 
         // NL::UI::IUIPlatformAPI
         BrowserRefHandle __cdecl AddOrGetBrowser(const char* a_browserName,
-                                                 const NL::JS::JSFuncInfo** a_funcInfoArr,
+                                                 NL::JS::JSFuncInfo* const* a_funcInfoArr,
                                                  const std::uint32_t a_funcInfoArrSize,
                                                  const char* a_startUrl,
                                                  NL::CEF::IBrowser*& a_outBrowser) override;

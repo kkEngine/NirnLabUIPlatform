@@ -16,16 +16,16 @@ namespace NL::Menus
         m_jsFuncStorage = a_jsFuncStorage == nullptr ? std::make_shared<NL::JS::JSFunctionStorage>() : a_jsFuncStorage;
 
         const auto cefClient = CefRefPtr<NL::CEF::NirnLabCefClient>(new NL::CEF::NirnLabCefClient());
-        m_cefBrowser = std::make_shared<NL::CEF::DefaultBrowser>(m_logger, cefClient, m_jsFuncStorage);
-        m_cefRenderLayer = m_cefBrowser->GetCefClient()->GetRenderLayer();
+        m_browser = std::make_shared<NL::CEF::DefaultBrowser>(m_logger, cefClient, m_jsFuncStorage);
+        m_cefRenderLayer = m_browser->GetCefClient()->GetRenderLayer();
     }
 
-    bool CEFMenu::StartBrowser(std::string_view a_url)
+    bool CEFMenu::LoadBrowser(std::string_view a_url)
     {
         std::lock_guard<std::mutex> lock(m_startBrowserMutex);
         if (!m_started)
         {
-            if (!m_cefService->CreateBrowser(m_cefBrowser->GetCefClient(), m_jsFuncStorage->ConvertToCefDictionary(), CefString(a_url.data())))
+            if (!m_cefService->CreateBrowser(m_browser->GetCefClient(), m_jsFuncStorage->ConvertToCefDictionary(), CefString(a_url.data())))
             {
                 m_logger->error("{}: failed to create browser", NameOf(DefaultBrowser));
                 return false;
@@ -34,7 +34,7 @@ namespace NL::Menus
         }
         else
         {
-            m_cefBrowser->LoadBrowserURL(a_url.data());
+            m_browser->LoadBrowserURL(a_url.data());
         }
 
         return true;
@@ -42,7 +42,7 @@ namespace NL::Menus
 
     std::shared_ptr<NL::CEF::IBrowser> CEFMenu::GetBrowser()
     {
-        return m_cefBrowser;
+        return m_browser;
     }
 
 #pragma region NL::Render::IRenderLayer
@@ -76,17 +76,17 @@ namespace NL::Menus
 
     bool CEFMenu::CanProcess(RE::InputEvent* a_event)
     {
-        return m_cefBrowser->CanProcess(a_event);
+        return m_browser->CanProcess(a_event);
     }
 
     bool CEFMenu::ProcessMouseMove(RE::MouseMoveEvent* a_event)
     {
-        return m_cefBrowser->ProcessMouseMove(a_event);
+        return m_browser->ProcessMouseMove(a_event);
     }
 
     bool CEFMenu::ProcessButton(RE::ButtonEvent* a_event)
     {
-        return m_cefBrowser->ProcessButton(a_event);
+        return m_browser->ProcessButton(a_event);
     }
 
 #pragma endregion
