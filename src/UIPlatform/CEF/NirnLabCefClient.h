@@ -7,7 +7,8 @@
 namespace NL::CEF
 {
     class NirnLabCefClient : public CefClient,
-                             public CefLifeSpanHandler
+                             public CefLifeSpanHandler,
+                             public CefLoadHandler
     {
         IMPLEMENT_REFCOUNTING(NirnLabCefClient);
 
@@ -25,9 +26,12 @@ namespace NL::CEF
 
         sigslot::signal<CefRefPtr<CefProcessMessage>> onIPCMessageReceived;
         sigslot::signal<CefRefPtr<CefBrowser>> onAfterBrowserCreated;
+        sigslot::signal<> onMainFrameLoadStart;
+        sigslot::signal<> onMainFrameLoadEnd;
 
         // CefClient
         CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() override;
+        CefRefPtr<CefLoadHandler> GetLoadHandler() override;
         CefRefPtr<CefRenderHandler> GetRenderHandler() override;
         bool OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
                                       CefRefPtr<CefFrame> frame,
@@ -36,5 +40,13 @@ namespace NL::CEF
 
         // CefLifeSpanHandler
         void OnAfterCreated(CefRefPtr<CefBrowser> browser) override;
+
+        // CefLoadHandler
+        void OnLoadStart(CefRefPtr<CefBrowser> browser,
+                         CefRefPtr<CefFrame> frame,
+                         TransitionType transition_type) override;
+        void OnLoadEnd(CefRefPtr<CefBrowser> browser,
+                       CefRefPtr<CefFrame> frame,
+                       int httpStatusCode) override;
     };
 }

@@ -20,18 +20,17 @@ namespace NL::CEF
         CefRefPtr<NirnLabCefClient> m_cefClient = nullptr;
         std::shared_ptr<NL::JS::JSFunctionStorage> m_jsFuncStorage = nullptr;
 
+        // Url
+        std::recursive_mutex m_urlMutex;
+        bool m_isUrlCached = false;
+        bool m_isPageLoaded = false;
+        std::string m_urlCache = "";
+
         // Focus
-        std::mutex m_isFocusedMutex;
         bool m_isFocused = false;
         bool m_isFocusedCached = false;
 
-        // Url
-        std::mutex m_urlMutex;
-        bool m_isUrlCached = false;
-        std::string m_urlCache = "";
-
-        // Execution js
-        std::mutex m_jsCacheMutex;
+        // JS execution
         std::vector<std::tuple<std::string, std::string>> m_jsExecCache;
 
         RE::CursorMenu* m_cursorMenu = nullptr;
@@ -70,6 +69,7 @@ namespace NL::CEF
 
         // IBrowser
         bool __cdecl IsBrowserReady() override;
+        bool __cdecl IsPageLoaded() override;
 
         void __cdecl SetBrowserVisible(bool a_value) override;
         bool __cdecl IsBrowserVisible() override;

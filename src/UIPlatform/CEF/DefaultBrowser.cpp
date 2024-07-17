@@ -33,36 +33,36 @@ namespace NL::CEF
             m_jsFuncStorage->ExecuteFunctionCallback(objName, funcName, params);
         });
         m_cefClient->onAfterBrowserCreated.connect([&](CefRefPtr<CefBrowser> a_cefBrowser) {
-            // Focus
-            {
-                std::lock_guard locker(m_isFocusedMutex);
-                if (m_isFocusedCached)
-                {
-                    SetBrowserFocused(m_isFocused);
-                }
-            }
-
+            std::lock_guard locker(m_urlMutex);
             // load url
+            if (m_isUrlCached)
             {
-                std::lock_guard locker(m_urlMutex);
-                if (m_isUrlCached)
-                {
-                    LoadBrowserURL(m_urlCache.c_str());
-                }
+                LoadBrowserURL(m_urlCache.c_str());
+            }
+        });
+        m_cefClient->onMainFrameLoadStart.connect([&]() {
+            std::lock_guard locker(m_urlMutex);
+            m_isPageLoaded = false;
+        });
+        m_cefClient->onMainFrameLoadEnd.connect([&]() {
+            std::lock_guard locker(m_urlMutex);
+            m_isPageLoaded = true;
+
+            // Focus
+            if (m_isFocusedCached)
+            {
+                SetBrowserFocused(m_isFocused);
             }
 
             // JS exec scripts
+            if (!m_jsExecCache.empty())
             {
-                std::lock_guard locker(m_jsCacheMutex);
-                if (!m_jsExecCache.empty())
+                for (auto& jsScript : m_jsExecCache)
                 {
-                    for (auto& jsScript : m_jsExecCache)
-                    {
-                        ExecuteJavaScript(std::get<0>(jsScript).c_str(), std::get<1>(jsScript).c_str());
-                    }
-                    m_jsExecCache.clear();
-                    m_jsExecCache.shrink_to_fit();
+                    ExecuteJavaScript(std::get<0>(jsScript).c_str(), std::get<1>(jsScript).c_str());
                 }
+                m_jsExecCache.clear();
+                m_jsExecCache.shrink_to_fit();
             }
         });
     }
@@ -184,7 +184,12 @@ namespace NL::CEF
 
     bool __cdecl DefaultBrowser::IsBrowserReady()
     {
-        return m_cefClient->IsBrowserReady();
+        return m_cefClient != nullptr && m_cefClient->IsBrowserReady();
+    }
+
+    bool __cdecl DefaultBrowser::IsPageLoaded()
+    {
+        return m_isPageLoaded;
     }
 
     void __cdecl DefaultBrowser::SetBrowserVisible(bool a_value)
@@ -209,20 +214,20 @@ namespace NL::CEF
 
     void __cdecl DefaultBrowser::SetBrowserFocused(bool a_value)
     {
-        std::lock_guard locker(m_isFocusedMutex);
-        if (!IsBrowserReady())
+        std::lock_guard locker(m_urlMutex);
+        if (!IsPageLoaded())
         {
             m_isFocusedCached = true;
             m_isFocused = a_value;
             return;
         }
 
-        const auto isContinue = (m_isFocusedCached && a_value) || (m_isFocused != a_value);
-        if (!isContinue)
-        {
-            m_isFocusedCached = false;
-            return;
-        }
+        // const auto isContinue = (m_isFocusedCached && a_value) || (m_isFocused != a_value);
+        // if (!isContinue)
+        //{
+        //     m_isFocusedCached = false;
+        //     return;
+        // }
 
         const auto uiMsgQ = RE::UIMessageQueue::GetSingleton();
         if (a_value)
@@ -281,8 +286,8 @@ namespace NL::CEF
 
     void __cdecl DefaultBrowser::ExecuteJavaScript(const char* a_script, const char* a_scriptUrl)
     {
-        std::lock_guard locker(m_jsCacheMutex);
-        if (!IsBrowserReady())
+        std::lock_guard locker(m_urlMutex);
+        if (!IsPageLoaded())
         {
             m_jsExecCache.push_back({a_script, a_scriptUrl});
             return;

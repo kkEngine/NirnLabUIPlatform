@@ -27,6 +27,11 @@ namespace NL::CEF
         return this;
     }
 
+    CefRefPtr<CefLoadHandler> NirnLabCefClient::GetLoadHandler()
+    {
+        return this;
+    }
+
     CefRefPtr<CefRenderHandler> NirnLabCefClient::GetRenderHandler()
     {
         return m_cefRenderLayer.get();
@@ -45,5 +50,25 @@ namespace NL::CEF
     {
         m_cefBrowser = browser;
         onAfterBrowserCreated(browser);
+    }
+
+    void NirnLabCefClient::OnLoadStart(CefRefPtr<CefBrowser> browser,
+                                       CefRefPtr<CefFrame> frame,
+                                       TransitionType transition_type)
+    {
+        if (browser->IsSame(m_cefBrowser) && frame->IsMain())
+        {
+            onMainFrameLoadStart();
+        }
+    }
+
+    void NirnLabCefClient::OnLoadEnd(CefRefPtr<CefBrowser> browser,
+                                     CefRefPtr<CefFrame> frame,
+                                     int httpStatusCode)
+    {
+        if (browser->IsSame(m_cefBrowser) && frame->IsMain())
+        {
+            onMainFrameLoadEnd();
+        }
     }
 }

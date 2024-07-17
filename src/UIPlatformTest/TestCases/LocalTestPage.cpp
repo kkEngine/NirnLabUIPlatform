@@ -40,7 +40,7 @@ namespace NL::UI::TestCase
         m_browserHandle = a_api->AddOrGetBrowser("LOCAL_TEST_PAGE",
                                                  m_funcInfoVector.data(),
                                                  static_cast<std::uint32_t>(m_funcInfoVector.size()),
-                                                 "file:///_testLocalPage.html",
+                                                 "",
                                                  m_browser);
 
         if (m_browserHandle == NL::UI::IUIPlatformAPI::InvalidBrowserRefHandle)
@@ -54,5 +54,7 @@ namespace NL::UI::TestCase
             spdlog::error("{}: browser is nullptr", NameOf(LoadYoutubeTestCase));
             return;
         }
+
+        m_browser->LoadBrowserURL("file:///_testLocalPage.html");
     }
 }

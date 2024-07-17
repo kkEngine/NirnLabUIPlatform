@@ -12,10 +12,15 @@ namespace NL::CEF
         virtual ~IBrowser() = default;
 
         /// <summary>
-        /// Browser takes time to load, so you can check if browser is ready using this method.
+        /// Browser takes time to load, so you can check if browser is ready using some methods.
         /// </summary>
         /// <returns></returns>
         virtual bool __cdecl IsBrowserReady() = 0;
+        /// <summary>
+        /// Page takes time to load. You can check that the page has loaded using this method.
+        /// </summary>
+        /// <returns></returns>
+        virtual bool __cdecl IsPageLoaded() = 0;
 
         virtual void __cdecl SetBrowserVisible(bool a_value) = 0;
         virtual bool __cdecl IsBrowserVisible() = 0;
