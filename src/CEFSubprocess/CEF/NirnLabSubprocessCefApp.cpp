@@ -2,35 +2,30 @@
 
 namespace NL::CEF
 {
-    void NirnLabSubprocessCefApp::InitLog(std::filesystem::path a_logDirPath)
+    void NirnLabSubprocessCefApp::InitLog(CefRefPtr<CefBrowser> a_browser)
     {
         auto level = spdlog::level::info;
-        a_logDirPath /= fmt::format("{}.log"sv, CEF_SUBPROCESS_PROJECT_NAME);
-        auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(a_logDirPath.string(), true);
-        auto log = std::make_shared<spdlog::logger>("global log"s, std::move(sink));
+        m_logSink = std::make_shared<NL::Log::IPCLogSink_mt>(a_browser);
+        auto logger = std::make_shared<spdlog::logger>("global log"s, m_logSink);
 
 #ifdef _DEBUG
         level = spdlog::level::trace;
-        log->sinks().push_back(std::make_shared<spdlog::sinks::msvc_sink_mt>());
+        logger->sinks().push_back(std::make_shared<spdlog::sinks::msvc_sink_mt>());
 #endif
 
-        log->set_level(level);
-        log->flush_on(level);
-        log->set_pattern("[%T.%e] [%^%l%$] : %v"s);
+        logger->set_level(level);
+        logger->flush_on(level);
+        logger->set_pattern("[%T.%e] [%^%l%$] : %v"s);
 
-        spdlog::set_default_logger(std::move(log));
+        spdlog::set_default_logger(logger);
     }
 
     void NirnLabSubprocessCefApp::OnBeforeCommandLineProcessing(CefString const& process_type,
                                                                 CefRefPtr<CefCommandLine> command_line)
     {
-        const auto logDir = command_line->GetSwitchValue("log-directory");
-        if (!logDir.empty())
-        {
-            InitLog(logDir.ToWString());
-        }
+        InitLog(nullptr);
 
-        DWORD mainProcessId = std::stoi(command_line->GetSwitchValue("main-process-id").ToWString());
+        DWORD mainProcessId = std::stoi(command_line->GetSwitchValue(IPC_CL_PROCESS_ID_NAME).ToWString());
         if (mainProcessId)
         {
             new std::thread([=]() {
@@ -57,6 +52,8 @@ namespace NL::CEF
     void NirnLabSubprocessCefApp::OnBrowserCreated(CefRefPtr<CefBrowser> browser,
                                                    CefRefPtr<CefDictionaryValue> extra_info)
     {
+        m_logSink->SetBrowser(browser);
+
         if (extra_info != nullptr && extra_info->GetSize() > 0)
         {
             CefDictionaryValue::KeyList keyList;
@@ -86,10 +83,20 @@ namespace NL::CEF
         }
     }
 
+    void NirnLabSubprocessCefApp::OnBrowserDestroyed(CefRefPtr<CefBrowser> browser)
+    {
+        m_logSink->SetBrowser(nullptr);
+    }
+
     void NirnLabSubprocessCefApp::OnContextCreated(CefRefPtr<CefBrowser> browser,
                                                    CefRefPtr<CefFrame> frame,
                                                    CefRefPtr<CefV8Context> context)
     {
+        if (!frame->IsMain())
+        {
+            return;
+        }
+
         std::uint32_t functionsCount = 0;
         auto currentObjectValue = context->GetGlobal();
 
@@ -115,7 +122,6 @@ namespace NL::CEF
             addFuncInfo = m_funcQueue.GetNext();
         }
 
-        // Sometimes this line doesn't print info. I don't know why (wrong thread?).
         spdlog::info("{}: registered {} functions for the browser with id {}", NameOf(OnContextCreated), functionsCount, browser->GetIdentifier());
     }
 

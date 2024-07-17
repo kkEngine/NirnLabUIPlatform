@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PCH.h"
+#include "Log/IPCLogSink.hpp"
 #include "JS/CEFFunctionQueue.h"
 #include "JS/CEFFunctionHandler.h"
 
@@ -14,7 +15,8 @@ namespace NL::CEF
       private:
         NL::JS::CEFFunctionQueue m_funcQueue;
 
-        void InitLog(std::filesystem::path a_logDirPath);
+        std::shared_ptr<NL::Log::IPCLogSink_mt> m_logSink = nullptr;
+        void InitLog(CefRefPtr<CefBrowser> a_browser);
 
       public:
         NirnLabSubprocessCefApp() = default;
@@ -26,6 +28,7 @@ namespace NL::CEF
         // CefRenderProcessHandler
         void OnBrowserCreated(CefRefPtr<CefBrowser> browser,
                               CefRefPtr<CefDictionaryValue> extra_info) override;
+        void OnBrowserDestroyed(CefRefPtr<CefBrowser> browser) override;
         void OnContextCreated(CefRefPtr<CefBrowser> browser,
                               CefRefPtr<CefFrame> frame,
                               CefRefPtr<CefV8Context> context) override;

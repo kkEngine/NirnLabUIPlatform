@@ -24,13 +24,25 @@ namespace NL::CEF
         });
 
         m_cefClient->onIPCMessageReceived.connect([&](CefRefPtr<CefProcessMessage> a_message) {
-            const auto ipcArgs = a_message->GetArgumentList();
-            const auto objName = ipcArgs->GetString(0).ToString();
-            const auto funcName = ipcArgs->GetString(1).ToString();
-            const auto argList = ipcArgs->GetList(2);
+            if (a_message->GetName() == IPC_JS_FUNCTION_CALL_EVENT)
+            {
+                const auto ipcArgs = a_message->GetArgumentList();
+                const auto objName = ipcArgs->GetString(0).ToString();
+                const auto funcName = ipcArgs->GetString(1).ToString();
+                const auto argList = ipcArgs->GetList(2);
 
-            const auto params = NL::Converters::CefValueToJSONConverter::ConvertToJSONStringArgs(argList);
-            m_jsFuncStorage->ExecuteFunctionCallback(objName, funcName, params);
+                const auto params = NL::Converters::CefValueToJSONConverter::ConvertToJSONStringArgs(argList);
+                m_jsFuncStorage->ExecuteFunctionCallback(objName, funcName, params);
+            }
+            else if (a_message->GetName() == IPC_LOG_EVENT)
+            {
+                const auto logger = spdlog::get(NL_UI_SUBPROC_NAME);
+                if (logger != nullptr)
+                {
+                    auto argList = a_message->GetArgumentList();
+                    logger->log(static_cast<spdlog::level::level_enum>(argList->GetInt(0)), argList->GetString(1).ToString().c_str());
+                }
+            }
         });
         m_cefClient->onAfterBrowserCreated.connect([&](CefRefPtr<CefBrowser> a_cefBrowser) {
             std::lock_guard locker(m_urlMutex);
