@@ -8,7 +8,7 @@ namespace NL::UI::TestCase
         auto func1 = new JS::JSFuncInfo();
         func1->objectName = "window";
         func1->funcName = "func1";
-        func1->callbackData.executeInGameThread = true;
+        func1->callbackData.executeInGameThread = false;
         func1->callbackData.callback = [](const char** a_args, int a_argsCount) {
             std::string argsStr = "";
             for (auto i = 0; i < a_argsCount; ++i)
@@ -56,5 +56,21 @@ namespace NL::UI::TestCase
         }
 
         m_browser->LoadBrowserURL("file:///_testLocalPage.html");
+
+        m_pingThread = std::make_shared<std::thread>([=]() {
+            while (!m_browser->IsPageLoaded())
+            {
+                std::this_thread::sleep_for(100ms);
+            }
+
+            int i = 0;
+            while (i < 8)
+            {
+                std::this_thread::sleep_for(1s);
+                m_browser->ExecuteJavaScript(fmt::format("window.func1({})", std::to_string(++i).c_str()).c_str());
+            }
+
+            a_api->ReleaseBrowserHandle(m_browserHandle);
+        });
     }
 }

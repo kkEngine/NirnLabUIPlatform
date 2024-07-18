@@ -48,15 +48,19 @@ namespace NL::CEF
         std::uint32_t m_toggleVisibleKeyCode1 = 0;
         std::uint32_t m_toggleVisibleKeyCode2 = 0;
 
-        sigslot::connection onWndInactiveConnection;
         bool m_wasCursorOpen = false;
 
+        sigslot::scoped_connection m_OnWndInactive_Connection;
+        sigslot::scoped_connection m_onIPCMessageReceived_Connection;
+        sigslot::scoped_connection m_onAfterBrowserCreated_Connection;
+        sigslot::scoped_connection m_onMainFrameLoadStart_Connection;
+        sigslot::scoped_connection m_onMainFrameLoadEnd_Connection;
       public:
         DefaultBrowser(
             std::shared_ptr<spdlog::logger> a_logger,
             CefRefPtr<NirnLabCefClient> a_cefClient,
             std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage);
-        ~DefaultBrowser() override = default;
+        ~DefaultBrowser() override;
 
         void UpdateCefKeyModifiers(const RE::ButtonEvent* a_event, const cef_event_flags_t a_flags);
         void ClearCefKeyModifiers();

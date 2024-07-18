@@ -1,3 +1,4 @@
+#include "PCH.h"
 #include "Controllers/PublicAPIController.h"
 
 inline void ShowMessageBox(const char* a_msg)
@@ -65,94 +66,6 @@ extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() {
     v.UsesStructsPost629(true);
     return v;
 }();
-
-#pragma region Tests
-
-#include "PCH.h"
-#include "Utils/InputConverter.h"
-#include "Providers/ICEFSettingsProvider.h"
-#include "Providers/DefaultCEFSettingsProvider.h"
-#include "Services/UIPlatformService.h"
-#include "Services/CEFService.h"
-#include "Menus/MultiLayerMenu.h"
-#include "Menus/CEFMenu.h"
-#include "Hooks/WinProcHook.h"
-#include "JS/JSFunctionStorage.h"
-
-void BuildTestMenu()
-{
-    const auto logger = spdlog::default_logger();
-    const auto cefSettingsProvider = std::make_shared<NL::Providers::DefaultCEFSettingsProvider>();
-    const auto cefService = std::make_shared<NL::Services::CEFService>(logger, cefSettingsProvider);
-
-    if (!NL::Services::UIPlatformService::GetSingleton().Init(logger, cefService))
-    {
-        logger->error("Failed to init platform service");
-        return;
-    }
-
-    auto msgQ = RE::UIMessageQueue::GetSingleton();
-    if (msgQ)
-    {
-        msgQ->AddMessage(NL::Menus::MultiLayerMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kShow, NULL);
-    }
-
-    // const auto cefMenu = std::make_shared<NL::Menus::CEFMenu>(spdlog::default_logger(), cefService, L"https://youtu.be/YPKhOyM1gZ8");
-    // const auto cefMenu = std::make_shared<NL::Menus::CEFMenu>(logger, cefService, L"https://google.com");
-    auto jsFuncStorage = std::make_shared<NL::JS::JSFunctionStorage>();
-    jsFuncStorage->AddFunctionCallback(
-        IPC_JS_WINDOW_OBJECT_NAME,
-        "func",
-        {[](const char** arr, int argCount) {
-             spdlog::info("CALLING \"func\"");
-             for (int i = 0; i < argCount; ++i)
-             {
-                 spdlog::info("arg[{}]: {}", i, arr[i]);
-             }
-         },
-         true});
-    jsFuncStorage->AddFunctionCallback(
-        IPC_JS_WINDOW_OBJECT_NAME,
-        "func2",
-        {[](const char** arr, int argCount) {
-             spdlog::info("func2");
-         },
-         false});
-
-    const auto cefMenu = std::make_shared<NL::Menus::CEFMenu>(logger, cefService, jsFuncStorage);
-    cefMenu->GetBrowser()->ToggleBrowserFocusByKeys(RE::BSKeyboardDevice::Keys::kF6, 0);
-    cefMenu->GetBrowser()->ToggleBrowserVisibleByKeys(RE::BSKeyboardDevice::Keys::kF7, 0);
-    NL::Services::UIPlatformService::GetSingleton().GetMultiLayerMenu()->AddSubMenu("CEF_DEFAULT", cefMenu);
-    cefMenu->LoadBrowser("file:///123.html");
-}
-
-void TestCase()
-{
-    SKSE::GetMessagingInterface()->RegisterListener([](SKSE::MessagingInterface::Message* a_msg) {
-        switch (a_msg->type)
-        {
-        case SKSE::MessagingInterface::kPostLoad:
-            break;
-        case SKSE::MessagingInterface::kPostPostLoad:
-            break;
-        case SKSE::MessagingInterface::kInputLoaded:
-            SKSE::GetTaskInterface()->AddTask([]() {
-                BuildTestMenu();
-            });
-            break;
-        case SKSE::MessagingInterface::kDataLoaded:
-            break;
-        case SKSE::MessagingInterface::kPreLoadGame:
-            break;
-        case SKSE::MessagingInterface::kPostLoadGame:
-            break;
-        default:
-            break;
-        }
-    });
-}
-
-#pragma endregion
 
 extern "C" DLLEXPORT bool SKSEAPI Entry(const SKSE::LoadInterface* a_skse)
 {

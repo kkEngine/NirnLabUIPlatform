@@ -11,6 +11,8 @@ namespace NL::UI::TestCase
 
         std::vector<JS::JSFuncInfo*> m_funcInfoVector;
 
+        std::shared_ptr<std::thread> m_pingThread = nullptr;
+
       public:
         void Start(NL::UI::IUIPlatformAPI* a_api);
     };

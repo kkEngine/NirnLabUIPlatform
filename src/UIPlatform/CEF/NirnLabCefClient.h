@@ -26,6 +26,7 @@ namespace NL::CEF
 
         sigslot::signal<CefRefPtr<CefProcessMessage>> onIPCMessageReceived;
         sigslot::signal<CefRefPtr<CefBrowser>> onAfterBrowserCreated;
+        sigslot::signal<CefRefPtr<CefBrowser>> onBeforeBrowserClose;
         sigslot::signal<> onMainFrameLoadStart;
         sigslot::signal<> onMainFrameLoadEnd;
 
@@ -40,6 +41,7 @@ namespace NL::CEF
 
         // CefLifeSpanHandler
         void OnAfterCreated(CefRefPtr<CefBrowser> browser) override;
+        void OnBeforeClose(CefRefPtr<CefBrowser> browser) override;
 
         // CefLoadHandler
         void OnLoadStart(CefRefPtr<CefBrowser> browser,

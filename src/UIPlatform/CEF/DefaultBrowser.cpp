@@ -19,11 +19,11 @@ namespace NL::CEF
         ZeroMemory(&m_lastCefMouseEvent, sizeof(CefMouseEvent));
         ZeroMemory(&m_lastCharCefKeyEvent, sizeof(CefKeyEvent));
 
-        onWndInactiveConnection = NL::Hooks::WinProcHook::OnWndInactive.connect([&]() {
+        m_OnWndInactive_Connection = NL::Hooks::WinProcHook::OnWndInactive.connect([&]() {
             ClearCefKeyModifiers();
         });
 
-        m_cefClient->onIPCMessageReceived.connect([&](CefRefPtr<CefProcessMessage> a_message) {
+        m_onIPCMessageReceived_Connection = m_cefClient->onIPCMessageReceived.connect([&, a_jsFuncStorage](CefRefPtr<CefProcessMessage> a_message) {
             if (a_message->GetName() == IPC_JS_FUNCTION_CALL_EVENT)
             {
                 const auto ipcArgs = a_message->GetArgumentList();
@@ -32,7 +32,7 @@ namespace NL::CEF
                 const auto argList = ipcArgs->GetList(2);
 
                 const auto params = NL::Converters::CefValueToJSONConverter::ConvertToJSONStringArgs(argList);
-                m_jsFuncStorage->ExecuteFunctionCallback(objName, funcName, params);
+                m_jsFuncStorage->ExecuteFunctionCallback(objName, funcName, params, a_jsFuncStorage);
             }
             else if (a_message->GetName() == IPC_LOG_EVENT)
             {
@@ -44,7 +44,8 @@ namespace NL::CEF
                 }
             }
         });
-        m_cefClient->onAfterBrowserCreated.connect([&](CefRefPtr<CefBrowser> a_cefBrowser) {
+
+        m_onAfterBrowserCreated_Connection = m_cefClient->onAfterBrowserCreated.connect([&](CefRefPtr<CefBrowser> a_cefBrowser) {
             std::lock_guard locker(m_urlMutex);
             // load url
             if (m_isUrlCached)
@@ -52,11 +53,13 @@ namespace NL::CEF
                 LoadBrowserURL(m_urlCache.c_str());
             }
         });
-        m_cefClient->onMainFrameLoadStart.connect([&]() {
+
+        m_onMainFrameLoadStart_Connection = m_cefClient->onMainFrameLoadStart.connect([&]() {
             std::lock_guard locker(m_urlMutex);
             m_isPageLoaded = false;
         });
-        m_cefClient->onMainFrameLoadEnd.connect([&]() {
+
+        m_onMainFrameLoadEnd_Connection = m_cefClient->onMainFrameLoadEnd.connect([&]() {
             std::lock_guard locker(m_urlMutex);
             m_isPageLoaded = true;
 
@@ -77,6 +80,17 @@ namespace NL::CEF
                 m_jsExecCache.shrink_to_fit();
             }
         });
+    }
+
+    DefaultBrowser::~DefaultBrowser()
+    {
+        auto browser = m_cefClient->GetBrowser();
+        if (browser != nullptr)
+        {
+            browser->GetHost()->CloseBrowser(false);
+        }
+
+        m_jsFuncStorage->ClearFunctionCallback();
     }
 
     void DefaultBrowser::UpdateCefKeyModifiers(const RE::ButtonEvent* a_event, const cef_event_flags_t a_flags)

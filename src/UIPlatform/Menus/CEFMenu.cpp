@@ -20,6 +20,11 @@ namespace NL::Menus
         m_cefRenderLayer = m_browser->GetCefClient()->GetRenderLayer();
     }
 
+    CEFMenu::~CEFMenu()
+    {
+        SetVisible(false);
+    }
+
     bool CEFMenu::LoadBrowser(std::string_view a_url)
     {
         std::lock_guard<std::mutex> lock(m_startBrowserMutex);

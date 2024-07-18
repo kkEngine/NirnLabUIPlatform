@@ -27,7 +27,7 @@ namespace NL::Menus
             std::shared_ptr<spdlog::logger> a_logger,
             std::shared_ptr<NL::Services::CEFService> a_cefService,
             std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage);
-        ~CEFMenu() override = default;
+        ~CEFMenu() override;
 
         bool LoadBrowser(std::string_view a_url);
         std::shared_ptr<NL::CEF::IBrowser> GetBrowser();

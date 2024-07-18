@@ -33,6 +33,8 @@ namespace NL::JS
       public:
         sigslot::signal<> OnQueueItemAdded;
 
+        std::recursive_mutex& GetCallbackMutex();
+
         virtual void QueueAddFunctionCallback(const std::string& a_objectName,
                                               const std::string& a_funcName,
                                               JSFuncCallbackData a_callbackData);
@@ -50,7 +52,8 @@ namespace NL::JS
         virtual JSFuncCallbackData GetFunctionCallbackData(const std::string& a_objectName, const std::string& a_funcName);
         virtual void ExecuteFunctionCallback(const std::string& a_objectName,
                                              const std::string& a_funcName,
-                                             std::shared_ptr<std::vector<std::string>> a_funcArgs);
+                                             std::shared_ptr<std::vector<std::string>> a_funcArgs,
+                                             std::shared_ptr<JSFunctionStorage> a_storage = nullptr);
 
         virtual CefRefPtr<CefDictionaryValue> ConvertToCefDictionary();
     };

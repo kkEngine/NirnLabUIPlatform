@@ -52,6 +52,12 @@ namespace NL::CEF
         onAfterBrowserCreated(browser);
     }
 
+    void NirnLabCefClient::OnBeforeClose(CefRefPtr<CefBrowser> browser)
+    {
+        onBeforeBrowserClose(browser);
+        m_cefBrowser = nullptr;
+    }
+
     void NirnLabCefClient::OnLoadStart(CefRefPtr<CefBrowser> browser,
                                        CefRefPtr<CefFrame> frame,
                                        TransitionType transition_type)

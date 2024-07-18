@@ -2,6 +2,11 @@
 
 namespace NL::JS
 {
+    std::recursive_mutex& JSFunctionStorage::GetCallbackMutex()
+    {
+        return m_funcCallbackMapMutex;
+    }
+
     void JSFunctionStorage::QueueAddFunctionCallback(const std::string& a_objectName,
                                                      const std::string& a_funcName,
                                                      JSFuncCallbackData a_callbackData)
@@ -134,7 +139,8 @@ namespace NL::JS
 
     void JSFunctionStorage::ExecuteFunctionCallback(const std::string& a_objectName,
                                                     const std::string& a_funcName,
-                                                    std::shared_ptr<std::vector<std::string>> a_funcArgs)
+                                                    std::shared_ptr<std::vector<std::string>> a_funcArgs,
+                                                    std::shared_ptr<JSFunctionStorage> a_storage)
     {
         std::lock_guard lock(m_funcCallbackMapMutex);
         const auto callbackData = GetFunctionCallbackData(a_objectName, a_funcName);
@@ -147,8 +153,13 @@ namespace NL::JS
         if (callbackData.executeInGameThread)
         {
             SKSE::GetTaskInterface()->AddTask([=]() {
-                std::lock_guard lock(m_funcCallbackMapMutex);
-                const auto innerCallbackData = GetFunctionCallbackData(a_objectName, a_funcName);
+                std::lock_guard lock(a_storage != nullptr ? a_storage->GetCallbackMutex() : m_funcCallbackMapMutex);
+                const auto innerCallbackData = a_storage != nullptr ? a_storage->GetFunctionCallbackData(a_objectName, a_funcName) : GetFunctionCallbackData(a_objectName, a_funcName);
+
+                if (innerCallbackData.callback == nullptr)
+                {
+                    return;
+                }
 
                 auto argsCharArray = NL::Converters::CefValueToJSONConverter::ConvertToCharArray(a_funcArgs);
                 innerCallbackData.callback(argsCharArray.data(), static_cast<int>(argsCharArray.size()));
