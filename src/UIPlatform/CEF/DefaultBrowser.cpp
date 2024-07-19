@@ -248,13 +248,6 @@ namespace NL::CEF
             return;
         }
 
-        // const auto isContinue = (m_isFocusedCached && a_value) || (m_isFocused != a_value);
-        // if (!isContinue)
-        //{
-        //     m_isFocusedCached = false;
-        //     return;
-        // }
-
         const auto uiMsgQ = RE::UIMessageQueue::GetSingleton();
         if (a_value)
         {

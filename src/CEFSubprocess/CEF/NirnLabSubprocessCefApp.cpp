@@ -100,7 +100,7 @@ namespace NL::CEF
         std::uint32_t functionsCount = 0;
         auto currentObjectValue = context->GetGlobal();
 
-        auto addFuncInfo = m_funcQueue.GetNext();
+        auto addFuncInfo = m_funcQueue.PopNext();
         while (addFuncInfo != nullptr)
         {
             ++functionsCount;
@@ -119,7 +119,7 @@ namespace NL::CEF
             CefRefPtr<CefV8Value> funcValue = CefV8Value::CreateFunction(addFuncInfo->functionName, funcHandler);
             currentObjectValue->SetValue(addFuncInfo->functionName, funcValue, V8_PROPERTY_ATTRIBUTE_NONE);
 
-            addFuncInfo = m_funcQueue.GetNext();
+            addFuncInfo = m_funcQueue.PopNext();
         }
 
         spdlog::info("{}: registered {} functions for the browser with id {}", NameOf(OnContextCreated), functionsCount, browser->GetIdentifier());

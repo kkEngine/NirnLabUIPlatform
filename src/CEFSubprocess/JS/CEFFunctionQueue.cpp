@@ -8,7 +8,7 @@ namespace NL::JS
         m_funcDeque.push_back(std::make_shared<CEFFunctionQueue::Item>(a_objectName, a_functionName));
     }
 
-    std::shared_ptr<CEFFunctionQueue::Item> CEFFunctionQueue::GetNext()
+    std::shared_ptr<CEFFunctionQueue::Item> CEFFunctionQueue::PopNext()
     {
         if (m_funcDeque.empty())
         {
