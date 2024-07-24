@@ -97,8 +97,7 @@ namespace NL::Controllers
             {
                 for (std::uint32_t i = 0; i < a_funcInfoArrSize; ++i)
                 {
-                    auto funcInfo = a_funcInfoArr[i];
-                    a_outBrowser->AddFunctionCallback(funcInfo->objectName, funcInfo->funcName, funcInfo->callbackData);
+                    a_outBrowser->AddFunctionCallback(*a_funcInfoArr[i]);
                 }
             }
 
@@ -113,8 +112,7 @@ namespace NL::Controllers
             {
                 for (std::uint32_t i = 0; i < a_funcInfoArrSize; ++i)
                 {
-                    auto funcInfo = a_funcInfoArr[i];
-                    jsFuncStorage->AddFunctionCallback(funcInfo->objectName, funcInfo->funcName, funcInfo->callbackData);
+                    jsFuncStorage->AddFunctionCallback(*a_funcInfoArr[i]);
                 }
             }
 
@@ -143,8 +141,7 @@ namespace NL::Controllers
             {
                 for (std::uint32_t i = 0; i < a_funcInfoArrSize; ++i)
                 {
-                    auto funcInfo = a_funcInfoArr[i];
-                    a_outBrowser->AddFunctionCallback(funcInfo->objectName, funcInfo->funcName, funcInfo->callbackData);
+                    a_outBrowser->AddFunctionCallback(*a_funcInfoArr[i]);
                 }
             }
         }

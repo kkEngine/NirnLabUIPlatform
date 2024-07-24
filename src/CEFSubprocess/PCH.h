@@ -15,6 +15,7 @@
 #include <vector>
 #include <filesystem>
 #include <deque>
+#include <type_traits>
 
 // spdlog
 #include <spdlog/spdlog.h>
@@ -29,5 +30,6 @@ using namespace std::string_literals;
 #include <include/cef_browser.h>
 #include <include/cef_client.h>
 #include <include/cef_version.h>
+#include <include/wrapper/cef_helpers.h>
 
 #include "IPC.h"

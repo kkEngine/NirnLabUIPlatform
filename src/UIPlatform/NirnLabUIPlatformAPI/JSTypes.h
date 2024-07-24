@@ -16,4 +16,18 @@ namespace NL::JS
         const char* funcName = nullptr;
         JSFuncCallbackData callbackData;
     };
+
+    struct JSFuncInfoString : public JSFuncInfo
+    {
+        JSFuncInfoString() = default;
+        JSFuncInfoString(const JSFuncInfo& a_info)
+            : objectNameString(a_info.objectName),
+              funcNameString(a_info.funcName)
+        {
+            callbackData = a_info.callbackData;
+        }
+
+        std::string objectNameString;
+        std::string funcNameString;
+    };
 }

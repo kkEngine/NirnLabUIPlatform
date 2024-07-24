@@ -50,7 +50,7 @@ namespace NL::CEF
             // load url
             if (m_isUrlCached)
             {
-                LoadBrowserURL(m_urlCache.c_str());
+                LoadBrowserURL(m_urlCache.c_str(), m_urlClearJSCache);
             }
         });
 
@@ -63,10 +63,10 @@ namespace NL::CEF
             std::lock_guard locker(m_urlMutex);
             m_isPageLoaded = true;
 
-            // Focus
-            if (m_isFocusedCached)
+            // JS funcs
+            for (auto& funcInfo : m_jsFuncCallbackInfoCache)
             {
-                SetBrowserFocused(m_isFocused);
+                AddFunctionCallbackAndSendMessage(funcInfo);
             }
 
             // JS exec scripts
@@ -79,6 +79,12 @@ namespace NL::CEF
                 m_jsExecCache.clear();
                 m_jsExecCache.shrink_to_fit();
             }
+
+            // Focus
+            if (m_isFocusedCached)
+            {
+                SetBrowserFocused(m_isFocused);
+            }
         });
     }
 
@@ -87,7 +93,7 @@ namespace NL::CEF
         auto browser = m_cefClient->GetBrowser();
         if (browser != nullptr)
         {
-            browser->GetHost()->CloseBrowser(false);
+            browser->GetHost()->CloseBrowser(true);
         }
 
         m_jsFuncStorage->ClearFunctionCallback();
@@ -206,6 +212,19 @@ namespace NL::CEF
         return result;
     }
 
+    void DefaultBrowser::AddFunctionCallbackAndSendMessage(const NL::JS::JSFuncInfo& a_callbackInfo)
+    {
+        m_jsFuncStorage->AddFunctionCallback(a_callbackInfo);
+        const auto browser = m_cefClient->GetBrowser();
+        if (browser != nullptr)
+        {
+            auto cefMessage = CefProcessMessage::Create(IPC_JS_FUNCION_ADD_EVENT);
+            cefMessage->GetArgumentList()->SetDictionary(0, m_jsFuncStorage->ConvertToCefDictionary());
+
+            browser->GetMainFrame()->SendProcessMessage(CefProcessId::PID_RENDERER, cefMessage);
+        }
+    }
+
 #pragma region IBrowser
 
     bool __cdecl DefaultBrowser::IsBrowserReady()
@@ -281,19 +300,21 @@ namespace NL::CEF
         m_toggleFocusKeyCode2 = a_keyCode2 < sizeof(RE::BSInputDeviceManager::GetSingleton()->GetKeyboard()->curState) ? a_keyCode2 : 0;
     }
 
-    void __cdecl DefaultBrowser::LoadBrowserURL(const char* a_url)
+    void __cdecl DefaultBrowser::LoadBrowserURL(const char* a_url, bool a_clearJSFunctions)
     {
         std::lock_guard locker(m_urlMutex);
         if (!IsBrowserReady())
         {
             m_isUrlCached = true;
             m_urlCache = a_url;
+            m_urlClearJSCache = a_clearJSFunctions;
             return;
         }
 
         const auto frame = m_cefClient->GetBrowser()->GetMainFrame();
         if (frame)
         {
+            
             frame->LoadURL(CefString(a_url));
         }
         else
@@ -322,13 +343,22 @@ namespace NL::CEF
             m_jsExecCache.shrink_to_fit();
         }
 
-        m_cefClient->GetBrowser()->GetMainFrame()->ExecuteJavaScript(a_script, a_scriptUrl, 0);
+        if (a_script != nullptr)
+        {
+            m_cefClient->GetBrowser()->GetMainFrame()->ExecuteJavaScript(a_script, a_scriptUrl, 0);
+        }
     }
 
-    void __cdecl DefaultBrowser::AddFunctionCallback(const char* a_objectName, const char* a_funcName, NL::JS::JSFuncCallbackData a_callbackData)
+    void __cdecl DefaultBrowser::AddFunctionCallback(const NL::JS::JSFuncInfo& a_callbackInfo)
     {
-        m_jsFuncStorage->AddFunctionCallback(a_objectName, a_funcName, a_callbackData);
-        // send IPC message to RenderProcess if started
+        std::lock_guard locker(m_urlMutex);
+        if (!IsPageLoaded())
+        {
+            m_jsFuncCallbackInfoCache.push_back(NL::JS::JSFuncInfoString(a_callbackInfo));
+            return;
+        }
+
+        AddFunctionCallbackAndSendMessage(a_callbackInfo);
     }
 
 #pragma endregion

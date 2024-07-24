@@ -40,7 +40,7 @@ namespace NL::UI::TestCase
         m_browserHandle = a_api->AddOrGetBrowser("LOCAL_TEST_PAGE",
                                                  m_funcInfoVector.data(),
                                                  static_cast<std::uint32_t>(m_funcInfoVector.size()),
-                                                 "",
+                                                 "https://www.youtube.com",
                                                  m_browser);
 
         if (m_browserHandle == NL::UI::IUIPlatformAPI::InvalidBrowserRefHandle)
@@ -55,16 +55,17 @@ namespace NL::UI::TestCase
             return;
         }
 
-        m_browser->LoadBrowserURL("file:///_testLocalPage.html");
-
         m_pingThread = std::make_shared<std::thread>([=]() {
+            std::this_thread::sleep_for(12s);
+
+            m_browser->LoadBrowserURL("file:///_testLocalPage.html");
             while (!m_browser->IsPageLoaded())
             {
                 std::this_thread::sleep_for(100ms);
             }
 
             int i = 0;
-            while (i < 8)
+            while (i < 10)
             {
                 std::this_thread::sleep_for(1s);
                 m_browser->ExecuteJavaScript(fmt::format("window.func1({})", std::to_string(++i).c_str()).c_str());

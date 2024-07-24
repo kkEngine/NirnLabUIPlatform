@@ -7,90 +7,24 @@ namespace NL::JS
         return m_funcCallbackMapMutex;
     }
 
-    void JSFunctionStorage::QueueAddFunctionCallback(const std::string& a_objectName,
-                                                     const std::string& a_funcName,
-                                                     JSFuncCallbackData a_callbackData)
-    {
-        {
-            std::lock_guard<std::mutex> lock(m_dequeMutex);
-            const auto newItem = std::make_shared<QueueItem>(QueueItem::OpCodes::AddOrReplace, a_objectName, a_funcName, a_callbackData);
-            m_deque.push_back(newItem);
-        }
-        OnQueueItemAdded();
-    }
-
-    void JSFunctionStorage::QueueRemoveFunctionCallback(const std::string& a_objectName, const std::string& a_funcName)
-    {
-        std::lock_guard<std::mutex> lock(m_dequeMutex);
-        for (auto it = m_deque.begin(); it != m_deque.end(); ++it)
-        {
-            if (it->get()->objectName == a_objectName && it->get()->functionName == a_funcName)
-            {
-                it->get()->opCode = JSFunctionStorage::QueueItem::OpCodes::Remove;
-                std::shared_ptr<QueueItem> item;
-                m_deque.erase(it)->swap(item);
-                m_deque.push_back(item);
-            }
-        }
-    }
-
-    std::shared_ptr<JSFunctionStorage::QueueItem> JSFunctionStorage::GetNextQueueItem()
-    {
-        std::lock_guard<std::mutex> lock(m_dequeMutex);
-        if (m_deque.empty())
-        {
-            return nullptr;
-        }
-
-        const auto item = m_deque.front();
-        m_deque.pop_front();
-        return item;
-    }
-
-    void JSFunctionStorage::ProcessQueue()
-    {
-        auto qItem = GetNextQueueItem();
-        while (qItem != nullptr)
-        {
-            switch (qItem->opCode)
-            {
-            case QueueItem::OpCodes::AddOrReplace:
-                AddFunctionCallback(qItem->objectName, qItem->functionName, qItem->functionCallbackData);
-                break;
-            case QueueItem::OpCodes::Remove:
-                RemoveFunctionCallback(qItem->objectName, qItem->functionName);
-                break;
-            case QueueItem::OpCodes::Clear:
-                ClearFunctionCallback();
-                break;
-            default:
-                break;
-            }
-
-            qItem = GetNextQueueItem();
-        }
-    }
-
-    bool JSFunctionStorage::AddFunctionCallback(const std::string& a_objectName,
-                                                const std::string& a_funcName,
-                                                JSFuncCallbackData a_callbackData)
+    bool JSFunctionStorage::AddFunctionCallback(const NL::JS::JSFuncInfo& a_funcInfo)
     {
         std::lock_guard lock(m_funcCallbackMapMutex);
-        const auto objIt = m_funcCallbackMap.find(a_objectName);
+        const auto objIt = m_funcCallbackMap.find(a_funcInfo.objectName);
         if (objIt == m_funcCallbackMap.end())
         {
-            m_funcCallbackMap.insert({a_objectName, {{a_funcName, a_callbackData}}});
+            m_funcCallbackMap.insert({a_funcInfo.objectName, {{a_funcInfo.funcName, a_funcInfo.callbackData}}});
             return true;
         }
 
-        const auto funcIt = objIt->second.find(a_funcName);
+        const auto funcIt = objIt->second.find(a_funcInfo.funcName);
         if (funcIt == objIt->second.end())
         {
-            objIt->second.insert({a_funcName, a_callbackData});
+            objIt->second.insert({a_funcInfo.funcName, a_funcInfo.callbackData});
             return true;
         }
 
-        funcIt->second = a_callbackData;
+        funcIt->second = a_funcInfo.callbackData;
         return false;
     }
 
@@ -146,7 +80,7 @@ namespace NL::JS
         const auto callbackData = GetFunctionCallbackData(a_objectName, a_funcName);
         if (callbackData.callback == nullptr)
         {
-            spdlog::error("{}: function callback is nullptr for {}.{}", NameOf(JSFunctionStorage), a_objectName.c_str(), a_funcName.c_str());
+            spdlog::warn("{}: function callback is nullptr for {}.{}", NameOf(JSFunctionStorage), a_objectName.c_str(), a_funcName.c_str());
             return;
         }
 
@@ -158,6 +92,7 @@ namespace NL::JS
 
                 if (innerCallbackData.callback == nullptr)
                 {
+                    spdlog::warn("{}: function callback is nullptr for {}.{}", NameOf(JSFunctionStorage), a_objectName.c_str(), a_funcName.c_str());
                     return;
                 }
 

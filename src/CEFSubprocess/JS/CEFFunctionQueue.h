@@ -19,6 +19,8 @@ namespace NL::JS
 
       public:
         void AddFunction(const CefString& a_objectName, const CefString& a_functionName);
+        void Clear();
         std::shared_ptr<Item> PopNext();
+        size_t GetSize();
     };
 }
