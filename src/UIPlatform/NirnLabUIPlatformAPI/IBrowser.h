@@ -44,8 +44,14 @@ namespace NL::CEF
         /// <returns></returns>
         virtual void __cdecl ToggleBrowserFocusByKeys(const std::uint32_t a_keyCode1, const std::uint32_t a_keyCode2) = 0;
 
-        virtual void __cdecl LoadBrowserURL(const char* a_url) = 0;
+        /// <summary>
+        /// Loads new url
+        /// </summary>
+        /// <param name="a_url"></param>
+        /// <param name="a_clearJSFunctions">If true then remove all previous js function callbacks</param>
+        /// <returns></returns>
+        virtual void __cdecl LoadBrowserURL(const char* a_url, bool a_clearJSFunctions = true) = 0;
         virtual void __cdecl ExecuteJavaScript(const char* a_script, const char* a_scriptUrl = JS_EXECUTE_SCRIPT_URL) = 0;
-        virtual void __cdecl AddFunctionCallback(const char* a_objectName, const char* a_funcName, NL::JS::JSFuncCallbackData a_callbackData) = 0;
+        virtual void __cdecl AddFunctionCallback(const NL::JS::JSFuncInfo& a_callbackInfo) = 0;
     };
 }

@@ -50,24 +50,35 @@ namespace NL::CEF
             // load url
             if (m_isUrlCached)
             {
-                LoadBrowserURL(m_urlCache.c_str(), m_urlClearJSCache);
+                LoadBrowserURL(m_urlCache.c_str(), m_clearJSFunctions);
             }
         });
 
         m_onMainFrameLoadStart_Connection = m_cefClient->onMainFrameLoadStart.connect([&]() {
             std::lock_guard locker(m_urlMutex);
-            m_isPageLoaded = false;
-        });
-
-        m_onMainFrameLoadEnd_Connection = m_cefClient->onMainFrameLoadEnd.connect([&]() {
-            std::lock_guard locker(m_urlMutex);
             m_isPageLoaded = true;
+            
+            // JS funcs callback
+            if (m_clearJSFunctions)
+            {
+                m_jsFuncStorage->ClearFunctionCallback();
+            }
+            else
+            {
+                const auto browser = m_cefClient->GetBrowser();
+                if (browser != nullptr && m_jsFuncStorage->GetSize() > 0)
+                {
+                    auto cefMessage = CefProcessMessage::Create(IPC_JS_FUNCION_ADD_EVENT);
+                    cefMessage->GetArgumentList()->SetDictionary(0, m_jsFuncStorage->ConvertToCefDictionary());
+                    browser->GetMainFrame()->SendProcessMessage(CefProcessId::PID_RENDERER, cefMessage);
+                }
+            }
 
-            // JS funcs
             for (auto& funcInfo : m_jsFuncCallbackInfoCache)
             {
                 AddFunctionCallbackAndSendMessage(funcInfo);
             }
+            m_jsFuncCallbackInfoCache.clear();
 
             // JS exec scripts
             if (!m_jsExecCache.empty())
@@ -219,8 +230,12 @@ namespace NL::CEF
         if (browser != nullptr)
         {
             auto cefMessage = CefProcessMessage::Create(IPC_JS_FUNCION_ADD_EVENT);
-            cefMessage->GetArgumentList()->SetDictionary(0, m_jsFuncStorage->ConvertToCefDictionary());
-
+            auto dictValue = CefDictionaryValue::Create();
+            auto listValue = CefListValue::Create();
+            listValue->SetSize(1);
+            listValue->SetString(0, CefString(a_callbackInfo.funcName));
+            dictValue->SetList(CefString(a_callbackInfo.objectName), listValue);
+            cefMessage->GetArgumentList()->SetDictionary(0, dictValue);
             browser->GetMainFrame()->SendProcessMessage(CefProcessId::PID_RENDERER, cefMessage);
         }
     }
@@ -303,18 +318,18 @@ namespace NL::CEF
     void __cdecl DefaultBrowser::LoadBrowserURL(const char* a_url, bool a_clearJSFunctions)
     {
         std::lock_guard locker(m_urlMutex);
-        if (!IsBrowserReady())
+        m_clearJSFunctions = a_clearJSFunctions;
+        if (!IsPageLoaded())
         {
             m_isUrlCached = true;
             m_urlCache = a_url;
-            m_urlClearJSCache = a_clearJSFunctions;
             return;
         }
 
         const auto frame = m_cefClient->GetBrowser()->GetMainFrame();
         if (frame)
         {
-            
+            m_isPageLoaded = false;
             frame->LoadURL(CefString(a_url));
         }
         else
@@ -354,7 +369,7 @@ namespace NL::CEF
         std::lock_guard locker(m_urlMutex);
         if (!IsPageLoaded())
         {
-            m_jsFuncCallbackInfoCache.push_back(NL::JS::JSFuncInfoString(a_callbackInfo));
+            m_jsFuncCallbackInfoCache.push_back(a_callbackInfo);
             return;
         }
 

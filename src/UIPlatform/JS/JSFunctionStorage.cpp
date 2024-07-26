@@ -9,16 +9,21 @@ namespace NL::JS
 
     bool JSFunctionStorage::AddFunctionCallback(const NL::JS::JSFuncInfo& a_funcInfo)
     {
+        if (a_funcInfo.objectName == nullptr || a_funcInfo.funcName == nullptr)
+        {
+            return false;
+        }
+
         std::lock_guard lock(m_funcCallbackMapMutex);
         const auto objIt = m_funcCallbackMap.find(a_funcInfo.objectName);
-        if (objIt == m_funcCallbackMap.end())
+        if (objIt == m_funcCallbackMap.cend())
         {
             m_funcCallbackMap.insert({a_funcInfo.objectName, {{a_funcInfo.funcName, a_funcInfo.callbackData}}});
             return true;
         }
 
         const auto funcIt = objIt->second.find(a_funcInfo.funcName);
-        if (funcIt == objIt->second.end())
+        if (funcIt == objIt->second.cend())
         {
             objIt->second.insert({a_funcInfo.funcName, a_funcInfo.callbackData});
             return true;
@@ -80,7 +85,7 @@ namespace NL::JS
         const auto callbackData = GetFunctionCallbackData(a_objectName, a_funcName);
         if (callbackData.callback == nullptr)
         {
-            spdlog::warn("{}: function callback is nullptr for {}.{}", NameOf(JSFunctionStorage), a_objectName.c_str(), a_funcName.c_str());
+            spdlog::debug("{}: function callback is nullptr for {}.{}", NameOf(JSFunctionStorage), a_objectName.c_str(), a_funcName.c_str());
             return;
         }
 
@@ -92,7 +97,7 @@ namespace NL::JS
 
                 if (innerCallbackData.callback == nullptr)
                 {
-                    spdlog::warn("{}: function callback is nullptr for {}.{}", NameOf(JSFunctionStorage), a_objectName.c_str(), a_funcName.c_str());
+                    spdlog::debug("{}: function callback is nullptr for {}.{}", NameOf(JSFunctionStorage), a_objectName.c_str(), a_funcName.c_str());
                     return;
                 }
 
@@ -107,6 +112,16 @@ namespace NL::JS
         }
     }
 
+    size_t JSFunctionStorage::GetSize()
+    {
+        size_t result = m_funcCallbackMap.size();
+        for (const auto& map : m_funcCallbackMap)
+        {
+            result += map.second.size();
+        }
+        return result;
+    }
+
     CefRefPtr<CefDictionaryValue> JSFunctionStorage::ConvertToCefDictionary()
     {
         std::lock_guard lock(m_funcCallbackMapMutex);
@@ -114,7 +129,7 @@ namespace NL::JS
 
         for (const auto& obj : m_funcCallbackMap)
         {
-            CefRefPtr<CefListValue> list(CefListValue::Create());
+            auto list = CefListValue::Create();
             list->SetSize(obj.second.size());
             auto funcIdx = 0;
             for (const auto& func : obj.second)

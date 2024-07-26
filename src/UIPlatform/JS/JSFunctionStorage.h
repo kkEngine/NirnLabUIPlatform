@@ -25,6 +25,7 @@ namespace NL::JS
                                              const std::string& a_funcName,
                                              std::shared_ptr<std::vector<std::string>> a_funcArgs,
                                              std::shared_ptr<JSFunctionStorage> a_storage = nullptr);
+        size_t GetSize();
 
         virtual CefRefPtr<CefDictionaryValue> ConvertToCefDictionary();
     };

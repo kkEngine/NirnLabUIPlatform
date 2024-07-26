@@ -72,7 +72,8 @@ namespace NL::CEF
                                      CefRefPtr<CefFrame> frame,
                                      int httpStatusCode)
     {
-        if (browser->IsSame(m_cefBrowser) && frame->IsMain())
+        // YES, httpStatusCode can be negative o_O
+        if (browser->IsSame(m_cefBrowser) && frame->IsMain() && httpStatusCode >= 0)
         {
             onMainFrameLoadEnd();
         }

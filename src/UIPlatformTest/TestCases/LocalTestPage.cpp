@@ -58,7 +58,22 @@ namespace NL::UI::TestCase
         m_pingThread = std::make_shared<std::thread>([=]() {
             std::this_thread::sleep_for(12s);
 
-            m_browser->LoadBrowserURL("file:///_testLocalPage.html");
+            m_browser->LoadBrowserURL("file:///_testLocalPage.html", false);
+
+            // func1
+            JS::JSFuncInfoString strFunInfo("window", "func1");
+            strFunInfo.callbackData.executeInGameThread = false;
+            strFunInfo.callbackData.callback = [](const char** a_args, int a_argsCount) {
+                std::string argsStr = "";
+                for (auto i = 0; i < a_argsCount; ++i)
+                {
+                    argsStr += fmt::format("{}{}", (i > 0 ? ", " : ""), a_args[i]);
+                }
+
+                spdlog::info("func1__ callback. params: {}", argsStr);
+            };
+            m_browser->AddFunctionCallback(strFunInfo);
+
             while (!m_browser->IsPageLoaded())
             {
                 std::this_thread::sleep_for(100ms);

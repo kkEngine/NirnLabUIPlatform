@@ -24,7 +24,7 @@ namespace NL::CEF
         std::recursive_mutex m_urlMutex;
         bool m_isUrlCached = false;
         bool m_isPageLoaded = false;
-        bool m_urlClearJSCache = true;
+        bool m_clearJSFunctions = false;
         std::string m_urlCache = "";
 
         // Focus

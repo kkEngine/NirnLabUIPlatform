@@ -30,7 +30,7 @@ namespace NL::Menus
         std::lock_guard<std::mutex> lock(m_startBrowserMutex);
         if (!m_started)
         {
-            if (!m_cefService->CreateBrowser(m_browser->GetCefClient(), m_jsFuncStorage->ConvertToCefDictionary(), CefString(a_url.data())))
+            if (!m_cefService->CreateBrowser(m_browser->GetCefClient(), nullptr, CefString(a_url.data())))
             {
                 m_logger->error("{}: failed to create browser", NameOf(DefaultBrowser));
                 return false;

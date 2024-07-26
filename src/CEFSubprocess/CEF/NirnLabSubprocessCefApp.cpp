@@ -20,13 +20,71 @@ namespace NL::CEF
         spdlog::set_default_logger(logger);
     }
 
+    size_t NirnLabSubprocessCefApp::AddFunctionHandlers(CefRefPtr<CefBrowser> a_browser,
+                                                        CefRefPtr<CefFrame> a_frame,
+                                                        CefProcessId a_sourceProcess,
+                                                        CefRefPtr<CefDictionaryValue> a_funcDict)
+    {
+        size_t addedFuncCount = 0;
+
+        const auto v8Context = a_frame->GetV8Context();
+        if (!v8Context->Enter())
+        {
+            spdlog::error("{}[{}]: can't enter v8 context", NameOf(NirnLabSubprocessCefApp::AddFunctionHandlers), ::GetCurrentProcessId());
+            return addedFuncCount;
+        }
+
+        CefDictionaryValue::KeyList keyList;
+        if (!a_funcDict->GetKeys(keyList))
+        {
+            spdlog::error("{}[{}]: can't get keys from function dictionary", NameOf(NirnLabSubprocessCefApp::AddFunctionHandlers), ::GetCurrentProcessId());
+        }
+        else
+        {
+            for (const auto& objectName : keyList)
+            {
+                auto currentObjectValue = v8Context->GetGlobal();
+                const auto funcList = a_funcDict->GetList(objectName);
+                for (auto i = 0; i < funcList->GetSize(); ++i)
+                {
+                    const auto& funcName = funcList->GetString(i);
+                    if (funcName.empty())
+                    {
+                        continue;
+                    }
+
+                    ++addedFuncCount;
+
+                    if (!objectName.empty() || objectName != IPC_JS_WINDOW_OBJECT_NAME)
+                    {
+                        auto objectValue = currentObjectValue->GetValue(objectName);
+                        if (objectValue == nullptr || objectValue->IsNull() || objectValue->IsUndefined())
+                        {
+                            objectValue = CefV8Value::CreateObject(nullptr, nullptr);
+                            currentObjectValue->SetValue(objectName, objectValue, V8_PROPERTY_ATTRIBUTE_NONE);
+                        }
+                        currentObjectValue = objectValue;
+                    }
+
+                    CefRefPtr<NL::JS::CEFFunctionHandler> funcHandler = new NL::JS::CEFFunctionHandler(a_browser, objectName);
+                    CefRefPtr<CefV8Value> funcValue = CefV8Value::CreateFunction(funcName, funcHandler);
+                    currentObjectValue->SetValue(funcName, funcValue, V8_PROPERTY_ATTRIBUTE_NONE);
+                }
+            }
+        }
+
+        v8Context->Exit();
+        return addedFuncCount;
+    }
+
     void NirnLabSubprocessCefApp::OnBeforeCommandLineProcessing(CefString const& process_type,
                                                                 CefRefPtr<CefCommandLine> command_line)
     {
+        m_processType = process_type;
         InitLog(nullptr);
 
         DWORD mainProcessId = std::stoi(command_line->GetSwitchValue(IPC_CL_PROCESS_ID_NAME).ToWString());
-        if (mainProcessId)
+        if (mainProcessId && process_type == RENDER_PROCESS_TYPE)
         {
             new std::thread([=]() {
                 const auto procHandle = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, mainProcessId);
@@ -39,6 +97,7 @@ namespace NL::CEF
                 //     // log or email to sportloto?
                 // }
 
+                std::this_thread::sleep_for(1.42s);
                 ::TerminateProcess(::GetCurrentProcess(), EXIT_SUCCESS);
             });
         }
@@ -53,38 +112,12 @@ namespace NL::CEF
                                                    CefRefPtr<CefDictionaryValue> extra_info)
     {
         m_logSink->SetBrowser(browser);
-
-        if (extra_info != nullptr && extra_info->GetSize() > 0)
-        {
-            CefDictionaryValue::KeyList keyList;
-            if (!extra_info->GetKeys(keyList))
-            {
-                spdlog::error("{}: error format in param {}", NameOf(NirnLabSubprocessCefApp::OnBrowserCreated), NameOf(extra_info));
-            }
-            else
-            {
-                for (const auto& key : keyList)
-                {
-                    const auto funcList = extra_info->GetList(key);
-                    for (auto i = 0; i < funcList->GetSize(); ++i)
-                    {
-                        const auto funcName = funcList->GetValue(i)->GetString();
-                        if (!funcName.empty())
-                        {
-                            m_funcQueue.AddFunction(key, funcName);
-                        }
-                        else
-                        {
-                            spdlog::error("{}: error format in param {}, key {}", NameOf(NirnLabSubprocessCefApp::OnBrowserCreated), NameOf(extra_info), key.ToString().c_str());
-                        }
-                    }
-                }
-            }
-        }
+        spdlog::info("{}[{}]: browser created with id {}", NameOf(NirnLabSubprocessCefApp), ::GetCurrentProcessId(), browser->GetIdentifier());
     }
 
     void NirnLabSubprocessCefApp::OnBrowserDestroyed(CefRefPtr<CefBrowser> browser)
     {
+        spdlog::info("{}[{}]: browser destroyed with id {}", NameOf(NirnLabSubprocessCefApp), ::GetCurrentProcessId(), browser->GetIdentifier());
         m_logSink->SetBrowser(nullptr);
     }
 
@@ -92,42 +125,36 @@ namespace NL::CEF
                                                    CefRefPtr<CefFrame> frame,
                                                    CefRefPtr<CefV8Context> context)
     {
-        if (!frame->IsMain())
+        if (frame->IsMain())
         {
-            return;
+            auto message = CefProcessMessage::Create(IPC_JS_CONTEXT_CREATED);
+            frame->SendProcessMessage(PID_BROWSER, message);
         }
-
-        std::uint32_t functionsCount = 0;
-        auto currentObjectValue = context->GetGlobal();
-
-        auto addFuncInfo = m_funcQueue.PopNext();
-        while (addFuncInfo != nullptr)
-        {
-            ++functionsCount;
-            if (!addFuncInfo->objectName.empty() || addFuncInfo->objectName != IPC_JS_WINDOW_OBJECT_NAME)
-            {
-                auto objectValue = currentObjectValue->GetValue(addFuncInfo->objectName);
-                if (objectValue == nullptr || objectValue->IsNull() || objectValue->IsUndefined())
-                {
-                    objectValue = CefV8Value::CreateObject(nullptr, nullptr);
-                    currentObjectValue->SetValue(addFuncInfo->objectName, objectValue, V8_PROPERTY_ATTRIBUTE_NONE);
-                }
-                currentObjectValue = objectValue;
-            }
-
-            CefRefPtr<NL::JS::CEFFunctionHandler> funcHandler = new NL::JS::CEFFunctionHandler(browser, addFuncInfo->objectName);
-            CefRefPtr<CefV8Value> funcValue = CefV8Value::CreateFunction(addFuncInfo->functionName, funcHandler);
-            currentObjectValue->SetValue(addFuncInfo->functionName, funcValue, V8_PROPERTY_ATTRIBUTE_NONE);
-
-            addFuncInfo = m_funcQueue.PopNext();
-        }
-
-        spdlog::info("{}: registered {} functions for the browser with id {}", NameOf(OnContextCreated), functionsCount, browser->GetIdentifier());
     }
 
     void NirnLabSubprocessCefApp::OnContextReleased(CefRefPtr<CefBrowser> browser,
                                                     CefRefPtr<CefFrame> frame,
                                                     CefRefPtr<CefV8Context> context)
     {
+    }
+
+    bool NirnLabSubprocessCefApp::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
+                                                           CefRefPtr<CefFrame> frame,
+                                                           CefProcessId source_process,
+                                                           CefRefPtr<CefProcessMessage> message)
+    {
+        if (message->GetName() == IPC_JS_FUNCION_ADD_EVENT)
+        {
+            const auto funcDict = message->GetArgumentList()->GetDictionary(0);
+            if (funcDict == nullptr)
+            {
+                return true;
+            }
+
+            const auto addedFuncCount = AddFunctionHandlers(browser, frame, source_process, funcDict);
+            spdlog::info("{}[{}]: registered {} functions for the browser with id {}", NameOf(NirnLabSubprocessCefApp::OnProcessMessageReceived), ::GetCurrentProcessId(), addedFuncCount, browser->GetIdentifier());
+        }
+
+        return false;
     }
 }

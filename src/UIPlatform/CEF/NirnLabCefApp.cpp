@@ -23,6 +23,12 @@ namespace NL::CEF
         // tell Chromium to autoplay <video> elements without
         // requiring the muted attribute or user interaction
         command_line->AppendSwitchWithValue("autoplay-policy", "no-user-gesture-required");
+
+        // https://chromium.googlesource.com/chromium/src/+/main/docs/process_model_and_site_isolation.md
+        command_line->AppendSwitch("disable-site-isolation-for-policy");
+        command_line->AppendSwitch("disable-site-isolation-trials");
+        command_line->AppendSwitchWithValue("process-per-site", "false");
+        //command_line->AppendSwitch("single-process");
     }
 
     CefRefPtr<CefBrowserProcessHandler> CEF::NirnLabCefApp::GetBrowserProcessHandler()
