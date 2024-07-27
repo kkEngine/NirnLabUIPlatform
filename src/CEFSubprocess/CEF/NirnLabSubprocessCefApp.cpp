@@ -53,9 +53,7 @@ namespace NL::CEF
                         continue;
                     }
 
-                    ++addedFuncCount;
-
-                    if (!objectName.empty() || objectName != IPC_JS_WINDOW_OBJECT_NAME)
+                    if (!objectName.empty())
                     {
                         auto objectValue = currentObjectValue->GetValue(objectName);
                         if (objectValue == nullptr || objectValue->IsNull() || objectValue->IsUndefined())
@@ -69,12 +67,67 @@ namespace NL::CEF
                     CefRefPtr<NL::JS::CEFFunctionHandler> funcHandler = new NL::JS::CEFFunctionHandler(a_browser, objectName);
                     CefRefPtr<CefV8Value> funcValue = CefV8Value::CreateFunction(funcName, funcHandler);
                     currentObjectValue->SetValue(funcName, funcValue, V8_PROPERTY_ATTRIBUTE_NONE);
+                    ++addedFuncCount;
                 }
             }
         }
 
         v8Context->Exit();
         return addedFuncCount;
+    }
+
+    size_t NirnLabSubprocessCefApp::RemoveFunctionHandlers(CefRefPtr<CefBrowser> a_browser,
+                                                           CefRefPtr<CefFrame> a_frame,
+                                                           CefProcessId a_sourceProcess,
+                                                           CefRefPtr<CefDictionaryValue> a_funcDict)
+    {
+        size_t removedFuncCount = 0;
+        const auto v8Context = a_frame->GetV8Context();
+        if (!v8Context->Enter())
+        {
+            spdlog::error("{}[{}]: can't enter v8 context", NameOf(NirnLabSubprocessCefApp::RemoveFunctionHandlers), ::GetCurrentProcessId());
+            return removedFuncCount;
+        }
+
+        CefDictionaryValue::KeyList keyList;
+        if (!a_funcDict->GetKeys(keyList))
+        {
+            spdlog::error("{}[{}]: can't get keys from function dictionary", NameOf(NirnLabSubprocessCefApp::RemoveFunctionHandlers), ::GetCurrentProcessId());
+        }
+        else
+        {
+            for (const auto& objectName : keyList)
+            {
+                auto currentObjectValue = v8Context->GetGlobal();
+                const auto funcList = a_funcDict->GetList(objectName);
+                for (auto i = 0; i < funcList->GetSize(); ++i)
+                {
+                    const auto& funcName = funcList->GetString(i);
+                    if (funcName.empty())
+                    {
+                        continue;
+                    }
+
+                    if (!objectName.empty())
+                    {
+                        auto objectValue = currentObjectValue->GetValue(objectName);
+                        if (objectValue != nullptr && objectValue->IsObject())
+                        {
+                            currentObjectValue = objectValue;
+                        }
+                    }
+
+                    // Note: the window object does not allow deleting a custom function for some reason. Use different object. 
+                    if (currentObjectValue->DeleteValue(funcName))
+                    {
+                        ++removedFuncCount;
+                    }
+                }
+            }
+        }
+
+        v8Context->Exit();
+        return removedFuncCount;
     }
 
     void NirnLabSubprocessCefApp::OnBeforeCommandLineProcessing(CefString const& process_type,
@@ -153,6 +206,17 @@ namespace NL::CEF
 
             const auto addedFuncCount = AddFunctionHandlers(browser, frame, source_process, funcDict);
             spdlog::info("{}[{}]: registered {} functions for the browser with id {}", NameOf(NirnLabSubprocessCefApp::OnProcessMessageReceived), ::GetCurrentProcessId(), addedFuncCount, browser->GetIdentifier());
+        }
+        else if (message->GetName() == IPC_JS_FUNCTION_REMOVE_EVENT)
+        {
+            const auto funcDict = message->GetArgumentList()->GetDictionary(0);
+            if (funcDict == nullptr)
+            {
+                return true;
+            }
+
+            const auto addedFuncCount = RemoveFunctionHandlers(browser, frame, source_process, funcDict);
+            spdlog::info("{}[{}]: removed {} functions for the browser with id {}", NameOf(NirnLabSubprocessCefApp::OnProcessMessageReceived), ::GetCurrentProcessId(), addedFuncCount, browser->GetIdentifier());
         }
 
         return false;

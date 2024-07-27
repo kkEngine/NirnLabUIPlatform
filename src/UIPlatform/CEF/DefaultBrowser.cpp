@@ -57,8 +57,8 @@ namespace NL::CEF
         m_onMainFrameLoadStart_Connection = m_cefClient->onMainFrameLoadStart.connect([&]() {
             std::lock_guard locker(m_urlMutex);
             m_isPageLoaded = true;
-            
-            // JS funcs callback
+
+            // Add js func callbacks
             if (m_clearJSFunctions)
             {
                 m_jsFuncStorage->ClearFunctionCallback();
@@ -79,6 +79,13 @@ namespace NL::CEF
                 AddFunctionCallbackAndSendMessage(funcInfo);
             }
             m_jsFuncCallbackInfoCache.clear();
+
+            // Remove js func callbacks
+            for (auto& funcInfo : m_jsFuncRemoveCache)
+            {
+                RemoveFunctionCallbackAndSendMessage(std::get<0>(funcInfo).c_str(), std::get<1>(funcInfo).c_str());
+            }
+            m_jsFuncRemoveCache.clear();
 
             // JS exec scripts
             if (!m_jsExecCache.empty())
@@ -233,8 +240,25 @@ namespace NL::CEF
             auto dictValue = CefDictionaryValue::Create();
             auto listValue = CefListValue::Create();
             listValue->SetSize(1);
-            listValue->SetString(0, CefString(a_callbackInfo.funcName));
-            dictValue->SetList(CefString(a_callbackInfo.objectName), listValue);
+            listValue->SetString(0, a_callbackInfo.funcName);
+            dictValue->SetList(a_callbackInfo.objectName, listValue);
+            cefMessage->GetArgumentList()->SetDictionary(0, dictValue);
+            browser->GetMainFrame()->SendProcessMessage(CefProcessId::PID_RENDERER, cefMessage);
+        }
+    }
+
+    void DefaultBrowser::RemoveFunctionCallbackAndSendMessage(const char* a_objectName, const char* a_funcName)
+    {
+        m_jsFuncStorage->RemoveFunctionCallback(a_objectName, a_funcName);
+        const auto browser = m_cefClient->GetBrowser();
+        if (browser != nullptr)
+        {
+            auto cefMessage = CefProcessMessage::Create(IPC_JS_FUNCTION_REMOVE_EVENT);
+            auto dictValue = CefDictionaryValue::Create();
+            auto listValue = CefListValue::Create();
+            listValue->SetSize(1);
+            listValue->SetString(0, a_objectName);
+            dictValue->SetList(a_funcName, listValue);
             cefMessage->GetArgumentList()->SetDictionary(0, dictValue);
             browser->GetMainFrame()->SendProcessMessage(CefProcessId::PID_RENDERER, cefMessage);
         }
@@ -369,11 +393,47 @@ namespace NL::CEF
         std::lock_guard locker(m_urlMutex);
         if (!IsPageLoaded())
         {
+            for (auto it = m_jsFuncRemoveCache.begin(); it != m_jsFuncRemoveCache.end(); ++it)
+            {
+                if (std::get<0>(*it) == a_callbackInfo.objectName && std::get<1>(*it) == a_callbackInfo.funcName)
+                {
+                    m_jsFuncRemoveCache.erase(it);
+                }
+            }
+
             m_jsFuncCallbackInfoCache.push_back(a_callbackInfo);
             return;
         }
 
         AddFunctionCallbackAndSendMessage(a_callbackInfo);
+    }
+
+    void __cdecl DefaultBrowser::RemoveFunctionCallback(const char* a_objectName, const char* a_funcName)
+    {
+        std::lock_guard locker(m_urlMutex);
+        if (!IsPageLoaded())
+        {
+            for (auto it = m_jsFuncCallbackInfoCache.begin(); it != m_jsFuncCallbackInfoCache.end(); ++it)
+            {
+                if (it->objectNameString == a_objectName && it->funcNameString == a_funcName)
+                {
+                    m_jsFuncCallbackInfoCache.erase(it);
+                }
+            }
+
+            if (!m_jsFuncStorage->RemoveFunctionCallback(a_objectName, a_funcName))
+            {
+                m_jsFuncRemoveCache.push_back({a_objectName, a_funcName});
+            }
+            return;
+        }
+
+        RemoveFunctionCallbackAndSendMessage(a_objectName, a_funcName);
+    }
+
+    void __cdecl DefaultBrowser::RemoveFunctionCallback(const NL::JS::JSFuncInfo& a_callbackInfo)
+    {
+        RemoveFunctionCallback(a_callbackInfo.objectName, a_callbackInfo.funcName);
     }
 
 #pragma endregion

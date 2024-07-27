@@ -53,5 +53,7 @@ namespace NL::CEF
         virtual void __cdecl LoadBrowserURL(const char* a_url, bool a_clearJSFunctions = true) = 0;
         virtual void __cdecl ExecuteJavaScript(const char* a_script, const char* a_scriptUrl = JS_EXECUTE_SCRIPT_URL) = 0;
         virtual void __cdecl AddFunctionCallback(const NL::JS::JSFuncInfo& a_callbackInfo) = 0;
+        virtual void __cdecl RemoveFunctionCallback(const char* a_objectName, const char* a_funcName) = 0;
+        virtual void __cdecl RemoveFunctionCallback(const NL::JS::JSFuncInfo& a_callbackInfo) = 0;
     };
 }

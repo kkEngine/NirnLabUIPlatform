@@ -6,7 +6,7 @@ namespace NL::UI::TestCase
     {
         // func1
         auto func1 = new JS::JSFuncInfo();
-        func1->objectName = "window";
+        func1->objectName = "NL";
         func1->funcName = "func1";
         func1->callbackData.executeInGameThread = false;
         func1->callbackData.callback = [](const char** a_args, int a_argsCount) {
@@ -21,7 +21,7 @@ namespace NL::UI::TestCase
 
         // func2
         auto func2 = new JS::JSFuncInfo();
-        func2->objectName = "window";
+        func2->objectName = "NL";
         func2->funcName = "func2";
         func2->callbackData.executeInGameThread = true;
         func2->callbackData.callback = [](const char** a_args, int a_argsCount) {
@@ -58,10 +58,10 @@ namespace NL::UI::TestCase
         m_pingThread = std::make_shared<std::thread>([=]() {
             std::this_thread::sleep_for(12s);
 
-            m_browser->LoadBrowserURL("file:///_testLocalPage.html", false);
+            m_browser->LoadBrowserURL("file:///_testLocalPage.html", true);
 
             // func1
-            JS::JSFuncInfoString strFunInfo("window", "func1");
+            JS::JSFuncInfoString strFunInfo("NL", "func1");
             strFunInfo.callbackData.executeInGameThread = false;
             strFunInfo.callbackData.callback = [](const char** a_args, int a_argsCount) {
                 std::string argsStr = "";
@@ -73,17 +73,18 @@ namespace NL::UI::TestCase
                 spdlog::info("func1__ callback. params: {}", argsStr);
             };
             m_browser->AddFunctionCallback(strFunInfo);
-
+            
             while (!m_browser->IsPageLoaded())
             {
                 std::this_thread::sleep_for(100ms);
             }
+            //m_browser->RemoveFunctionCallback(strFunInfo.objectName, strFunInfo.funcName);
 
             int i = 0;
             while (i < 10)
             {
                 std::this_thread::sleep_for(1s);
-                m_browser->ExecuteJavaScript(fmt::format("window.func1({})", std::to_string(++i).c_str()).c_str());
+                m_browser->ExecuteJavaScript(fmt::format("NL.func1({})", std::to_string(++i).c_str()).c_str());
             }
 
             a_api->ReleaseBrowserHandle(m_browserHandle);

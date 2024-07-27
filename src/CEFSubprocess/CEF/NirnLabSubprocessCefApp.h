@@ -26,6 +26,10 @@ namespace NL::CEF
                                    CefRefPtr<CefFrame> a_frame,
                                    CefProcessId a_sourceProcess,
                                    CefRefPtr<CefDictionaryValue> a_funcDict);
+        size_t RemoveFunctionHandlers(CefRefPtr<CefBrowser> a_browser,
+                                      CefRefPtr<CefFrame> a_frame,
+                                      CefProcessId a_sourceProcess,
+                                      CefRefPtr<CefDictionaryValue> a_funcDict);
 
         // CefApp
         void OnBeforeCommandLineProcessing(CefString const& process_type, CefRefPtr<CefCommandLine> command_line) override;

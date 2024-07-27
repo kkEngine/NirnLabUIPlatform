@@ -35,7 +35,8 @@ namespace NL::CEF
         std::vector<std::tuple<std::string, std::string>> m_jsExecCache;
 
         // JS function callback
-        std::vector<NL::JS::JSFuncInfoString> m_jsFuncCallbackInfoCache;
+        std::list<NL::JS::JSFuncInfoString> m_jsFuncCallbackInfoCache;
+        std::list<std::tuple<std::string, std::string>> m_jsFuncRemoveCache;
 
         RE::CursorMenu* m_cursorMenu = nullptr;
         float& m_currentMousePosX = RE::MenuCursor::GetSingleton()->cursorPosX;
@@ -77,6 +78,7 @@ namespace NL::CEF
         bool IsReadyAndLog();
 
         void AddFunctionCallbackAndSendMessage(const NL::JS::JSFuncInfo& a_callbackInfo);
+        void RemoveFunctionCallbackAndSendMessage(const char* a_objectName, const char* a_funcName);
 
         // IBrowser
         bool __cdecl IsBrowserReady() override;
@@ -93,6 +95,8 @@ namespace NL::CEF
         void __cdecl LoadBrowserURL(const char* a_url, bool a_clearJSFunctions = true) override;
         void __cdecl ExecuteJavaScript(const char* a_script, const char* a_scriptUrl = JS_EXECUTE_SCRIPT_URL) override;
         void __cdecl AddFunctionCallback(const NL::JS::JSFuncInfo& a_callbackInfo) override;
+        void __cdecl RemoveFunctionCallback(const char* a_objectName, const char* a_funcName) override;
+        void __cdecl RemoveFunctionCallback(const NL::JS::JSFuncInfo& a_callbackInfo) override;
 
         // RE::MenuEventHandler
         bool CanProcess(RE::InputEvent* a_event) override;
