@@ -100,11 +100,14 @@ NirnLab is a competitive MMO-like mod for Skyrim which will be announced after t
 If you want to follow the progress and news, subscribe to [![Discord](https://img.shields.io/discord/1004071212361711678?label=Discord&logo=Discord)](https://discord.gg/3YDR4pDJYy).
 
 ### Thanks to
-[@Pospelove](https://github.com/Pospelove)
-[Skymp](https://github.com/skyrim-multiplayer/skymp)
-[CommonLibSSE](https://github.com/Ryan-rsm-McKenzie/CommonLibSSE)
-[CommonLibSSE-NG](https://github.com/CharmedBaryon/CommonLibSSE-NG)
-Chromium Embedded Framework ([CEF](https://bitbucket.org/chromiumembedded/cef))
+[@Pospelove](https://github.com/Pospelove) <br />
+[Skymp](https://github.com/skyrim-multiplayer/skymp) <br />
+[CommonLibSSE](https://github.com/Ryan-rsm-McKenzie/CommonLibSSE) <br />
+[CommonLibSSE-NG](https://github.com/CharmedBaryon/CommonLibSSE-NG) <br />
+Chromium Embedded Framework ([CEF](https://bitbucket.org/chromiumembedded/cef)) <br />
+
+### Nexus
+[mod](https://www.nexusmods.com/skyrimspecialedition/mods/125447)
 
 ### License
 MIT
