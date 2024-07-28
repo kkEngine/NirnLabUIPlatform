@@ -47,7 +47,7 @@ namespace NL::UI
 
         /// <summary>
         /// Response with version info. See ResponseVersionMessage struct.
-        /// You should check current API version (APIVersion::AS_INT) and version in response.
+        /// You should check current API version (NL::UI::APIVersion::AS_INT) and version in response.
         /// It is not guaranteed that the major versions are compatible. In this case, I recommend not using the library.
         /// </summary>
         ResponseVersion,
@@ -69,12 +69,12 @@ namespace NL::UI
         /// <summary>
         /// NirnLabUIPlatform version
         /// </summary>
-        std::uint32_t libVersion = LibVersion::AS_INT;
+        std::uint32_t libVersion = NL::UI::LibVersion::AS_INT;
 
         /// <summary>
         /// NirnLabUIPlatform API version
         /// </summary>
-        std::uint32_t apiVersion = APIVersion::AS_INT;
+        std::uint32_t apiVersion = NL::UI::APIVersion::AS_INT;
     };
 
     struct ResponseAPIMessage

@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace LibVersion
+namespace NL::UI::LibVersion
 {
     inline constexpr std::uint32_t MAJOR = @PROJECT_VERSION_MAJOR@;
     inline constexpr std::uint32_t MINOR = @PROJECT_VERSION_MINOR@;
@@ -23,7 +23,7 @@ namespace LibVersion
     }
 }
 
-namespace APIVersion
+namespace NL::UI::APIVersion
 {
     inline constexpr std::uint32_t MAJOR = @API_MAJOR_VERSION@;
     inline constexpr std::uint32_t MINOR = @API_MINOR_VERSION@;

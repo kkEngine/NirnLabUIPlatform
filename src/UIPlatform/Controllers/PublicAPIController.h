@@ -19,7 +19,7 @@ namespace NL::Controllers
         };
 
       protected:
-        NL::UI::ResponseVersionMessage m_rvMessage{LibVersion::AS_INT, APIVersion::AS_INT};
+        NL::UI::ResponseVersionMessage m_rvMessage{NL::UI::LibVersion::AS_INT, NL::UI::APIVersion::AS_INT};
         NL::UI::ResponseAPIMessage m_rAPIMessage{this};
 
         std::atomic<BrowserRefHandle> m_currentRefHandle{1};

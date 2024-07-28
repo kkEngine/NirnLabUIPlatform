@@ -55,46 +55,46 @@ SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
         {
         case SKSE::MessagingInterface::kPostPostLoad:
             // All plugins are loaded. Request lib version.
-            SKSE::GetMessagingInterface()->Dispatch(NL::UI::APIMessageType::RequestVersion, nullptr, 0, LibVersion::PROJECT_NAME);
+            SKSE::GetMessagingInterface()->Dispatch(NL::UI::APIMessageType::RequestVersion, nullptr, 0, NL::UI::LibVersion::PROJECT_NAME);
             break;
         case SKSE::MessagingInterface::kInputLoaded:
             if (g_canUseAPI)
             {
                 // API version is ok. Request interface.
-                SKSE::GetMessagingInterface()->Dispatch(NL::UI::APIMessageType::RequestAPI, nullptr, 0, LibVersion::PROJECT_NAME);
+                SKSE::GetMessagingInterface()->Dispatch(NL::UI::APIMessageType::RequestAPI, nullptr, 0, NL::UI::LibVersion::PROJECT_NAME);
             }
             break;
         default:
             break;
         }
     });
-    SKSE::GetMessagingInterface()->RegisterListener(nullptr, [](SKSE::MessagingInterface::Message* a_msg) {
+    SKSE::GetMessagingInterface()->RegisterListener(NL::UI::LibVersion::PROJECT_NAME, [](SKSE::MessagingInterface::Message* a_msg) {
         spdlog::info("Received message({}) from \"{}\"", a_msg->type, a_msg->sender ? a_msg->sender : "nullptr");
         switch (a_msg->type)
         {
         case NL::UI::APIMessageType::ResponseVersion: {
             const auto versionInfo = reinterpret_cast<NL::UI::ResponseVersionMessage*>(a_msg->data);
-            spdlog::info("NirnLabUIPlatform version: {}.{}", LibVersion::GetMajorVersion(versionInfo->libVersion), LibVersion::GetMinorVersion(versionInfo->libVersion));
+            spdlog::info("NirnLabUIPlatform version: {}.{}", NL::UI::LibVersion::GetMajorVersion(versionInfo->libVersion), NL::UI::LibVersion::GetMinorVersion(versionInfo->libVersion));
 
-            const auto majorAPIVersion = APIVersion::GetMajorVersion(versionInfo->apiVersion);
+            const auto majorAPIVersion = NL::UI::APIVersion::GetMajorVersion(versionInfo->apiVersion);
             // If the major version is different from ours, then using the API may cause problems
-            if (majorAPIVersion != APIVersion::MAJOR)
+            if (majorAPIVersion != NL::UI::APIVersion::MAJOR)
             {
                 g_canUseAPI = false;
                 spdlog::error("Can't using this API version of NirnLabUIPlatform. We have {}.{} and installed is {}.{}",
-                              APIVersion::MAJOR,
-                              APIVersion::MINOR,
-                              APIVersion::GetMajorVersion(versionInfo->apiVersion),
-                              APIVersion::GetMinorVersion(versionInfo->apiVersion));
+                              NL::UI::APIVersion::MAJOR,
+                              NL::UI::APIVersion::MINOR,
+                              NL::UI::APIVersion::GetMajorVersion(versionInfo->apiVersion),
+                              NL::UI::APIVersion::GetMinorVersion(versionInfo->apiVersion));
             }
             else
             {
                 g_canUseAPI = true;
                 spdlog::info("API version is ok. We have {}.{} and installed is {}.{}",
-                             APIVersion::MAJOR,
-                             APIVersion::MINOR,
-                             APIVersion::GetMajorVersion(versionInfo->apiVersion),
-                             APIVersion::GetMinorVersion(versionInfo->apiVersion));
+                             NL::UI::APIVersion::MAJOR,
+                             NL::UI::APIVersion::MINOR,
+                             NL::UI::APIVersion::GetMajorVersion(versionInfo->apiVersion),
+                             NL::UI::APIVersion::GetMinorVersion(versionInfo->apiVersion));
             }
             break;
         }
