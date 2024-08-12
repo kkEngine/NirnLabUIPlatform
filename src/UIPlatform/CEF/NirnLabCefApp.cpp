@@ -24,6 +24,10 @@ namespace NL::CEF
         // requiring the muted attribute or user interaction
         command_line->AppendSwitchWithValue("autoplay-policy", "no-user-gesture-required");
 
+        // Allow local files
+        command_line->AppendSwitch("allow-file-access-from-files");
+        command_line->AppendSwitch("allow-insecure-localhost");
+
         // https://chromium.googlesource.com/chromium/src/+/main/docs/process_model_and_site_isolation.md
         command_line->AppendSwitch("disable-site-isolation-for-policy");
         command_line->AppendSwitch("disable-site-isolation-trials");

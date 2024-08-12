@@ -4,7 +4,7 @@ option(BUILD_AS_SHARED "Build as dll skse plugin else build as static lib" ON)
 
 # Version
 set(LIB_MAJOR_VERSION 1)
-set(LIB_MINOR_VERSION 0)
+set(LIB_MINOR_VERSION 1)
 set(API_MAJOR_VERSION 1)
 set(API_MINOR_VERSION 0)
 

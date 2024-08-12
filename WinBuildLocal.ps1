@@ -9,4 +9,5 @@ if (!$Work) {
 $buildDir = mkdir -Force build
 Set-Location $buildDir
 
-cmake .. -DVCPKG_ROOT="F:\vcpkg" -DOUTPUT_PATH="F:/Steam/steamapps/common/Skyrim Special Edition_NirnLabUIPlatform"
+cmake .. -DVCPKG_ROOT="F:\vcpkg" -UOUTPUT_PATH
+cmake --build . --config Release --parallel 4
