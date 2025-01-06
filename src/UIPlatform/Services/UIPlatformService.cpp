@@ -39,7 +39,15 @@ namespace NL::Services
         }
         m_cefService = a_cefService;
 
-        m_mlMenu = std::make_shared<NL::Menus::MultiLayerMenu>(m_logger);
+        try
+        {
+            m_mlMenu = std::make_shared<NL::Menus::MultiLayerMenu>(m_logger);
+        }
+        catch (const std::runtime_error& error)
+        {
+            m_logger->error(error.what());
+            return false;
+        }
 
         const auto app = CefRefPtr<NL::CEF::NirnLabCefApp>(new NL::CEF::NirnLabCefApp());
         if (!m_cefService->CEFInitialize(app))

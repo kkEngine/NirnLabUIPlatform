@@ -11,8 +11,17 @@ namespace NL::Menus
         const auto device = reinterpret_cast<ID3D11Device*>(RE::BSGraphics::Renderer::GetDevice());
         ThrowIfNullptr(MultiLayerMenu, device);
 
-        ID3D11DeviceContext* immediateContext = nullptr;
-        device->GetImmediateContext(&immediateContext);
+        HRESULT hResult = 0;
+        ID3D11Device3* device3 = nullptr;
+        hResult = device->QueryInterface(__uuidof(ID3D11Device3), (void**)&device3);
+        if (FAILED(hResult))
+        {
+            const auto errorMsg = fmt::format("{}: failed to QueryInterface() with {} and result {}", NameOf(MultiLayerMenu), NameOf(ID3D11Device1), hResult);
+            throw std::runtime_error(errorMsg.c_str());
+        }
+
+        ID3D11DeviceContext3* immediateContext = nullptr;
+        device3->GetImmediateContext3(&immediateContext);
         ThrowIfNullptr(MultiLayerMenu, immediateContext);
 
         const auto nativeMenuRenderData = RE::BSGraphics::Renderer::GetRendererData()->renderTargets[RE::RENDER_TARGETS::kMENUBG];
@@ -120,6 +129,8 @@ namespace NL::Menus
         }
         m_renderData.spriteBatch->End();
         m_renderData.drawLock.Unlock();
+
+        m_renderData.deviceContext->Flush1(D3D11_CONTEXT_TYPE::D3D11_CONTEXT_TYPE_COPY, nullptr);
     }
 
     RE::UI_MESSAGE_RESULTS MultiLayerMenu::ProcessMessage(RE::UIMessage& a_message)

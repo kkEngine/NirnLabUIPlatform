@@ -109,8 +109,7 @@ namespace NL::Render
         const RectList& dirtyRects,
         const CefAcceleratedPaintInfo& info)
     {
-        if (
-            type == PET_POPUP ||
+        if (type == PET_POPUP ||
             m_renderData == nullptr ||
             m_device1 == nullptr)
         {
