@@ -8,13 +8,13 @@ namespace NL::Services
 
         if (s_cefApp != nullptr)
         {
-            throw std::runtime_error(fmt::format("{}: CEF already inited", NameOf(CEFService)).c_str());
+            throw std::runtime_error(fmt::format("{}: CEF already inited", NameOf(CEFService)));
         }
 
         CefMainArgs args(GetModuleHandleA(nullptr));
         if (!CefInitialize(args, a_cefSettings, a_cefApp, nullptr))
         {
-            throw std::runtime_error(fmt::format("{}: failed to initialize CEF, code {}", NameOf(CEFService), CefGetExitCode()).c_str());
+            throw std::runtime_error(fmt::format("{}: failed to initialize CEF, code {}", NameOf(CEFService), CefGetExitCode()));
         }
 
         s_cefApp = a_cefApp;

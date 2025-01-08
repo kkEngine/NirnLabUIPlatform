@@ -17,7 +17,7 @@ namespace NL::Menus
         if (FAILED(hResult))
         {
             const auto errorMsg = fmt::format("{}: failed to QueryInterface() with {} and result {}", NameOf(MultiLayerMenu), NameOf(ID3D11Device1), hResult);
-            throw std::runtime_error(errorMsg.c_str());
+            throw std::runtime_error(errorMsg);
         }
 
         ID3D11DeviceContext3* immediateContext = nullptr;
