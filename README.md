@@ -35,7 +35,8 @@ SKSE::GetMessagingInterface()->RegisterListener(LibVersion::PROJECT_NAME, [](SKS
 
 Check the API version and if it's ok, request API
 ```cpp
-SKSE::GetMessagingInterface()->Dispatch(NL::UI::APIMessageType::RequestAPI, nullptr, 0, NL::UI::LibVersion::PROJECT_NAME);
+NL::UI::Settings defaultSettings;
+SKSE::GetMessagingInterface()->Dispatch(NL::UI::APIMessageType::RequestAPI, &defaultSettings, sizeof(defaultSettings), NL::UI::LibVersion::PROJECT_NAME);
 ```
 When a first plugin requests API, library and CEF will initialize
 Response message will contain API struct. You can save the API pointer and use it in the future.
@@ -57,7 +58,10 @@ NL::UI::IUIPlatformAPI::BrowserRefHandle g_browserHandle = NL::UI::IUIPlatformAP
 
 void CreateBrowser(NL::UI::IUIPlatformAPI* a_api)
 {
-    g_browserHandle = a_api->AddOrGetBrowser("MyPluginCEF", nullptr, 0, "https://www.youtube.com", g_browser);
+    NL::UI::BrowserSettings bSettings;
+    bSettings.frameRate = 60;
+
+    g_browserHandle = a_api->AddOrGetBrowser("MyPluginCEF", nullptr, 0, "https://www.youtube.com", &bSettings, g_browser);
     if (g_browserHandle == NL::UI::IUIPlatformAPI::InvalidBrowserRefHandle)
     {
         spdlog::error("browser handle is invalid");
