@@ -19,7 +19,7 @@ namespace NL::UI::LibVersion
 
     inline std::uint32_t GetMinorVersion(std::uint32_t a_version)
     {
-        return a_version - MAJOR * MAJOR_MULT;
+        return a_version - GetMajorVersion(a_version) * MAJOR_MULT;
     }
 }
 
@@ -39,6 +39,6 @@ namespace NL::UI::APIVersion
 
     inline std::uint32_t GetMinorVersion(std::uint32_t a_version)
     {
-        return a_version - MAJOR * MAJOR_MULT;
+        return a_version - GetMajorVersion(a_version) * MAJOR_MULT;
     }
 }
