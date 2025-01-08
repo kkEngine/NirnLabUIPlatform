@@ -12,24 +12,24 @@ namespace NL::Menus
 {
     class CEFMenu : public ISubMenu
     {
-      protected:
+    protected:
         std::mutex m_startBrowserMutex;
         bool m_started = false;
 
         std::shared_ptr<spdlog::logger> m_logger = nullptr;
-        std::shared_ptr<NL::Services::CEFService> m_cefService = nullptr;
         std::shared_ptr<NL::JS::JSFunctionStorage> m_jsFuncStorage = nullptr;
         std::shared_ptr<NL::Render::IRenderLayer> m_cefRenderLayer = nullptr;
         std::shared_ptr<NL::CEF::DefaultBrowser> m_browser = nullptr;
 
-      public:
+    public:
         CEFMenu(
             std::shared_ptr<spdlog::logger> a_logger,
-            std::shared_ptr<NL::Services::CEFService> a_cefService,
             std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage);
         ~CEFMenu() override;
 
-        bool LoadBrowser(std::string_view a_url);
+        bool LoadBrowser(std::string_view a_url,
+                         const CefWindowInfo& a_cefWindowInfo,
+                         const CefBrowserSettings& a_cefBrowserSettings);
         std::shared_ptr<NL::CEF::IBrowser> GetBrowser();
 
         // NL::Render::IRenderLayer

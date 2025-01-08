@@ -8,24 +8,24 @@
 #include "CEF/DefaultBrowser.h"
 #include "Menus/MultiLayerMenu.h"
 #include "Menus/CEFMenu.h"
-#include "Providers/DefaultCEFSettingsProvider.h"
+#include "Providers/CustomCEFSettingsProvider.h"
 #include "JS/JSFunctionStorage.h"
+#include "NirnLabUIPlatformAPI/Settings.h"
 
 namespace NL::Services
 {
     class UIPlatformService : public NL::Common::Singleton<UIPlatformService>
     {
-      protected:
+    protected:
         friend class NL::Common::Singleton<UIPlatformService>;
 
         static inline std::mutex s_uipInitMutex;
         static inline bool s_isUIPInited = false;
 
         std::shared_ptr<spdlog::logger> m_logger = nullptr;
-        std::shared_ptr<CEFService> m_cefService = nullptr;
         std::shared_ptr<NL::Menus::MultiLayerMenu> m_mlMenu = nullptr;
 
-      public:
+    public:
         UIPlatformService();
         ~UIPlatformService() override;
 
@@ -35,13 +35,14 @@ namespace NL::Services
         /// Init ui service and it's dependencies
         /// </summary>
         /// <returns></returns>
-        bool Init(std::shared_ptr<spdlog::logger> a_logger, std::shared_ptr<CEFService> a_cefService);
+        bool Init(std::shared_ptr<spdlog::logger> a_logger,
+                  std::shared_ptr<NL::Providers::ICEFSettingsProvider> a_settingsProvider);
 
         /// <summary>
-        /// Init ui service with default params
+        /// Init ui service with custom settings
         /// </summary>
         /// <returns></returns>
-        bool InitWithDefaultParams();
+        bool InitAndShowMenuWithSettings(std::shared_ptr<NL::Providers::ICEFSettingsProvider> a_settingsProvider);
 
         /// <summary>
         /// Close ui service and it's dependencies

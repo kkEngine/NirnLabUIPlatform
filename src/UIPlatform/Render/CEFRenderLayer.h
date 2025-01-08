@@ -10,22 +10,22 @@ namespace NL::Render
     /// OBSOLETE
     /// Using this class may cause CTD
     /// </summary>
-    class CEFRenderLayer : public IRenderLayer,
-                           public CefRenderHandler
+    class [[deprecated("MAY CAUSE CTD, DON'T USE")]] CEFRenderLayer : public IRenderLayer,
+                                                           public CefRenderHandler
     {
         IMPLEMENT_REFCOUNTING(CEFRenderLayer);
 
-      public:
+    public:
         static std::shared_ptr<CEFRenderLayer> make_shared();
         static void release_shared(CEFRenderLayer* a_render);
 
-      protected:
+    protected:
         HANDLE m_sharedTextureHandle = nullptr;
         ID3D11Texture2D* m_cefTexture = nullptr;
         ID3D11ShaderResourceView* m_cefSRV = nullptr;
         Microsoft::WRL::ComPtr<ID3D11Device1> m_device1 = nullptr;
 
-      public:
+    public:
         ~CEFRenderLayer() override;
 
         // IRenderLayer

@@ -45,13 +45,13 @@ namespace NL::UI::TestCase
 
         if (m_browserHandle == NL::UI::IUIPlatformAPI::InvalidBrowserRefHandle)
         {
-            spdlog::error("{}: browser handle is invalid", NameOf(LoadYoutubeTestCase));
+            spdlog::error("{}: browser handle is invalid", NameOf(LocalTestPage));
             return;
         }
 
         if (m_browser == nullptr)
         {
-            spdlog::error("{}: browser is nullptr", NameOf(LoadYoutubeTestCase));
+            spdlog::error("{}: browser is nullptr", NameOf(LocalTestPage));
             return;
         }
 
@@ -73,12 +73,12 @@ namespace NL::UI::TestCase
                 spdlog::info("func1__ callback. params: {}", argsStr);
             };
             m_browser->AddFunctionCallback(strFunInfo);
-            
+
             while (!m_browser->IsPageLoaded())
             {
                 std::this_thread::sleep_for(100ms);
             }
-            //m_browser->RemoveFunctionCallback(strFunInfo.objectName, strFunInfo.funcName);
+            // m_browser->RemoveFunctionCallback(strFunInfo.objectName, strFunInfo.funcName);
 
             int i = 0;
             while (i < 10)

@@ -4,14 +4,10 @@ namespace NL::Menus
 {
     CEFMenu::CEFMenu(
         std::shared_ptr<spdlog::logger> a_logger,
-        std::shared_ptr<NL::Services::CEFService> a_cefService,
         std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage)
     {
         ThrowIfNullptr(CEFMenu, a_logger);
         m_logger = a_logger;
-
-        ThrowIfNullptr(CEFMenu, a_cefService);
-        m_cefService = a_cefService;
 
         m_jsFuncStorage = a_jsFuncStorage == nullptr ? std::make_shared<NL::JS::JSFunctionStorage>() : a_jsFuncStorage;
 
@@ -25,12 +21,21 @@ namespace NL::Menus
         SetVisible(false);
     }
 
-    bool CEFMenu::LoadBrowser(std::string_view a_url)
+    bool CEFMenu::LoadBrowser(std::string_view a_url,
+                              const CefWindowInfo& a_cefWindowInfo,
+                              const CefBrowserSettings& a_cefBrowserSettings)
     {
-        std::lock_guard<std::mutex> lock(m_startBrowserMutex);
+        std::lock_guard locker(m_startBrowserMutex);
+
         if (!m_started)
         {
-            if (!m_cefService->CreateBrowser(m_browser->GetCefClient(), nullptr, CefString(a_url.data())))
+            const auto createBrowserResult =
+                NL::Services::CEFService::CreateBrowser(m_browser->GetCefClient(),
+                                                        nullptr,
+                                                        CefString(a_url.data()),
+                                                        a_cefWindowInfo,
+                                                        a_cefBrowserSettings);
+            if (!createBrowserResult)
             {
                 m_logger->error("{}: failed to create browser", NameOf(DefaultBrowser));
                 return false;

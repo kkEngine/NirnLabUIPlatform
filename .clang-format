@@ -1,4 +1,5 @@
-﻿BasedOnStyle: Microsoft
+﻿AccessModifierOffset: -4
+BasedOnStyle: Microsoft
 AlwaysBreakAfterReturnType: None
 BinPackArguments: 'false'
 BinPackParameters: 'false'

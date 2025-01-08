@@ -3,22 +3,41 @@
 #include "PCH.h"
 #include "Common/Singleton.h"
 #include "Services/UIPlatformService.h"
+#include "Providers/CustomCEFSettingsProvider.h"
 
 namespace NL::Controllers
 {
     using BrowserRefHandle = NL::UI::IUIPlatformAPI::BrowserRefHandle;
 
-    class PublicAPIController : public NL::Common::Singleton<PublicAPIController>,
-                                public NL::UI::IUIPlatformAPI
+    class PublicAPIController : public NL::UI::IUIPlatformAPI,
+                                public NL::Common::Singleton<PublicAPIController>
+
     {
-      protected:
+    protected:
         struct BrowserHandleData
         {
             NL::CEF::IBrowser* browser = nullptr;
             std::unordered_set<BrowserRefHandle> refHandles;
         };
 
-      protected:
+    public:
+        // NL::UI::IUIPlatformAPI
+        BrowserRefHandle __cdecl AddOrGetBrowser(const char* a_browserName,
+                                                 NL::JS::JSFuncInfo* const* a_funcInfoArr,
+                                                 const std::uint32_t a_funcInfoArrSize,
+                                                 const char* a_startUrl,
+                                                 NL::CEF::IBrowser*& a_outBrowser) override;
+
+        void __cdecl ReleaseBrowserHandle(BrowserRefHandle a_handle) override;
+
+        BrowserRefHandle __cdecl AddOrGetBrowser(const char* a_browserName,
+                                                 NL::JS::JSFuncInfo* const* a_funcInfoArr,
+                                                 const std::uint32_t a_funcInfoArrSize,
+                                                 const char* a_startUrl,
+                                                 NL::UI::BrowserSettings* a_settings,
+                                                 NL::CEF::IBrowser*& a_outBrowser) override;
+
+    protected:
         NL::UI::ResponseVersionMessage m_rvMessage{NL::UI::LibVersion::AS_INT, NL::UI::APIVersion::AS_INT};
         NL::UI::ResponseAPIMessage m_rAPIMessage{this};
 
@@ -28,20 +47,16 @@ namespace NL::Controllers
         std::unordered_map<std::string, BrowserHandleData> m_browserNameMap;
         std::unordered_map<BrowserRefHandle, std::string> m_browserHandleMap;
 
+        std::shared_ptr<NL::Providers::ICEFSettingsProvider> m_settingsProvider = nullptr;
+
         std::shared_ptr<NL::Menus::MultiLayerMenu> GetMultiLayerMenu();
 
-      public:
+    public:
         NL::UI::ResponseVersionMessage* GetVersionMessage();
         NL::UI::ResponseAPIMessage* GetAPIMessage();
 
         void Init();
-
-        // NL::UI::IUIPlatformAPI
-        BrowserRefHandle __cdecl AddOrGetBrowser(const char* a_browserName,
-                                                 NL::JS::JSFuncInfo* const* a_funcInfoArr,
-                                                 const std::uint32_t a_funcInfoArrSize,
-                                                 const char* a_startUrl,
-                                                 NL::CEF::IBrowser*& a_outBrowser) override;
-        void __cdecl ReleaseBrowserHandle(BrowserRefHandle a_handle) override;
+        void SetSettingsProvider(const NL::UI::Settings* a_settings);
+        std::shared_ptr<NL::Providers::ICEFSettingsProvider> GetSettingsProvider();
     };
 }

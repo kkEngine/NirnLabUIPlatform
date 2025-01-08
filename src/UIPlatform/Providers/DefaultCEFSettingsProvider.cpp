@@ -9,9 +9,9 @@ namespace NL::Providers
         settings.multi_threaded_message_loop = true;
         settings.windowless_rendering_enabled = true;
         // CefString(&settings.user_agent).FromString(L"NirnLabUIPlatform");
+        settings.remote_debugging_port = 9009;
 #ifdef _DEBUG
         settings.log_severity = LOGSEVERITY_VERBOSE;
-        settings.remote_debugging_port = 9000;
 #else
         settings.log_severity = LOGSEVERITY_INFO;
 #endif
@@ -39,6 +39,11 @@ namespace NL::Providers
         browserSettings.background_color = 0x00;
 
         return browserSettings;
+    }
+
+    CefBrowserSettings DefaultCEFSettingsProvider::MergeAndGetCefBrowserSettings(NL::UI::BrowserSettings* a_settings)
+    {
+        return GetCefBrowserSettings();
     }
 
     CefWindowInfo DefaultCEFSettingsProvider::GetCefWindowInfo()

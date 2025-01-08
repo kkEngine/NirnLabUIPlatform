@@ -5,11 +5,11 @@ namespace NL::Common
     template<class T>
     class Singleton
     {
-      protected:
+    protected:
         Singleton() = default;
         virtual ~Singleton() = default;
 
-      public:
+    public:
         static T& GetSingleton()
         {
             static T instance;

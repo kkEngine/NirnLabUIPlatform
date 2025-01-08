@@ -4,6 +4,7 @@ namespace NL::Services
 {
     UIPlatformService::UIPlatformService()
     {
+        m_logger = spdlog::default_logger();
     }
 
     UIPlatformService::~UIPlatformService()
@@ -16,9 +17,10 @@ namespace NL::Services
         return s_isUIPInited;
     }
 
-    bool UIPlatformService::Init(std::shared_ptr<spdlog::logger> a_logger, std::shared_ptr<CEFService> a_cefService)
+    bool UIPlatformService::Init(std::shared_ptr<spdlog::logger> a_logger,
+                                 std::shared_ptr<NL::Providers::ICEFSettingsProvider> a_settingsProvider)
     {
-        std::lock_guard<std::mutex> lock(s_uipInitMutex);
+        std::lock_guard locker(s_uipInitMutex);
         if (s_isUIPInited)
         {
             m_logger->warn("{}: already inited", NameOf(UIPlatformService));
@@ -32,13 +34,6 @@ namespace NL::Services
         }
         m_logger = a_logger;
 
-        if (a_cefService == nullptr)
-        {
-            m_logger->error("{}: has null {}", NameOf(UIPlatformService), NameOf(a_cefService));
-            return false;
-        }
-        m_cefService = a_cefService;
-
         try
         {
             m_mlMenu = std::make_shared<NL::Menus::MultiLayerMenu>(m_logger);
@@ -50,8 +45,18 @@ namespace NL::Services
         }
 
         const auto app = CefRefPtr<NL::CEF::NirnLabCefApp>(new NL::CEF::NirnLabCefApp());
-        if (!m_cefService->CEFInitialize(app))
+        try
         {
+            NL::Services::CEFService::CEFInitialize(app, a_settingsProvider->GetCefSettings());
+        }
+        catch (const std::exception& error)
+        {
+            m_logger->error("{}: failed to CEFInitialize, {}", NameOf(UIPlatformService), error.what());
+            return false;
+        }
+        catch (...)
+        {
+            m_logger->error("{}: failed to CEFInitialize", NameOf(UIPlatformService));
             return false;
         }
 
@@ -65,13 +70,10 @@ namespace NL::Services
         return true;
     }
 
-    bool UIPlatformService::InitWithDefaultParams()
+    bool UIPlatformService::InitAndShowMenuWithSettings(std::shared_ptr<NL::Providers::ICEFSettingsProvider> a_settingsProvider)
     {
         const auto logger = spdlog::default_logger();
-        const auto cefSettingsProvider = std::make_shared<NL::Providers::DefaultCEFSettingsProvider>();
-        const auto cefService = std::make_shared<NL::Services::CEFService>(logger, cefSettingsProvider);
-
-        if (Init(logger, cefService))
+        if (Init(logger, a_settingsProvider))
         {
             SKSE::GetTaskInterface()->AddTask([]() {
                 auto msgQ = RE::UIMessageQueue::GetSingleton();
@@ -88,7 +90,18 @@ namespace NL::Services
 
     void UIPlatformService::Shutdown()
     {
-        m_cefService->CEFShutdown();
+        try
+        {
+            NL::Services::CEFService::CEFShutdown();
+        }
+        catch (const std::exception& error)
+        {
+            m_logger->error("{}: error while CEFShutdown, {}", NameOf(UIPlatformService), error.what());
+        }
+        catch (...)
+        {
+            m_logger->error("{}: error while CEFShutdown", NameOf(UIPlatformService));
+        }
     }
 
     std::shared_ptr<NL::Menus::MultiLayerMenu> UIPlatformService::GetMultiLayerMenu()
@@ -98,6 +111,6 @@ namespace NL::Services
 
     std::shared_ptr<NL::Menus::CEFMenu> UIPlatformService::CreateCefMenu(std::shared_ptr<NL::JS::JSFunctionStorage> a_funcStorage)
     {
-        return std::make_shared<NL::Menus::CEFMenu>(m_logger, m_cefService, a_funcStorage);
+        return std::make_shared<NL::Menus::CEFMenu>(m_logger, a_funcStorage);
     }
 }

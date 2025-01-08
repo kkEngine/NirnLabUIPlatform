@@ -60,8 +60,9 @@ SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
         case SKSE::MessagingInterface::kInputLoaded:
             if (g_canUseAPI)
             {
+                NL::UI::Settings defaultSettings;
                 // API version is ok. Request interface.
-                SKSE::GetMessagingInterface()->Dispatch(NL::UI::APIMessageType::RequestAPI, nullptr, 0, NL::UI::LibVersion::PROJECT_NAME);
+                SKSE::GetMessagingInterface()->Dispatch(NL::UI::APIMessageType::RequestAPI, &defaultSettings, sizeof(defaultSettings), NL::UI::LibVersion::PROJECT_NAME);
             }
             break;
         default:
@@ -112,6 +113,11 @@ SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
             break;
         }
     });
+
+    const auto iniCollection = RE::INISettingCollection::GetSingleton();
+    // [General]
+    // Don't stop game when window is collapsed
+    iniCollection->GetSetting("bAlwaysActive:General")->data.b = true;
 
     return true;
 }

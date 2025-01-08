@@ -32,7 +32,10 @@ namespace NL::CEF
         command_line->AppendSwitch("disable-site-isolation-for-policy");
         command_line->AppendSwitch("disable-site-isolation-trials");
         command_line->AppendSwitchWithValue("process-per-site", "false");
-        //command_line->AppendSwitch("single-process");
+        // command_line->AppendSwitch("single-process");
+
+        // Allow remote debugging
+        command_line->AppendSwitchWithValue("remote-allow-origins", "*");
     }
 
     CefRefPtr<CefBrowserProcessHandler> CEF::NirnLabCefApp::GetBrowserProcessHandler()
