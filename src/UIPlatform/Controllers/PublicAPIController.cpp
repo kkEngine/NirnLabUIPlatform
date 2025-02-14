@@ -33,6 +33,16 @@ namespace NL::Controllers
 
     void PublicAPIController::Init()
     {
+        m_onShutdownConnection = NL::Hooks::WinMainHook::OnShutdown.connect([&]() {
+            spdlog::default_logger()->flush();
+            while (!m_onShutdownFuncs.empty())
+            {
+                m_onShutdownFuncs.front()();
+                m_onShutdownFuncs.pop();
+            }
+            NL::Services::UIPlatformService::GetSingleton().Shutdown();
+        });
+
         SKSE::GetMessagingInterface()->RegisterListener(nullptr, [](SKSE::MessagingInterface::Message* a_msg) {
             if (std::strcmp(a_msg->sender, "SKSE") == 0)
             {
@@ -233,6 +243,11 @@ namespace NL::Controllers
         m_browserHandleMap.insert({refHandle, a_browserName});
 
         return refHandle;
+    }
+
+    void PublicAPIController::RegisterOnShutdown(OnShutdownFunc_t a_callback)
+    {
+        m_onShutdownFuncs.push(a_callback);
     }
 
 #pragma endregion

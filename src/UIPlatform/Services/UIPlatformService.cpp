@@ -7,11 +7,6 @@ namespace NL::Services
         m_logger = spdlog::default_logger();
     }
 
-    UIPlatformService::~UIPlatformService()
-    {
-        Shutdown();
-    }
-
     bool UIPlatformService::IsInited()
     {
         return s_isUIPInited;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PCH.h"
+#include "Hooks/WinMainHook.hpp"
 #include "Common/Singleton.h"
 #include "Services/UIPlatformService.h"
 #include "Providers/CustomCEFSettingsProvider.h"
@@ -20,6 +21,9 @@ namespace NL::Controllers
             std::unordered_set<BrowserRefHandle> refHandles;
         };
 
+        sigslot::scoped_connection m_onShutdownConnection;
+        std::queue<OnShutdownFunc_t> m_onShutdownFuncs;
+
     public:
         // NL::UI::IUIPlatformAPI
         BrowserRefHandle __cdecl AddOrGetBrowser(const char* a_browserName,
@@ -36,6 +40,8 @@ namespace NL::Controllers
                                                  const char* a_startUrl,
                                                  NL::UI::BrowserSettings* a_settings,
                                                  NL::CEF::IBrowser*& a_outBrowser) override;
+
+        void RegisterOnShutdown(OnShutdownFunc_t a_callback) override;
 
     protected:
         NL::UI::ResponseVersionMessage m_rvMessage{NL::UI::LibVersion::AS_INT, NL::UI::APIVersion::AS_INT};

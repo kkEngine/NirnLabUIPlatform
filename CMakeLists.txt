@@ -4,9 +4,9 @@ option(BUILD_AS_SHARED "Build as dll skse plugin else build as static lib" ON)
 
 # Version
 set(LIB_MAJOR_VERSION 2)
-set(LIB_MINOR_VERSION 0)
+set(LIB_MINOR_VERSION 1)
 set(API_MAJOR_VERSION 2)
-set(API_MINOR_VERSION 0)
+set(API_MINOR_VERSION 1)
 
 # VCPKG config
 string(REPLACE "\\" "/" ENV_VCPKG_ROOT "$ENV{VCPKG_ROOT}")
@@ -16,6 +16,10 @@ set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 set(VCPKG_TARGET_TRIPLET "x64-windows-static")
 set(VCPKG_OVERLAY_TRIPLETS "${CMAKE_CURRENT_LIST_DIR}/overlay_triplets")
 set(VCPKG_OVERLAY_PORTS "${CMAKE_CURRENT_LIST_DIR}/overlay_ports")
+
+# Includes pdb files in release mode
+#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
+#set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
 
 # Options
 set(CMAKE_CXX_STANDARD 20)
@@ -168,7 +172,7 @@ set_target_properties(
         LIBRARY_OUTPUT_DIRECTORY_DEBUG ${NL_UI_PATH}
         LIBRARY_OUTPUT_DIRECTORY_RELEASE ${NL_UI_PATH}
         #ARCHIVE_OUTPUT_DIRECTORY ${NL_UI_PATH}/archive
-        #PDB_OUTPUT_DIRECTORY ${NL_UI_PATH}/pdb
+        #PDB_OUTPUT_DIRECTORY ${NL_UI_PATH}
 )
 
 target_compile_definitions(
@@ -213,7 +217,7 @@ if(BUILD_AS_SHARED)
             LIBRARY_OUTPUT_DIRECTORY_DEBUG ${NL_UI_PATH}
             LIBRARY_OUTPUT_DIRECTORY_RELEASE ${NL_UI_PATH}
             #ARCHIVE_OUTPUT_DIRECTORY ${NL_UI_PATH}/archive
-            #PDB_OUTPUT_DIRECTORY ${NL_UI_PATH}/pdb
+            #PDB_OUTPUT_DIRECTORY ${NL_UI_PATH}
     )
 else()
     add_library(${UIPlatformProjectName} STATIC ${UIPlatformProjectName_src})
@@ -284,7 +288,7 @@ if(BUILD_AS_SHARED)
             LIBRARY_OUTPUT_DIRECTORY_DEBUG ${SKSE_PLUGIN_PATH}
             LIBRARY_OUTPUT_DIRECTORY_RELEASE ${SKSE_PLUGIN_PATH}
             #ARCHIVE_OUTPUT_DIRECTORY ${SKSE_PLUGIN_PATH}/archive
-            #PDB_OUTPUT_DIRECTORY ${SKSE_PLUGIN_PATH}/pdb
+            #PDB_OUTPUT_DIRECTORY ${SKSE_PLUGIN_PATH}
     )
 
     target_include_directories(
@@ -339,7 +343,7 @@ if(BUILD_AS_SHARED)
             LIBRARY_OUTPUT_DIRECTORY_DEBUG ${SKSE_PLUGIN_PATH}
             LIBRARY_OUTPUT_DIRECTORY_RELEASE ${SKSE_PLUGIN_PATH}
             #ARCHIVE_OUTPUT_DIRECTORY ${SKSE_PLUGIN_PATH}/archive
-            #PDB_OUTPUT_DIRECTORY ${SKSE_PLUGIN_PATH}/pdb
+            #PDB_OUTPUT_DIRECTORY ${SKSE_PLUGIN_PATH}
     )
 
     target_include_directories(

@@ -27,7 +27,7 @@ namespace NL::Services
 
     public:
         UIPlatformService();
-        ~UIPlatformService() override;
+        ~UIPlatformService() override = default;
 
         bool IsInited();
 

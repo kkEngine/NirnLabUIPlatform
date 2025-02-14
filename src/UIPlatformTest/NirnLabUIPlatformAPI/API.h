@@ -12,6 +12,7 @@ namespace NL::UI
     public:
         using BrowserRefHandle = std::uint32_t;
         static constexpr BrowserRefHandle InvalidBrowserRefHandle = 0;
+        using OnShutdownFunc_t = void (*)();
 
     public:
         virtual ~IUIPlatformAPI() = default;
@@ -54,6 +55,13 @@ namespace NL::UI
                                                          const char* a_startUrl,
                                                          NL::UI::BrowserSettings* a_settings,
                                                          NL::CEF::IBrowser*& a_outBrowser) = 0;
+
+        /// <summary>
+        /// Registers a shutdown callback function.
+        /// After this callback, you should stop using any browser
+        /// </summary>
+        /// <param name="a_callback"></param>
+        virtual void RegisterOnShutdown(OnShutdownFunc_t a_callback) = 0;
     };
 
     enum APIMessageType : std::uint32_t

@@ -1,4 +1,5 @@
 #include "PCH.h"
+#include "Hooks/WinMainHook.hpp"
 #include "Controllers/PublicAPIController.h"
 
 inline void ShowMessageBox(const char* a_msg)
@@ -84,6 +85,7 @@ extern "C" DLLEXPORT bool SKSEAPI Entry(const SKSE::LoadInterface* a_skse)
 
         // Hooks
         NL::Hooks::WinProcHook::Install();
+        NL::Hooks::WinMainHook::Install();
 
         // API controller
         NL::Controllers::PublicAPIController::GetSingleton().Init();
