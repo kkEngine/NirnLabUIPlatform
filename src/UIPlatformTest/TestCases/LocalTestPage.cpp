@@ -2,8 +2,30 @@
 
 namespace NL::UI::TestCase
 {
+    LocalTestPage::LocalTestPage()
+    {
+        std::lock_guard locker(s_thisVectorMutex);
+        s_thisVector.push_back(this);
+    }
+
+    LocalTestPage::~LocalTestPage()
+    {
+        std::lock_guard locker(s_thisVectorMutex);
+        for (auto it = s_thisVector.begin(); it != s_thisVector.end(); ++it)
+        {
+            if (*it == this)
+            {
+                s_thisVector.erase(it);
+                break;
+            }
+        }
+        Shutdown();
+    }
+
     void LocalTestPage::Start(NL::UI::IUIPlatformAPI* a_api)
     {
+        a_api->RegisterOnShutdown(&LocalTestPage::StaticShutdown);
+
         // func1
         auto func1 = new JS::JSFuncInfo();
         func1->objectName = "NL";
@@ -55,7 +77,8 @@ namespace NL::UI::TestCase
             return;
         }
 
-        m_pingThread = std::make_shared<std::thread>([=]() {
+        m_printThread = std::make_shared<std::jthread>([=]() {
+            const auto stopToken = m_printThread->get_stop_source().get_token();
             std::this_thread::sleep_for(12s);
 
             m_browser->LoadBrowserURL("file:///_testLocalPage.html", true);
@@ -81,7 +104,7 @@ namespace NL::UI::TestCase
             // m_browser->RemoveFunctionCallback(strFunInfo.objectName, strFunInfo.funcName);
 
             int i = 0;
-            while (i < 10)
+            while (i < 10 && !stopToken.stop_requested())
             {
                 std::this_thread::sleep_for(1s);
                 m_browser->ExecuteJavaScript(fmt::format("NL.func1({})", std::to_string(++i).c_str()).c_str());
@@ -89,5 +112,17 @@ namespace NL::UI::TestCase
 
             a_api->ReleaseBrowserHandle(m_browserHandle);
         });
+    }
+
+    void LocalTestPage::Shutdown()
+    {
+        spdlog::info("LocalTestPage::Shutdown");
+
+        auto jthread = m_printThread;
+        if (jthread != nullptr)
+        {
+            jthread->request_stop();
+            jthread->join();
+        }
     }
 }
