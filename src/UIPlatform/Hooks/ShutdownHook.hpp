@@ -4,15 +4,18 @@
 
 namespace NL::Hooks
 {
-    class WinMainHook
+    class ShutdownHook
     {
     public:
+        static inline bool IsGameClosing = false;
         static inline sigslot::signal<> OnShutdown;
 
         static void Shutdown()
         {
+            IsGameClosing = true;
             OnShutdown();
             _Shutdown();
+
             std::exit(EXIT_SUCCESS);
         }
 

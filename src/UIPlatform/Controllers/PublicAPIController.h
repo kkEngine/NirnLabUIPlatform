@@ -1,7 +1,7 @@
 #pragma once
 
 #include "PCH.h"
-#include "Hooks/WinMainHook.hpp"
+#include "Hooks/ShutdownHook.hpp"
 #include "Common/Singleton.h"
 #include "Services/UIPlatformService.h"
 #include "Providers/CustomCEFSettingsProvider.h"

@@ -33,7 +33,7 @@ namespace NL::Controllers
 
     void PublicAPIController::Init()
     {
-        m_onShutdownConnection = NL::Hooks::WinMainHook::OnShutdown.connect([&]() {
+        m_onShutdownConnection = NL::Hooks::ShutdownHook::OnShutdown.connect([&]() {
             spdlog::default_logger()->flush();
             while (!m_onShutdownFuncs.empty())
             {
