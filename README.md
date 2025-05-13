@@ -111,6 +111,9 @@ eventFunc->funcName = "addEventListener";
 eventFunc->callbackData.isEventFunction = true;
 
 // Pass with other functions in array when browser creating. see AddOrGetBrowser in api.
+
+// ...
+m_browser->ExecEventFunction("on:message", "EVENT_FUNC WORKS!");
 ```
 
 ## Dev and build requirements
