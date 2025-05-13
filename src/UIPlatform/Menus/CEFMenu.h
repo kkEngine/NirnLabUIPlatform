@@ -17,6 +17,8 @@ namespace NL::Menus
         std::mutex m_startBrowserMutex;
         bool m_started = false;
 
+        NL::JS::JSEventFuncInfo m_eventFuncInfo{};
+
         std::shared_ptr<spdlog::logger> m_logger = nullptr;
         std::shared_ptr<NL::JS::JSFunctionStorage> m_jsFuncStorage = nullptr;
         std::shared_ptr<NL::Render::IRenderLayer> m_cefRenderLayer = nullptr;

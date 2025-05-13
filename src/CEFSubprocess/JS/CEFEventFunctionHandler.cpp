@@ -2,16 +2,6 @@
 
 namespace NL::JS
 {
-    CEFEventFunctionHandler::CEFEventFunctionHandler(CefRefPtr<CefBrowser> a_browser)
-    {
-        if (a_browser == nullptr)
-        {
-            spdlog::error("{}: browser is nullptr", NameOf(CEFEventFunctionHandler));
-        }
-
-        m_browser = a_browser;
-    }
-
     void CEFEventFunctionHandler::CallEventFunc(const CefString& a_eventName, CefRefPtr<CefBrowser> a_browser, const CefString& a_data)
     {
         std::lock_guard locker(s_eventFuncMapMutex);

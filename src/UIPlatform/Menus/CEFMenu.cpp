@@ -11,9 +11,10 @@ namespace NL::Menus
         m_logger = a_logger;
 
         m_jsFuncStorage = a_jsFuncStorage == nullptr ? std::make_shared<NL::JS::JSFunctionStorage>() : a_jsFuncStorage;
+        m_eventFuncInfo = a_eventFuncInfo;
 
         const auto cefClient = CefRefPtr<NL::CEF::NirnLabCefClient>(new NL::CEF::NirnLabCefClient());
-        m_browser = std::make_shared<NL::CEF::DefaultBrowser>(m_logger, cefClient, m_jsFuncStorage, a_eventFuncInfo);
+        m_browser = std::make_shared<NL::CEF::DefaultBrowser>(m_logger, cefClient, m_jsFuncStorage);
         m_cefRenderLayer = m_browser->GetCefClient()->GetRenderLayer();
     }
 
@@ -30,9 +31,16 @@ namespace NL::Menus
 
         if (!m_started)
         {
+            auto eventFuncInfo = CefListValue::Create();
+            eventFuncInfo->SetString(0, m_eventFuncInfo.objectName);
+            eventFuncInfo->SetString(1, m_eventFuncInfo.funcName);
+
+            auto jsFuncInfo = CefDictionaryValue::Create();
+            jsFuncInfo->SetList(IPC_JS_EVENT_FUNCTION_ADD_NAME, eventFuncInfo);
+
             const auto createBrowserResult =
                 NL::Services::CEFService::CreateBrowser(m_browser->GetCefClient(),
-                                                        nullptr,
+                                                        jsFuncInfo,
                                                         CefString(a_url.data()),
                                                         a_cefWindowInfo,
                                                         a_cefBrowserSettings);

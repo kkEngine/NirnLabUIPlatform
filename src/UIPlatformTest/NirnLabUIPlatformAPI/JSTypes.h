@@ -8,6 +8,7 @@ namespace NL::JS
     {
         JSFuncCallback callback = nullptr;
         bool executeInGameThread = true;
+        bool isEventFunction = false;
     };
 
     struct JSFuncInfo

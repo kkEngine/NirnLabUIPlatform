@@ -5,8 +5,7 @@ namespace NL::CEF
     DefaultBrowser::DefaultBrowser(
         std::shared_ptr<spdlog::logger> a_logger,
         CefRefPtr<NirnLabCefClient> a_cefClient,
-        std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage,
-        NL::JS::JSEventFuncInfo a_eventFuncInfo)
+        std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage)
     {
         ThrowIfNullptr(DefaultBrowser, a_logger);
         m_logger = a_logger;
@@ -55,7 +54,7 @@ namespace NL::CEF
             }
         });
 
-        m_onMainFrameLoadStart_Connection = m_cefClient->onMainFrameLoadStart.connect([&, a_eventFuncInfo]() {
+        m_onMainFrameLoadStart_Connection = m_cefClient->onMainFrameLoadStart.connect([&]() {
             std::lock_guard locker(m_urlMutex);
             m_isPageLoaded = true;
 
@@ -71,14 +70,6 @@ namespace NL::CEF
                 {
                     auto cefMessage = CefProcessMessage::Create(IPC_JS_FUNCION_ADD_EVENT);
                     cefMessage->GetArgumentList()->SetDictionary(0, m_jsFuncStorage->ConvertToCefDictionary());
-                    browser->GetMainFrame()->SendProcessMessage(CefProcessId::PID_RENDERER, cefMessage);
-                }
-                if (browser != nullptr && !a_eventFuncInfo.funcName.empty())
-                {
-                    auto cefMessage = CefProcessMessage::Create(IPC_JS_EVENT_FUNCTION_ADD_EVENT);
-                    auto args = cefMessage->GetArgumentList();
-                    args->SetString(0, a_eventFuncInfo.objectName);
-                    args->SetString(1, a_eventFuncInfo.funcName);
                     browser->GetMainFrame()->SendProcessMessage(CefProcessId::PID_RENDERER, cefMessage);
                 }
             }
@@ -451,10 +442,9 @@ namespace NL::CEF
         if (IsPageLoaded() && browser != nullptr)
         {
             auto cefMessage = CefProcessMessage::Create(IPC_JS_EVENT_FUNCTION_CALL_EVENT);
-            auto funcData = CefListValue::Create();
-            funcData->SetString(0, a_eventName);
-            funcData->SetString(1, a_data);
-            cefMessage->GetArgumentList()->SetList(0, funcData);
+            cefMessage->GetArgumentList()->SetString(0, a_eventName);
+            cefMessage->GetArgumentList()->SetString(1, a_data);
+
             browser->GetMainFrame()->SendProcessMessage(CefProcessId::PID_RENDERER, cefMessage);
         }
     }

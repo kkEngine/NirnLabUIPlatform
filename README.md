@@ -2,6 +2,11 @@
 
 UI platform for Skyrim with CEF (Chromium Embedded Framework) integration and more. You can create interface based on html5, css, javascript. This project is a part of NirnLab project.
 
+## NirnLab
+
+NirnLab is a competitive MMO-like mod for Skyrim which will be announced after the main part is completed.
+If you want to follow the progress and news, subscribe to [![Discord](https://img.shields.io/discord/1004071212361711678?label=Discord&logo=Discord)](https://discord.gg/zxgzE45Vtz).
+
 ## Features
 - Chromium browser is rendered in Skyrim's native menu (can take screenshots, using native cursor)
 - Creating multiple browsers
@@ -87,6 +92,27 @@ void ReleaseBrowser(NL::UI::IUIPlatformAPI::BrowserRefHandle a_handle)
 }
 ```
 
+# Events from c++ to js
+You can create special "event function" that will receive events.
+An example of creating an event function can be found in LocalTestPage.cpp
+
+```js
+NL.addEventListener("on:message", (data) => {
+	const para = document.createElement("p");
+	const node = document.createTextNode(data);
+	para.appendChild(node);
+});
+```
+
+```cpp
+auto eventFunc = new JS::JSFuncInfo();
+eventFunc->objectName = "NL";
+eventFunc->funcName = "addEventListener";
+eventFunc->callbackData.isEventFunction = true;
+
+// Pass with other functions in array when browser creating. see AddOrGetBrowser in api.
+```
+
 ## Dev and build requirements
 - CMake 3.23+
 - Vcpkg
@@ -97,11 +123,6 @@ void ReleaseBrowser(NL::UI::IUIPlatformAPI::BrowserRefHandle a_handle)
 ## Runtime dependencies
 - Address library (https://www.nexusmods.com/skyrimspecialedition/mods/32444)
 - SKSE (https://skse.silverlock.org/)
-
-## NirnLab
-
-NirnLab is a competitive MMO-like mod for Skyrim which will be announced after the main part is completed.
-If you want to follow the progress and news, subscribe to [![Discord](https://img.shields.io/discord/1004071212361711678?label=Discord&logo=Discord)](https://discord.gg/3YDR4pDJYy).
 
 ### Thanks to
 [@Pospelove](https://github.com/Pospelove) <br />

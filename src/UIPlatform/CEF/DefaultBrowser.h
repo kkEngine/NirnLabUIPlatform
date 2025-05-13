@@ -66,8 +66,7 @@ namespace NL::CEF
         DefaultBrowser(
             std::shared_ptr<spdlog::logger> a_logger,
             CefRefPtr<NirnLabCefClient> a_cefClient,
-            std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage,
-            NL::JS::JSEventFuncInfo a_eventFuncInfo);
+            std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage);
         ~DefaultBrowser() override;
 
         void UpdateCefKeyModifiers(const RE::ButtonEvent* a_event, const cef_event_flags_t a_flags);

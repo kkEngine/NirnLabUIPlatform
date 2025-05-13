@@ -16,8 +16,6 @@ namespace NL::JS
         static inline std::map<std::pair<std::string, int>, std::tuple<CefRefPtr<CefV8Context>, CefRefPtr<CefV8Value>, CefRefPtr<CefV8Value>>> s_eventFuncMap;
 
     public:
-        CEFEventFunctionHandler(CefRefPtr<CefBrowser> a_browser);
-
         static void CallEventFunc(const CefString& a_eventName, CefRefPtr<CefBrowser> a_browser, const CefString& a_data);
         static void RemoveEventFunc(CefRefPtr<CefV8Context> a_context);
 

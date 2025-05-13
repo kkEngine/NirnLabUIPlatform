@@ -56,8 +56,15 @@ namespace NL::UI::TestCase
             spdlog::info("func2 callback. params: {}", argsStr);
         };
 
+        // Event func
+        auto func3 = new JS::JSFuncInfo();
+        func3->objectName = "NL";
+        func3->funcName = "addEventListener";
+        func3->callbackData.isEventFunction = true;
+
         m_funcInfoVector.push_back(func1);
         m_funcInfoVector.push_back(func2);
+        m_funcInfoVector.push_back(func3);
 
         m_browserHandle = a_api->AddOrGetBrowser("LOCAL_TEST_PAGE",
                                                  m_funcInfoVector.data(),
@@ -107,6 +114,7 @@ namespace NL::UI::TestCase
             while (i < 10 && !stopToken.stop_requested())
             {
                 std::this_thread::sleep_for(1s);
+                m_browser->ExecEventFunction("on:message", "EVENT_FUNC WORKS!");
                 m_browser->ExecuteJavaScript(fmt::format("NL.func1({})", std::to_string(++i).c_str()).c_str());
             }
 

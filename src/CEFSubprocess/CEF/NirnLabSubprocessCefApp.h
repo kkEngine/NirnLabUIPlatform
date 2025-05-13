@@ -19,6 +19,7 @@ namespace NL::CEF
     private:
         std::shared_ptr<NL::Log::IPCLogSink_mt> m_logSink = nullptr;
         CefString m_processType;
+        CefRefPtr<CefDictionaryValue> m_extraInfo = nullptr;
 
         void InitLog(CefRefPtr<CefBrowser> a_browser);
 

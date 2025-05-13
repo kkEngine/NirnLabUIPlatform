@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Browser</title>
+</head>
+
+<body>
+  <h1>
+    Test case for Skyrim CEF
+  </h1>
+	<div id="div1" style="color: green">
+	<p id="p1">This is a paragraph.</p>
+	<p id="p2">This is another paragraph.</p>
+	</div>
+  <script>
+	setInterval(() => {
+		if (NL.func1)
+		{
+			//window.func(console);
+			NL.func1(1, 2.33, "str", [1, 2, 3], { "k1": 1, "k2": 2.3451, "k3": "str3", "k4": [12, 13, 14], "k5": null });
+			//window.func2(33);
+		
+			const para = document.createElement("p");
+			const node = document.createTextNode("This is NEW paragraph.");
+			//const node = document.createTextNode(window.func1);
+			para.appendChild(node);
+
+			const element = document.getElementById("div1");
+			element.appendChild(para);
+		}
+	}, 1000);
+	
+	NL.addEventListener("on:message", (data) => {
+		const para = document.createElement("p");
+		const node = document.createTextNode(data);
+		para.appendChild(node);
+
+		const element = document.getElementById("div1");
+		element.appendChild(para);
+	});
+  </script>
+</body>
+
+</html>
