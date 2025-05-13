@@ -8,7 +8,7 @@ namespace NL::CEF
 {
     class IBrowser
     {
-      public:
+    public:
         virtual ~IBrowser() = default;
 
         /// <summary>
@@ -51,9 +51,11 @@ namespace NL::CEF
         /// <param name="a_clearJSFunctions">If true then remove all previous js function callbacks</param>
         /// <returns></returns>
         virtual void __cdecl LoadBrowserURL(const char* a_url, bool a_clearJSFunctions = true) = 0;
+
         virtual void __cdecl ExecuteJavaScript(const char* a_script, const char* a_scriptUrl = JS_EXECUTE_SCRIPT_URL) = 0;
         virtual void __cdecl AddFunctionCallback(const NL::JS::JSFuncInfo& a_callbackInfo) = 0;
         virtual void __cdecl RemoveFunctionCallback(const char* a_objectName, const char* a_funcName) = 0;
         virtual void __cdecl RemoveFunctionCallback(const NL::JS::JSFuncInfo& a_callbackInfo) = 0;
+        virtual void __cdecl ExecEventFunction(const char* a_eventName, const char* a_data) = 0;
     };
 }

@@ -5,6 +5,8 @@
 
 #define IPC_JS_WINDOW_OBJECT_NAME "window"
 #define IPC_JS_CONTEXT_CREATED "js-context-created"
-#define IPC_JS_FUNCTION_CALL_EVENT "js-function-call"
-#define IPC_JS_FUNCION_ADD_EVENT "js-function-add"
-#define IPC_JS_FUNCTION_REMOVE_EVENT "js-function-remove"
+#define IPC_JS_FUNCTION_CALL_EVENT "1"
+#define IPC_JS_FUNCION_ADD_EVENT "2"
+#define IPC_JS_FUNCTION_REMOVE_EVENT "3"
+#define IPC_JS_EVENT_FUNCTION_ADD_EVENT "4"
+#define IPC_JS_EVENT_FUNCTION_CALL_EVENT "5"

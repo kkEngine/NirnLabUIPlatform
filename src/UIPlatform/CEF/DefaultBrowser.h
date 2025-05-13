@@ -6,6 +6,7 @@
 #include "Services/CEFService.h"
 #include "Hooks/WinProcHook.h"
 #include "JS/JSFunctionStorage.h"
+#include "JS/JSEventFuncInfo.h"
 #include "Converters/CefValueToJSONConverter.h"
 
 namespace NL::CEF
@@ -15,7 +16,7 @@ namespace NL::CEF
     class DefaultBrowser : public IBrowser,
                            public RE::MenuEventHandler
     {
-      protected:
+    protected:
         std::shared_ptr<spdlog::logger> m_logger = nullptr;
         CefRefPtr<NirnLabCefClient> m_cefClient = nullptr;
         std::shared_ptr<NL::JS::JSFunctionStorage> m_jsFuncStorage = nullptr;
@@ -55,17 +56,18 @@ namespace NL::CEF
 
         bool m_wasCursorOpen = false;
 
-        sigslot::scoped_connection m_OnWndInactive_Connection;
+        sigslot::scoped_connection m_onWndInactive_Connection;
         sigslot::scoped_connection m_onIPCMessageReceived_Connection;
         sigslot::scoped_connection m_onAfterBrowserCreated_Connection;
         sigslot::scoped_connection m_onMainFrameLoadStart_Connection;
         sigslot::scoped_connection m_onMainFrameLoadEnd_Connection;
 
-      public:
+    public:
         DefaultBrowser(
             std::shared_ptr<spdlog::logger> a_logger,
             CefRefPtr<NirnLabCefClient> a_cefClient,
-            std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage);
+            std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage,
+            NL::JS::JSEventFuncInfo a_eventFuncInfo);
         ~DefaultBrowser() override;
 
         void UpdateCefKeyModifiers(const RE::ButtonEvent* a_event, const cef_event_flags_t a_flags);
@@ -97,6 +99,7 @@ namespace NL::CEF
         void __cdecl AddFunctionCallback(const NL::JS::JSFuncInfo& a_callbackInfo) override;
         void __cdecl RemoveFunctionCallback(const char* a_objectName, const char* a_funcName) override;
         void __cdecl RemoveFunctionCallback(const NL::JS::JSFuncInfo& a_callbackInfo) override;
+        void __cdecl ExecEventFunction(const char* a_eventName, const char* a_data) override;
 
         // RE::MenuEventHandler
         bool CanProcess(RE::InputEvent* a_event) override;

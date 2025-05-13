@@ -3,9 +3,11 @@
 #define RENDER_PROCESS_TYPE "renderer"
 
 #include "PCH.h"
+#include "CEFV8ContextGuard.h"
 #include "Log/IPCLogSink.hpp"
 #include "JS/CEFFunctionQueue.h"
 #include "JS/CEFFunctionHandler.h"
+#include "JS/CEFEventFunctionHandler.h"
 
 namespace NL::CEF
 {
@@ -14,14 +16,16 @@ namespace NL::CEF
     {
         IMPLEMENT_REFCOUNTING(NirnLabSubprocessCefApp);
 
-      private:
+    private:
         std::shared_ptr<NL::Log::IPCLogSink_mt> m_logSink = nullptr;
         CefString m_processType;
+
         void InitLog(CefRefPtr<CefBrowser> a_browser);
 
-      public:
+    public:
         NirnLabSubprocessCefApp() = default;
 
+        CefRefPtr<CefV8Value> GetOrCreateObject(CefRefPtr<CefV8Value> a_parent, const CefString& a_objectName);
         size_t AddFunctionHandlers(CefRefPtr<CefBrowser> a_browser,
                                    CefRefPtr<CefFrame> a_frame,
                                    CefProcessId a_sourceProcess,

@@ -104,8 +104,9 @@ namespace NL::Services
         return m_mlMenu;
     }
 
-    std::shared_ptr<NL::Menus::CEFMenu> UIPlatformService::CreateCefMenu(std::shared_ptr<NL::JS::JSFunctionStorage> a_funcStorage)
+    std::shared_ptr<NL::Menus::CEFMenu> UIPlatformService::CreateCefMenu(std::shared_ptr<NL::JS::JSFunctionStorage> a_funcStorage,
+                                                                         NL::JS::JSEventFuncInfo& a_eventFuncInfo)
     {
-        return std::make_shared<NL::Menus::CEFMenu>(m_logger, a_funcStorage);
+        return std::make_shared<NL::Menus::CEFMenu>(m_logger, a_funcStorage, a_eventFuncInfo);
     }
 }

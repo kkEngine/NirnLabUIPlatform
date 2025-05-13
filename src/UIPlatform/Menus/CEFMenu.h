@@ -6,6 +6,7 @@
 #include "CEF/DefaultBrowser.h"
 #include "CEF/NirnLabCefClient.h"
 #include "JS/JSFunctionStorage.h"
+#include "JS/JSEventFuncInfo.h"
 #include "Services/CEFService.h"
 
 namespace NL::Menus
@@ -24,7 +25,8 @@ namespace NL::Menus
     public:
         CEFMenu(
             std::shared_ptr<spdlog::logger> a_logger,
-            std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage);
+            std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage,
+            NL::JS::JSEventFuncInfo& a_eventFuncInfo);
         ~CEFMenu() override;
 
         bool LoadBrowser(std::string_view a_url,

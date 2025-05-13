@@ -50,6 +50,7 @@ namespace NL::Services
         void Shutdown();
 
         std::shared_ptr<NL::Menus::MultiLayerMenu> GetMultiLayerMenu();
-        std::shared_ptr<NL::Menus::CEFMenu> CreateCefMenu(std::shared_ptr<NL::JS::JSFunctionStorage> a_funcStorage);
+        std::shared_ptr<NL::Menus::CEFMenu> CreateCefMenu(std::shared_ptr<NL::JS::JSFunctionStorage> a_funcStorage,
+                                                          NL::JS::JSEventFuncInfo& a_eventFuncInfo);
     };
 }

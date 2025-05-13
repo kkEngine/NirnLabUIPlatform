@@ -181,7 +181,10 @@ namespace NL::Controllers
             {
                 for (std::uint32_t i = 0; i < a_funcInfoArrSize; ++i)
                 {
-                    a_outBrowser->AddFunctionCallback(*a_funcInfoArr[i]);
+                    if (!a_funcInfoArr[i]->callbackData.isEventFunction)
+                    {
+                        a_outBrowser->AddFunctionCallback(*a_funcInfoArr[i]);
+                    }
                 }
             }
 
@@ -191,16 +194,24 @@ namespace NL::Controllers
         const auto cefMenu = mlMenu->GetSubMenu(a_browserName);
         if (cefMenu == nullptr)
         {
+            NL::JS::JSEventFuncInfo a_eventFuncInfo{"", ""};
             auto jsFuncStorage = std::make_shared<NL::JS::JSFunctionStorage>();
             if (a_funcInfoArr != nullptr)
             {
                 for (std::uint32_t i = 0; i < a_funcInfoArrSize; ++i)
                 {
-                    jsFuncStorage->AddFunctionCallback(*a_funcInfoArr[i]);
+                    if (a_funcInfoArr[i]->callbackData.isEventFunction)
+                    {
+                        a_eventFuncInfo = NL::JS::JSEventFuncInfo::CreateFromFuncInfo(*a_funcInfoArr[i]);
+                    }
+                    else
+                    {
+                        jsFuncStorage->AddFunctionCallback(*a_funcInfoArr[i]);
+                    }
                 }
             }
 
-            auto newCefMenu = NL::Services::UIPlatformService::GetSingleton().CreateCefMenu(jsFuncStorage);
+            auto newCefMenu = NL::Services::UIPlatformService::GetSingleton().CreateCefMenu(jsFuncStorage, a_eventFuncInfo);
             if (!newCefMenu->LoadBrowser(a_startUrl, m_settingsProvider->GetCefWindowInfo(), m_settingsProvider->MergeAndGetCefBrowserSettings(a_settings)))
             {
                 spdlog::error("{}: failed to load browser ({}) with name \"{}\"", NameOf(PublicAPIController), a_startUrl, a_browserName);

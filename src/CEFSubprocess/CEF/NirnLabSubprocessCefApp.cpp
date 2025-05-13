@@ -20,6 +20,17 @@ namespace NL::CEF
         spdlog::set_default_logger(logger);
     }
 
+    CefRefPtr<CefV8Value> NirnLabSubprocessCefApp::GetOrCreateObject(CefRefPtr<CefV8Value> a_parent, const CefString& a_objectName)
+    {
+        auto object = a_parent->GetValue(a_objectName);
+        if (object == nullptr || object->IsNull() || object->IsUndefined())
+        {
+            object = CefV8Value::CreateObject(nullptr, nullptr);
+            a_parent->SetValue(a_objectName, object, V8_PROPERTY_ATTRIBUTE_NONE);
+        }
+        return object;
+    }
+
     size_t NirnLabSubprocessCefApp::AddFunctionHandlers(CefRefPtr<CefBrowser> a_browser,
                                                         CefRefPtr<CefFrame> a_frame,
                                                         CefProcessId a_sourceProcess,
@@ -27,8 +38,8 @@ namespace NL::CEF
     {
         size_t addedFuncCount = 0;
 
-        const auto v8Context = a_frame->GetV8Context();
-        if (!v8Context->Enter())
+        CEFV8ContextGuard v8ContextGuard(a_frame->GetV8Context());
+        if (!v8ContextGuard.IsEntered())
         {
             spdlog::error("{}[{}]: can't enter v8 context", NameOf(NirnLabSubprocessCefApp::AddFunctionHandlers), ::GetCurrentProcessId());
             return addedFuncCount;
@@ -43,7 +54,7 @@ namespace NL::CEF
         {
             for (const auto& objectName : keyList)
             {
-                auto currentObjectValue = v8Context->GetGlobal();
+                auto currentObjectValue = a_frame->GetV8Context()->GetGlobal();
                 const auto funcList = a_funcDict->GetList(objectName);
                 for (auto i = 0; i < funcList->GetSize(); ++i)
                 {
@@ -55,13 +66,7 @@ namespace NL::CEF
 
                     if (!objectName.empty())
                     {
-                        auto objectValue = currentObjectValue->GetValue(objectName);
-                        if (objectValue == nullptr || objectValue->IsNull() || objectValue->IsUndefined())
-                        {
-                            objectValue = CefV8Value::CreateObject(nullptr, nullptr);
-                            currentObjectValue->SetValue(objectName, objectValue, V8_PROPERTY_ATTRIBUTE_NONE);
-                        }
-                        currentObjectValue = objectValue;
+                        currentObjectValue = GetOrCreateObject(currentObjectValue, objectName);
                     }
 
                     CefRefPtr<NL::JS::CEFFunctionHandler> funcHandler = new NL::JS::CEFFunctionHandler(a_browser, objectName);
@@ -72,7 +77,6 @@ namespace NL::CEF
             }
         }
 
-        v8Context->Exit();
         return addedFuncCount;
     }
 
@@ -117,7 +121,7 @@ namespace NL::CEF
                         }
                     }
 
-                    // Note: the window object does not allow deleting a custom function for some reason. Use different object. 
+                    // Note: the window object does not allow deleting a custom function for some reason. Use different object.
                     if (currentObjectValue->DeleteValue(funcName))
                     {
                         ++removedFuncCount;
@@ -189,6 +193,7 @@ namespace NL::CEF
                                                     CefRefPtr<CefFrame> frame,
                                                     CefRefPtr<CefV8Context> context)
     {
+        NL::JS::CEFEventFunctionHandler::RemoveEventFunc(context);
     }
 
     bool NirnLabSubprocessCefApp::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
@@ -196,6 +201,8 @@ namespace NL::CEF
                                                            CefProcessId source_process,
                                                            CefRefPtr<CefProcessMessage> message)
     {
+        auto isMessageHandled = false;
+
         if (message->GetName() == IPC_JS_FUNCION_ADD_EVENT)
         {
             const auto funcDict = message->GetArgumentList()->GetDictionary(0);
@@ -206,6 +213,7 @@ namespace NL::CEF
 
             const auto addedFuncCount = AddFunctionHandlers(browser, frame, source_process, funcDict);
             spdlog::info("{}[{}]: registered {} functions for the browser with id {}", NameOf(NirnLabSubprocessCefApp::OnProcessMessageReceived), ::GetCurrentProcessId(), addedFuncCount, browser->GetIdentifier());
+            isMessageHandled = true;
         }
         else if (message->GetName() == IPC_JS_FUNCTION_REMOVE_EVENT)
         {
@@ -217,8 +225,53 @@ namespace NL::CEF
 
             const auto addedFuncCount = RemoveFunctionHandlers(browser, frame, source_process, funcDict);
             spdlog::info("{}[{}]: removed {} functions for the browser with id {}", NameOf(NirnLabSubprocessCefApp::OnProcessMessageReceived), ::GetCurrentProcessId(), addedFuncCount, browser->GetIdentifier());
+            isMessageHandled = true;
+        }
+        else if (message->GetName() == IPC_JS_EVENT_FUNCTION_ADD_EVENT)
+        {
+            if (message->GetArgumentList()->GetSize() < 2)
+            {
+                return true;
+            }
+
+            const auto objectName = message->GetArgumentList()->GetString(0);
+            const auto funcName = message->GetArgumentList()->GetString(1);
+            if (funcName.empty())
+            {
+                return true;
+            }
+
+            CEFV8ContextGuard v8ContextGuard(frame->GetV8Context());
+            if (!v8ContextGuard.IsEntered())
+            {
+                spdlog::error("{}[{}]: can't enter v8 context", NameOf(NirnLabSubprocessCefApp::AddFunctionHandlers), ::GetCurrentProcessId());
+                return false;
+            }
+
+            auto currentObjectValue = frame->GetV8Context()->GetGlobal();
+            if (!objectName.empty())
+            {
+                currentObjectValue = GetOrCreateObject(currentObjectValue, objectName);
+            }
+
+            CefRefPtr<NL::JS::CEFEventFunctionHandler> funcHandler = new NL::JS::CEFEventFunctionHandler(browser);
+            CefRefPtr<CefV8Value> funcValue = CefV8Value::CreateFunction(funcName, funcHandler);
+            currentObjectValue->SetValue(funcName, funcValue, V8_PROPERTY_ATTRIBUTE_NONE);
+
+            isMessageHandled = true;
+        }
+        else if (message->GetName() == IPC_JS_EVENT_FUNCTION_CALL_EVENT)
+        {
+            if (message->GetArgumentList()->GetSize() < 2)
+            {
+                return true;
+            }
+
+            const auto funcData = message->GetArgumentList()->GetList(0); 
+
+            NL::JS::CEFEventFunctionHandler::CallEventFunc(funcData->GetString(0), browser, funcData->GetString(1));
         }
 
-        return false;
+        return isMessageHandled;
     }
 }

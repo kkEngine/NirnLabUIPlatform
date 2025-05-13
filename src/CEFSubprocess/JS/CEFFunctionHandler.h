@@ -9,11 +9,11 @@ namespace NL::JS
     {
         IMPLEMENT_REFCOUNTING(CEFFunctionHandler);
 
-      protected:
+    protected:
         CefRefPtr<CefBrowser> m_browser = nullptr;
         CefString m_objectName = "";
 
-      public:
+    public:
         CEFFunctionHandler(CefRefPtr<CefBrowser> a_browser, CefString a_objectName);
 
         // CefV8Handler
