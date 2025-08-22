@@ -140,6 +140,11 @@ namespace NL::CEF
         m_processType = process_type;
         InitLog(nullptr);
 
+        //command_line->AppendSwitch("angle");
+        command_line->AppendSwitchWithValue("use-angle", "d3d11");
+        command_line->AppendSwitchWithValue(
+            "use-adapter-luid", "0,67785");
+
         DWORD mainProcessId = std::stoi(command_line->GetSwitchValue(IPC_CL_PROCESS_ID_NAME).ToWString());
         if (mainProcessId && process_type == RENDER_PROCESS_TYPE)
         {

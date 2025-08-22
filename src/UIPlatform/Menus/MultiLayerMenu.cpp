@@ -1,5 +1,12 @@
 #include "MultiLayerMenu.h"
 
+#define KEK_DEBUG(...) \
+    do \
+    { \
+        const auto ss = fmt::format(__VA_ARGS__); \
+        MessageBox(GetForegroundWindow(), ss.c_str(), "debug", MB_OK); \
+    } while (0)
+
 namespace NL::Menus
 {
     MultiLayerMenu::MultiLayerMenu(std::shared_ptr<spdlog::logger> a_logger)
@@ -12,13 +19,23 @@ namespace NL::Menus
         ThrowIfNullptr(MultiLayerMenu, device);
 
         HRESULT hResult = 0;
+        IDXGIDevice* dxgiDevice;
+        hResult = device->QueryInterface<IDXGIDevice>(&dxgiDevice);
+        CHECK_HRESULT_THROW(hResult, fmt::format("{}: failed to query interface {}", NameOf(MultiLayerMenu), NameOf(IDXGIDevice)));
+
+        IDXGIAdapter* dxgiAdapter;
+        hResult = dxgiDevice->GetAdapter(&dxgiAdapter);
+        CHECK_HRESULT_THROW(hResult, fmt::format("{}: failed to get dxgi adapter", NameOf(MultiLayerMenu)));
+
+        DXGI_ADAPTER_DESC adapterDesc;
+        dxgiAdapter->GetDesc(&adapterDesc);
+        CHECK_HRESULT_THROW(hResult, fmt::format("{}: failed to get dxgi adapter desc", NameOf(MultiLayerMenu)));
+
+        m_logger->info("{}: using adapter luid={},{}", NameOf(MultiLayerMenu), adapterDesc.AdapterLuid.HighPart, adapterDesc.AdapterLuid.LowPart);
+
         ID3D11Device3* device3 = nullptr;
-        hResult = device->QueryInterface(__uuidof(ID3D11Device3), (void**)&device3);
-        if (FAILED(hResult))
-        {
-            const auto errorMsg = fmt::format("{}: failed to QueryInterface() with {} and result {}", NameOf(MultiLayerMenu), NameOf(ID3D11Device1), hResult);
-            throw std::runtime_error(errorMsg);
-        }
+        hResult = device->QueryInterface<ID3D11Device3>(&device3);
+        CHECK_HRESULT_THROW(hResult, fmt::format("{}: failed to query interface {}", NameOf(MultiLayerMenu), NameOf(ID3D11Device1)));
 
         ID3D11DeviceContext3* immediateContext = nullptr;
         device3->GetImmediateContext3(&immediateContext);
