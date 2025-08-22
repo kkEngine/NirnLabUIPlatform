@@ -19,20 +19,6 @@ namespace NL::Menus
         ThrowIfNullptr(MultiLayerMenu, device);
 
         HRESULT hResult = 0;
-        IDXGIDevice* dxgiDevice;
-        hResult = device->QueryInterface<IDXGIDevice>(&dxgiDevice);
-        CHECK_HRESULT_THROW(hResult, fmt::format("{}: failed to query interface {}", NameOf(MultiLayerMenu), NameOf(IDXGIDevice)));
-
-        IDXGIAdapter* dxgiAdapter;
-        hResult = dxgiDevice->GetAdapter(&dxgiAdapter);
-        CHECK_HRESULT_THROW(hResult, fmt::format("{}: failed to get dxgi adapter", NameOf(MultiLayerMenu)));
-
-        DXGI_ADAPTER_DESC adapterDesc;
-        dxgiAdapter->GetDesc(&adapterDesc);
-        CHECK_HRESULT_THROW(hResult, fmt::format("{}: failed to get dxgi adapter desc", NameOf(MultiLayerMenu)));
-
-        m_logger->info("{}: using adapter luid={},{}", NameOf(MultiLayerMenu), adapterDesc.AdapterLuid.HighPart, adapterDesc.AdapterLuid.LowPart);
-
         ID3D11Device3* device3 = nullptr;
         hResult = device->QueryInterface<ID3D11Device3>(&device3);
         CHECK_HRESULT_THROW(hResult, fmt::format("{}: failed to query interface {}", NameOf(MultiLayerMenu), NameOf(ID3D11Device1)));

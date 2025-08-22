@@ -2,6 +2,30 @@
 
 namespace NL::CEF
 {
+    namespace
+    {
+        std::string GetAdapterLuid()
+        {
+            const auto device = reinterpret_cast<ID3D11Device*>(RE::BSGraphics::Renderer::GetDevice());
+            ThrowIfNullptr(NirnLabCefApp, device);
+
+            HRESULT hr;
+            IDXGIDevice* dxgiDevice;
+            hr = device->QueryInterface<IDXGIDevice>(&dxgiDevice);
+            CHECK_HRESULT_THROW(hr, fmt::format("{}: failed to query interface {}", NameOf(NirnLabCefApp), NameOf(IDXGIDevice)));
+
+            IDXGIAdapter* dxgiAdapter;
+            hr = dxgiDevice->GetAdapter(&dxgiAdapter);
+            CHECK_HRESULT_THROW(hr, fmt::format("{}: failed to get dxgi adapter", NameOf(NirnLabCefApp)));
+
+            DXGI_ADAPTER_DESC adapterDesc;
+            dxgiAdapter->GetDesc(&adapterDesc);
+            CHECK_HRESULT_THROW(hr, fmt::format("{}: failed to get dxgi adapter desc", NameOf(NirnLabCefApp)));
+
+            return fmt::format("{},{}", adapterDesc.AdapterLuid.HighPart, adapterDesc.AdapterLuid.LowPart);
+        }
+    }
+
     // command line switches https://peter.sh/experiments/chromium-command-line-switches/
     void NirnLabCefApp::OnBeforeCommandLineProcessing(CefString const& process_type, CefRefPtr<CefCommandLine> command_line)
     {
@@ -19,6 +43,9 @@ namespace NL::CEF
         // Chromium may still choose to disable D3D11 for gpu workarounds.
         // Accelerated OSR will not at all with D3D11 disabled, so we force it on.
         command_line->AppendSwitchWithValue("use-angle", "d3d11");
+
+        // Ensure Chromium runs on the same GPU (will not be able to copy frames otherwise)
+        command_line->AppendSwitchWithValue("use-adapter-luid", GetAdapterLuid());
 
         // tell Chromium to autoplay <video> elements without
         // requiring the muted attribute or user interaction
