@@ -45,7 +45,10 @@ namespace NL::CEF
         command_line->AppendSwitchWithValue("use-angle", "d3d11");
 
         // Ensure Chromium runs on the same GPU (will not be able to copy frames otherwise)
-        command_line->AppendSwitchWithValue("use-adapter-luid", GetAdapterLuid());
+        // Also requires D3D11
+        auto luid = GetAdapterLuid();
+        command_line->AppendSwitchWithValue("use-adapter-luid", luid);
+        spdlog::info("NirnLabCefApp: using adapter luid={}", luid);
 
         // tell Chromium to autoplay <video> elements without
         // requiring the muted attribute or user interaction
