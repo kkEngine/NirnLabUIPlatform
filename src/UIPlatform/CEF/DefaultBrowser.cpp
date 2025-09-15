@@ -299,6 +299,11 @@ namespace NL::CEF
     void __cdecl DefaultBrowser::SetBrowserFocused(bool a_value)
     {
         std::lock_guard locker(m_urlMutex);
+        if (m_isFocused == a_value)
+        {
+            return;
+        }
+
         if (!IsPageLoaded())
         {
             m_isFocusedCached = true;
