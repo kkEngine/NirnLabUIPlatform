@@ -338,6 +338,11 @@ namespace NL::CEF
             cdata.lookInputVec.y = 0;
             cdata.prevLookVec.x = 0;
             cdata.prevLookVec.y = 0;
+            if (!cdata.autoMove)
+            {
+                cdata.moveInputVec.x = 0;
+                cdata.moveInputVec.y = 0;
+            }
         }
     }
 
