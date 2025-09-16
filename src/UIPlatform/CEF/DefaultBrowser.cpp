@@ -331,6 +331,14 @@ namespace NL::CEF
         m_cefClient->GetBrowser()->GetHost()->SetFocus(a_value);
         m_isFocusedCached = false;
         m_isFocused = a_value;
+        if (m_isFocused)
+        {
+            auto& cdata = RE::PlayerControls::GetSingleton()->data;
+            cdata.lookInputVec.x = 0;
+            cdata.lookInputVec.y = 0;
+            cdata.prevLookVec.x = 0;
+            cdata.prevLookVec.y = 0;
+        }
     }
 
     bool __cdecl DefaultBrowser::IsBrowserFocused()
