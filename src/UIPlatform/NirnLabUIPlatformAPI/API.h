@@ -1,5 +1,10 @@
 #pragma once
 
+#define WIN32_LEAN_AND_MEAN
+#define NOGDI
+#define NOMINMAX
+#include <Windows.h>
+
 #include "Version.h"
 #include "JSTypes.h"
 #include "IBrowser.h"
@@ -113,4 +118,11 @@ namespace NL::UI
     {
         IUIPlatformAPI* API = nullptr;
     };
+
+    ResponseVersionMessage GetUIPlatformAPIVersion();
+    bool CreateOrGetUIPlatformAPI(IUIPlatformAPI** a_outApi, NL::UI::Settings* a_settings);
+    bool CreateOrGetUIPlatformAPIWithVersionCheck(NL::UI::IUIPlatformAPI** a_outApi,
+                                                  NL::UI::Settings* a_settings,
+                                                  std::uint32_t a_requestLibVersion,
+                                                  const char* a_requestLibName);
 }

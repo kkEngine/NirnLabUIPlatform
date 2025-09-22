@@ -70,10 +70,7 @@ namespace NL::Controllers
                     spdlog::info("{}: Request api from \"{}\"", NameOf(PublicAPIController), a_msg->sender);
                 }
 
-                controller.SetSettingsProvider(static_cast<NL::UI::Settings*>(a_msg->data));
-
-                auto& platformService = NL::Services::UIPlatformService::GetSingleton();
-                if (!platformService.IsInited() && !platformService.InitAndShowMenuWithSettings(controller.GetSettingsProvider()))
+                if (!controller.InitIfNotPlatformService(static_cast<NL::UI::Settings*>(a_msg->data)))
                 {
                     spdlog::error("{}: Can't response API because ui platform failed to init", NameOf(PublicAPIController));
                     break;
@@ -88,6 +85,20 @@ namespace NL::Controllers
                 break;
             }
         });
+    }
+
+    bool PublicAPIController::InitIfNotPlatformService(const NL::UI::Settings* a_settings)
+    {
+        std::lock_guard locker(m_initPlatformServiceMutex);
+
+        auto& platformService = NL::Services::UIPlatformService::GetSingleton();
+        if (platformService.IsInited())
+        {
+            return true;
+        }
+
+        SetSettingsProvider(a_settings);
+        return platformService.InitAndShowMenuWithSettings(GetSettingsProvider());
     }
 
     void PublicAPIController::SetSettingsProvider(const NL::UI::Settings* a_settings)

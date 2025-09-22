@@ -1,8 +1,6 @@
 #include "PCH.h"
 #include "TestCases/TestCases.hpp"
 
-bool g_canUseAPI = false;
-
 extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() {
     SKSE::PluginVersionData v{};
     v.pluginVersion = 1;
@@ -39,17 +37,9 @@ void InitLog()
     spdlog::set_pattern("[%T.%e] [%^%l%$] : %v"s);
 }
 
-SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
+void Init1stMethodToGetAPI()
 {
-    if (a_skse->IsEditor())
-    {
-        return false;
-    }
-
-    // SKSE
-    SKSE::Init(a_skse);
-    SKSE::AllocTrampoline(1024);
-    InitLog();
+    static bool s_canUseAPI = false;
     SKSE::GetMessagingInterface()->RegisterListener([](SKSE::MessagingInterface::Message* a_msg) {
         switch (a_msg->type)
         {
@@ -58,7 +48,7 @@ SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
             SKSE::GetMessagingInterface()->Dispatch(NL::UI::APIMessageType::RequestVersion, nullptr, 0, NL::UI::LibVersion::PROJECT_NAME);
             break;
         case SKSE::MessagingInterface::kInputLoaded:
-            if (g_canUseAPI)
+            if (s_canUseAPI)
             {
                 NL::UI::Settings defaultSettings;
                 // API version is ok. Request interface.
@@ -81,7 +71,7 @@ SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
             // If the major version is different from ours, then using the API may cause problems
             if (majorAPIVersion != NL::UI::APIVersion::MAJOR)
             {
-                g_canUseAPI = false;
+                s_canUseAPI = false;
                 spdlog::error("Can't using this API version of NirnLabUIPlatform. We have {}.{} and installed is {}.{}",
                               NL::UI::APIVersion::MAJOR,
                               NL::UI::APIVersion::MINOR,
@@ -90,7 +80,7 @@ SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
             }
             else
             {
-                g_canUseAPI = true;
+                s_canUseAPI = true;
                 spdlog::info("API version is ok. We have {}.{} and installed is {}.{}",
                              NL::UI::APIVersion::MAJOR,
                              NL::UI::APIVersion::MINOR,
@@ -113,6 +103,54 @@ SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
             break;
         }
     });
+}
+
+void Init2ndMethodToGetAPI()
+{
+    SKSE::GetMessagingInterface()->RegisterListener([](SKSE::MessagingInterface::Message* a_msg) {
+        switch (a_msg->type)
+        {
+        case SKSE::MessagingInterface::kInputLoaded:
+            // All plugins are loaded
+            try
+            {
+                NL::UI::IUIPlatformAPI* api = nullptr;
+                NL::UI::Settings defaultSettings;
+
+                if (NL::UI::CreateOrGetUIPlatformAPIWithVersionCheck(&api, &defaultSettings, NL::UI::APIVersion::AS_INT, PLUGIN_NAME))
+                {
+                    NL::UI::TestCase::StartTests(api);
+                }
+                else
+                {
+                    spdlog::error("Failed to load NirnLabUIPlatform API :(");
+                }
+            }
+            catch (const std::exception& err)
+            {
+                spdlog::error("Failed to load NirnLabUIPlatform API, {}", err.what());
+            }
+            break;
+        default:
+            break;
+        }
+    });
+}
+
+SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
+{
+    if (a_skse->IsEditor())
+    {
+        return false;
+    }
+
+    // SKSE
+    SKSE::Init(a_skse);
+    SKSE::AllocTrampoline(1024);
+    InitLog();
+    // First method may not work correctly with some plugins
+    // Init1stMethodToGetAPI();
+    Init2ndMethodToGetAPI();
 
     const auto iniCollection = RE::INISettingCollection::GetSingleton();
     // [General]

@@ -4,9 +4,9 @@ option(BUILD_AS_SHARED "Build as dll skse plugin else build as static lib" ON)
 
 # Version
 set(LIB_MAJOR_VERSION 2)
-set(LIB_MINOR_VERSION 2)
+set(LIB_MINOR_VERSION 3)
 set(API_MAJOR_VERSION 2)
-set(API_MINOR_VERSION 2)
+set(API_MINOR_VERSION 3)
 
 # VCPKG config
 string(REPLACE "\\" "/" ENV_VCPKG_ROOT "$ENV{VCPKG_ROOT}")
