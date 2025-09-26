@@ -17,13 +17,14 @@ namespace NL::Providers
 #endif
 
         const auto currentPath = std::filesystem::current_path();
-        const auto cefAppDataPath = NL::Utils::GetLocalAppDataPath() / L"CEF";
-        const auto cefLogFilePath = cefAppDataPath / L"cef.log";
+        const auto currentPathHash = std::hash<std::wstring>{}(currentPath.wstring());
+        const auto cefCachePath = NL::Utils::GetTempAppDataPath() / (L"CEF" + std::to_wstring(currentPathHash));
+        const auto cefLogFilePath = cefCachePath / L"cef.log";
         const auto cefFilesRoot = currentPath / NL_UI_REL_PATH;
         const auto subprocPath = cefFilesRoot / NL_UI_SUBPROC_NAME;
 
         CefString(&settings.log_file).FromWString(cefLogFilePath.wstring());
-        CefString(&settings.cache_path).FromWString(cefAppDataPath.wstring());
+        CefString(&settings.cache_path).FromWString(cefCachePath.wstring());
         CefString(&settings.browser_subprocess_path).FromWString(subprocPath.wstring());
         CefString(&settings.framework_dir_path).FromWString(cefFilesRoot / "CEF");
         CefString(&settings.resources_dir_path).FromWString(cefFilesRoot / "CEF");
