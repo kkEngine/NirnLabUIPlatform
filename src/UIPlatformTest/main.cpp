@@ -1,4 +1,8 @@
 #include "PCH.h"
+
+#include "NirnLabUIPlatformAPI/API.h"
+#include "NirnLabUIPlatformAPI/DllLoader.h"
+#include "NirnLabUIPlatformAPI/SKSELoader.h"
 #include "TestCases/TestCases.hpp"
 
 extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() {
@@ -117,7 +121,7 @@ void Init2ndMethodToGetAPI()
                 NL::UI::IUIPlatformAPI* api = nullptr;
                 NL::UI::Settings defaultSettings;
 
-                if (NL::UI::CreateOrGetUIPlatformAPIWithVersionCheck(&api, &defaultSettings, NL::UI::APIVersion::AS_INT, PLUGIN_NAME))
+                if (NL::UI::DllLoader::CreateOrGetUIPlatformAPIWithVersionCheck(&api, &defaultSettings, NL::UI::APIVersion::AS_INT, PLUGIN_NAME))
                 {
                     NL::UI::TestCase::StartTests(api);
                 }
@@ -137,6 +141,16 @@ void Init2ndMethodToGetAPI()
     });
 }
 
+void Init3rdMethodToGetAPI()
+{
+    SKSE::GetMessagingInterface()->RegisterListener([](SKSE::MessagingInterface::Message* a_msg) {
+        NL::UI::SKSELoader::ProcessSKSEMessage(a_msg);
+    });
+    NL::UI::SKSELoader::GetUIPlatformAPIWithVersionCheck([](NL::UI::IUIPlatformAPI* a_api) {
+        NL::UI::TestCase::StartTests(a_api);
+    });
+}
+
 SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
 {
     if (a_skse->IsEditor())
@@ -150,7 +164,8 @@ SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
     InitLog();
     // First method may not work correctly with some plugins
     // Init1stMethodToGetAPI();
-    Init2ndMethodToGetAPI();
+    // Init2ndMethodToGetAPI();
+    Init3rdMethodToGetAPI();
 
     const auto iniCollection = RE::INISettingCollection::GetSingleton();
     // [General]
