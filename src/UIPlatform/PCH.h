@@ -70,35 +70,15 @@ inline constexpr float KEY_CHAR_REPEAT_DELAY = 0.06f;
 #include "IPC.h"
 
 #include "NirnLabUIPlatformAPI/API.h"
-#include "Utils/PathUtils.h"
 #include "Utils/BSTArrayExtension.h"
+#include "Utils/CheckHresult.h"
 #include "Utils/InputConverter.h"
+#include "Utils/PathUtils.h"
 
 // utils
 #define NameOf(name) #name
-#define ThrowIfNullptr(type, arg) \
-    if (arg == nullptr)           \
-        throw std::runtime_error(fmt::format("{} has null {}", typeid(type).name(), NameOf(arg)));
-
-#define CHECK_HRESULT_THROW(hr, msg)                                                                  \
-    do                                                                                                \
-    {                                                                                                 \
-        if (FAILED(hr))                                                                               \
-        {                                                                                             \
-            _com_error err(hr);                                                                       \
-            LPCTSTR errMsg = err.ErrorMessage();                                                      \
-            throw std::runtime_error(fmt::format("{}: unexpected HRESULT {:#X} ({})", msg, static_cast<unsigned long>(hr), errMsg)); \
-        }                                                                                             \
-    } while (0)
-
-#define CHECK_HRESULT_LOG_RETURN(hr, msg)                                                  \
-    do                                                                                     \
-    {                                                                                      \
-        if (FAILED(hr))                                                                    \
-        {                                                                                  \
-            _com_error err(hr);                                                            \
-            LPCTSTR errMsg = err.ErrorMessage();                                           \
-            spdlog::error(fmt::format("{}: unexpected HRESULT {:#X} ({})", msg, static_cast<unsigned long>(hr), errMsg)); \
-            return;                                                                        \
-        }                                                                                  \
+#define ThrowIfNullptr(type, arg)                                                                    \
+    do {                                                                                             \
+      if (arg == nullptr)                                                                            \
+          throw std::runtime_error(fmt::format("{} has null {}", typeid(type).name(), NameOf(arg))); \
     } while (0)

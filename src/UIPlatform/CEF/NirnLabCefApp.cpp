@@ -12,7 +12,8 @@ namespace NL::CEF
             HRESULT hr;
             IDXGIDevice* dxgiDevice;
             hr = device->QueryInterface<IDXGIDevice>(&dxgiDevice);
-            CHECK_HRESULT_THROW(hr, fmt::format("{}: failed to query interface {}", NameOf(NirnLabCefApp), NameOf(IDXGIDevice)));
+            //CHECK_HRESULT_THROW(hr, fmt::format("{}: failed to query interface {}", NameOf(NirnLabCefApp), NameOf(IDXGIDevice)));
+            CheckHresultThrow(hr, NameOf(NirnLabCefApp) ": failed to query interface " NameOf(IDXGIDevice));
 
             IDXGIAdapter* dxgiAdapter;
             hr = dxgiDevice->GetAdapter(&dxgiAdapter);
@@ -48,7 +49,7 @@ namespace NL::CEF
         // Also requires D3D11
         auto luid = GetAdapterLuid();
         command_line->AppendSwitchWithValue("use-adapter-luid", luid);
-        spdlog::info("NirnLabCefApp: using adapter luid={}", luid);
+        spdlog::info(NameOf(NirnLabCefApp) ": using adapter luid={}", luid);
 
         // tell Chromium to autoplay <video> elements without
         // requiring the muted attribute or user interaction

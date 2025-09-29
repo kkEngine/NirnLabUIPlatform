@@ -1,12 +1,5 @@
 #include "MultiLayerMenu.h"
 
-#define KEK_DEBUG(...) \
-    do \
-    { \
-        const auto ss = fmt::format(__VA_ARGS__); \
-        MessageBox(GetForegroundWindow(), ss.c_str(), "debug", MB_OK); \
-    } while (0)
-
 namespace NL::Menus
 {
     MultiLayerMenu::MultiLayerMenu(std::shared_ptr<spdlog::logger> a_logger)
