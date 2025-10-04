@@ -12,16 +12,15 @@ namespace NL::CEF
             HRESULT hr;
             IDXGIDevice* dxgiDevice;
             hr = device->QueryInterface<IDXGIDevice>(&dxgiDevice);
-            //CHECK_HRESULT_THROW(hr, fmt::format("{}: failed to query interface {}", NameOf(NirnLabCefApp), NameOf(IDXGIDevice)));
-            CheckHresultThrow(hr, NameOf(NirnLabCefApp) ": failed to query interface " NameOf(IDXGIDevice));
+            CheckHresultThrow(hr, fmt::format("{}: failed to query interface {}", NameOf(NirnLabCefApp), NameOf(IDXGIDevice)));
 
             IDXGIAdapter* dxgiAdapter;
             hr = dxgiDevice->GetAdapter(&dxgiAdapter);
-            CHECK_HRESULT_THROW(hr, fmt::format("{}: failed to get dxgi adapter", NameOf(NirnLabCefApp)));
+            CheckHresultThrow(hr, fmt::format("{}: failed to get dxgi adapter", NameOf(NirnLabCefApp)));
 
             DXGI_ADAPTER_DESC adapterDesc;
             dxgiAdapter->GetDesc(&adapterDesc);
-            CHECK_HRESULT_THROW(hr, fmt::format("{}: failed to get dxgi adapter desc", NameOf(NirnLabCefApp)));
+            CheckHresultThrow(hr, fmt::format("{}: failed to get dxgi adapter desc", NameOf(NirnLabCefApp)));
 
             return fmt::format("{},{}", adapterDesc.AdapterLuid.HighPart, adapterDesc.AdapterLuid.LowPart);
         }

@@ -14,7 +14,7 @@ namespace NL::Menus
         HRESULT hResult = 0;
         ID3D11Device3* device3 = nullptr;
         hResult = device->QueryInterface<ID3D11Device3>(&device3);
-        CHECK_HRESULT_THROW(hResult, fmt::format("{}: failed to query interface {}", NameOf(MultiLayerMenu), NameOf(ID3D11Device1)));
+        CheckHresultThrow(hResult, fmt::format("{}: failed to query interface {}", NameOf(MultiLayerMenu), NameOf(ID3D11Device1)));
 
         ID3D11DeviceContext3* immediateContext = nullptr;
         device3->GetImmediateContext3(&immediateContext);
