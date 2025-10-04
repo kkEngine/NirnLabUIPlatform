@@ -23,14 +23,15 @@ namespace NL::UI::SKSELoader
             {
             case NL::UI::APIMessageType::ResponseVersion: {
                 const auto versionInfo = reinterpret_cast<NL::UI::ResponseVersionMessage*>(a_msg->data);
-                spdlog::info("NirnLabUIPlatform version: {}.{}", NL::UI::LibVersion::GetMajorVersion(versionInfo->libVersion), NL::UI::LibVersion::GetMinorVersion(versionInfo->libVersion));
+                spdlog::info("NirnLabUIPlatform loader: installed version: {}.{}", NL::UI::LibVersion::GetMajorVersion(versionInfo->libVersion), NL::UI::LibVersion::GetMinorVersion(versionInfo->libVersion));
 
                 const auto majorAPIVersion = NL::UI::APIVersion::GetMajorVersion(versionInfo->apiVersion);
-                // If the major version is different from ours, then using the API may cause problems
-                if (majorAPIVersion != NL::UI::APIVersion::MAJOR)
+                const auto minorAPIVersion = NL::UI::APIVersion::GetMinorVersion(versionInfo->apiVersion);
+                // Different major version can cause serious compatibility issues. Older minor version may have missing methods
+                if (majorAPIVersion != NL::UI::APIVersion::MAJOR || minorAPIVersion != NL::UI::APIVersion::MINOR)
                 {
                     LoaderData::s_canUseAPI = false;
-                    spdlog::error("Can't using this API version of NirnLabUIPlatform. We have {}.{} and installed is {}.{}",
+                    spdlog::error("NirnLabUIPlatform loader: can't use using this API version. We have {}.{}, but {}.{} is installed",
                                   NL::UI::APIVersion::MAJOR,
                                   NL::UI::APIVersion::MINOR,
                                   NL::UI::APIVersion::GetMajorVersion(versionInfo->apiVersion),
@@ -39,7 +40,7 @@ namespace NL::UI::SKSELoader
                 else
                 {
                     LoaderData::s_canUseAPI = true;
-                    spdlog::info("API version is ok. We have {}.{} and installed is {}.{}",
+                    spdlog::info("NirnLabUIPlatform loader: API version is ok. Our version {}.{}, installed {}.{}",
                                  NL::UI::APIVersion::MAJOR,
                                  NL::UI::APIVersion::MINOR,
                                  NL::UI::APIVersion::GetMajorVersion(versionInfo->apiVersion),
@@ -64,7 +65,7 @@ namespace NL::UI::SKSELoader
         });
     }
 
-    inline void ProcessSKSEMessage(const SKSE::MessagingInterface::Message* a_msg)
+    inline void ProcessSKSEMessage(const SKSE::MessagingInterface::Message* a_msg, NL::UI::Settings* settings = nullptr)
     {
         switch (a_msg->type)
         {
@@ -76,8 +77,13 @@ namespace NL::UI::SKSELoader
             if (LoaderData::s_canUseAPI)
             {
                 NL::UI::Settings defaultSettings;
+                if (settings == nullptr)
+                {
+                    settings = &defaultSettings;
+                }
+
                 // API version is ok. Request interface.
-                SKSE::GetMessagingInterface()->Dispatch(NL::UI::APIMessageType::RequestAPI, &defaultSettings, sizeof(defaultSettings), NL::UI::LibVersion::PROJECT_NAME);
+                SKSE::GetMessagingInterface()->Dispatch(NL::UI::APIMessageType::RequestAPI, settings, sizeof(*settings), NL::UI::LibVersion::PROJECT_NAME);
             }
             break;
         default:

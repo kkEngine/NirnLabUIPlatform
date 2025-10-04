@@ -13,6 +13,8 @@
 #undef NOGDI
 #undef NOMINMAX
 
+#define NameOf(x) #x
+
 namespace NL::UI::DllLoader
 {
     inline HMODULE GetNirnLabUILib()
@@ -44,6 +46,11 @@ namespace NL::UI::DllLoader
     inline bool CreateOrGetUIPlatformAPI(IUIPlatformAPI** a_outApi, NL::UI::Settings* a_settings)
     {
         const auto funcPtr = reinterpret_cast<decltype(&CreateOrGetUIPlatformAPI)>(GetProcAddress(GetNirnLabUILib(), NameOf(CreateOrGetUIPlatformAPI)));
+        if (funcPtr == nullptr)
+        {
+          return false;
+        }
+
         return funcPtr(a_outApi, a_settings);
     }
 
@@ -53,6 +60,11 @@ namespace NL::UI::DllLoader
                                                          const char* a_requestLibName)
     {
         const auto funcPtr = reinterpret_cast<decltype(&CreateOrGetUIPlatformAPIWithVersionCheck)>(GetProcAddress(GetNirnLabUILib(), NameOf(CreateOrGetUIPlatformAPIWithVersionCheck)));
+        if (funcPtr == nullptr)
+        {
+          return false;
+        }
+
         return funcPtr(a_outApi, a_settings, a_requestLibVersion, a_requestLibName);
     }
 }
