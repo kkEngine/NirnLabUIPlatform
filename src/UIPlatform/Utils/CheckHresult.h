@@ -1,5 +1,7 @@
 #pragma once
 
+#include <comdef.h>
+
 inline std::string CheckHresultMessage(HRESULT hr, const std::string& userMsg)
 {
     if (!FAILED(hr))
