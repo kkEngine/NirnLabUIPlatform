@@ -1,5 +1,7 @@
 #pragma once
 
+#define NameOf(name) #name
+
 #include "Version.h"
 #include "JSTypes.h"
 #include "IBrowser.h"

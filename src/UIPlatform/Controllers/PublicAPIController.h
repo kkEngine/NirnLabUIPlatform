@@ -53,6 +53,7 @@ namespace NL::Controllers
         std::unordered_map<std::string, BrowserHandleData> m_browserNameMap;
         std::unordered_map<BrowserRefHandle, std::string> m_browserHandleMap;
 
+        std::mutex m_initPlatformServiceMutex;
         std::shared_ptr<NL::Providers::ICEFSettingsProvider> m_settingsProvider = nullptr;
 
         std::shared_ptr<NL::Menus::MultiLayerMenu> GetMultiLayerMenu();
@@ -62,6 +63,7 @@ namespace NL::Controllers
         NL::UI::ResponseAPIMessage* GetAPIMessage();
 
         void Init();
+        bool InitIfNotPlatformService(const NL::UI::Settings* a_settings);
         void SetSettingsProvider(const NL::UI::Settings* a_settings);
         std::shared_ptr<NL::Providers::ICEFSettingsProvider> GetSettingsProvider();
     };
