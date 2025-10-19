@@ -1,10 +1,5 @@
 #pragma once
 
-#define NameOf(name) #name
-#define ThrowIfNullptr(type, arg) \
-    if (arg == nullptr)           \
-        throw std::runtime_error(fmt::format("{} has null {}", typeid(type).name(), NameOf(arg)));
-
 #ifndef NL_UI_SUBPROC_NAME
     #define NL_UI_SUBPROC_NAME ""
 #endif // !NL_UI_SUBPROC_NAME
@@ -74,6 +69,15 @@ inline constexpr float KEY_CHAR_REPEAT_DELAY = 0.06f;
 #include "IPC.h"
 
 #include "NirnLabUIPlatformAPI/API.h"
-#include "Utils/PathUtils.h"
 #include "Utils/BSTArrayExtension.h"
+#include "Utils/CheckHresult.h"
 #include "Utils/InputConverter.h"
+#include "Utils/PathUtils.h"
+
+// utils
+#define NameOf(name) #name
+#define ThrowIfNullptr(type, arg)                                                                    \
+    do {                                                                                             \
+      if (arg == nullptr)                                                                            \
+          throw std::runtime_error(fmt::format("{} has null {}", typeid(type).name(), NameOf(arg))); \
+    } while (0)
