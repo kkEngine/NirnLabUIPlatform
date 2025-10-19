@@ -48,7 +48,7 @@ namespace NL::UI::DllLoader
         const auto funcPtr = reinterpret_cast<decltype(&CreateOrGetUIPlatformAPI)>(GetProcAddress(GetNirnLabUILib(), NameOf(CreateOrGetUIPlatformAPI)));
         if (funcPtr == nullptr)
         {
-          return false;
+            return false;
         }
 
         return funcPtr(a_outApi, a_settings);
@@ -62,7 +62,7 @@ namespace NL::UI::DllLoader
         const auto funcPtr = reinterpret_cast<decltype(&CreateOrGetUIPlatformAPIWithVersionCheck)>(GetProcAddress(GetNirnLabUILib(), NameOf(CreateOrGetUIPlatformAPIWithVersionCheck)));
         if (funcPtr == nullptr)
         {
-          return false;
+            return false;
         }
 
         return funcPtr(a_outApi, a_settings, a_requestLibVersion, a_requestLibName);
