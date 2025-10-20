@@ -559,32 +559,6 @@ namespace NL::CEF
                         m_lastCharCefKeyEvent.windows_key_code = NL::Utils::InputConverter::VkCodeToChar(scanCode, vkCode, m_cefKeyModifiers & (EVENTFLAG_SHIFT_DOWN | EVENTFLAG_CAPS_LOCK_ON));
                         browserHost->SendKeyEvent(m_lastCharCefKeyEvent);
                     }
-
-                    //  Shortcuts
-                    if (m_cefKeyModifiers & EVENTFLAG_CONTROL_DOWN)
-                    {
-                        switch (vkCode)
-                        {
-                        case 0x43:
-                            // CTRL-C
-                            m_cefClient->GetBrowser()->GetFocusedFrame()->Copy();
-                            break;
-                        case 0x58:
-                            // CTRL-X
-                            m_cefClient->GetBrowser()->GetFocusedFrame()->Cut();
-                            break;
-                        case 0x56:
-                            // CTRL-V
-                            m_cefClient->GetBrowser()->GetFocusedFrame()->Paste();
-                            break;
-                        case 0x41:
-                            // CTRL-A
-                            m_cefClient->GetBrowser()->GetFocusedFrame()->SelectAll();
-                            break;
-                        default:
-                            break;
-                        }
-                    }
                 }
                 else if (a_event->IsUp())
                 {
