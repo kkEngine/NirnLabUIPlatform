@@ -9,7 +9,7 @@ namespace NL::CEF
     {
         IMPLEMENT_REFCOUNTING(NirnLabCefApp);
 
-      public:
+    public:
         ~NirnLabCefApp() override = default;
 
         // CefApp

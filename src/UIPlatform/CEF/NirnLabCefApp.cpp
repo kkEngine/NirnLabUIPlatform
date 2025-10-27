@@ -35,7 +35,7 @@ namespace NL::CEF
         // command_line->AppendSwitch("disable-accelerated-video-decode");
 
         // un-comment to show the built-in Chromium fps meter
-        // command_line->AppendSwitch("show-fps-counter");
+        command_line->AppendSwitch("show-fps-counter");
 
         // command_line->AppendSwitch("disable-gpu-vsync");
 
@@ -66,6 +66,10 @@ namespace NL::CEF
 
         // Allow remote debugging
         command_line->AppendSwitchWithValue("remote-allow-origins", "*");
+
+        // command_line->AppendSwitch("in-process-gpu");
+        // command_line->AppendSwitch("enable-chrome-runtime"); 
+        // command_line->AppendSwitch("off-screen-rendering-enabled");
     }
 
     CefRefPtr<CefBrowserProcessHandler> CEF::NirnLabCefApp::GetBrowserProcessHandler()

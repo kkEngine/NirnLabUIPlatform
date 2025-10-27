@@ -12,11 +12,11 @@ namespace NL::CEF
     {
         IMPLEMENT_REFCOUNTING(NirnLabCefClient);
 
-      protected:
+    protected:
         std::shared_ptr<NL::Render::CEFCopyRenderLayer> m_cefRenderLayer = nullptr;
         CefRefPtr<CefBrowser> m_cefBrowser = nullptr;
 
-      public:
+    public:
         NirnLabCefClient();
         virtual ~NirnLabCefClient() override = default;
 
@@ -50,5 +50,10 @@ namespace NL::CEF
         void OnLoadEnd(CefRefPtr<CefBrowser> browser,
                        CefRefPtr<CefFrame> frame,
                        int httpStatusCode) override;
+        virtual void OnLoadError(CefRefPtr<CefBrowser> browser,
+                                 CefRefPtr<CefFrame> frame,
+                                 ErrorCode errorCode,
+                                 const CefString& errorText,
+                                 const CefString& failedUrl) override;
     };
 }

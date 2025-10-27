@@ -6,8 +6,9 @@ inline std::string CheckHresultMessage(HRESULT hr, const std::string& userMsg)
 {
     if (!FAILED(hr))
     {
-      return "";
+        return "";
     }
+
     _com_error err(hr);
     LPCTSTR errMsg = err.ErrorMessage();
     return fmt::format("{}: unexpected HRESULT {:#X}: {}", userMsg, static_cast<unsigned long>(hr), errMsg);

@@ -17,6 +17,7 @@ namespace NL::Services
             throw std::runtime_error(fmt::format("{}: failed to initialize CEF, code {}", NameOf(CEFService), CefGetExitCode()));
         }
 
+        spdlog::info("CEFService::CEFInitialize successfully");
         s_cefApp = a_cefApp;
     }
 
@@ -39,12 +40,15 @@ namespace NL::Services
                                    const CefWindowInfo& a_cefWindowInfo,
                                    const CefBrowserSettings& a_cefBrowserSettings)
     {
-        return CefBrowserHost::CreateBrowser(
+        const auto isCreated = CefBrowserHost::CreateBrowser(
             a_cefWindowInfo,
             a_client,
             a_url,
             a_cefBrowserSettings,
             a_jsFuncInfo,
             nullptr);
+
+        spdlog::info("CEFService::CreateBrowser: {}", isCreated ? "true" : "false");
+        return isCreated;
     }
 }

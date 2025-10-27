@@ -7,10 +7,10 @@ namespace NL::Log
     template<class Mutex>
     class IPCLogSink : public spdlog::sinks::base_sink<Mutex>
     {
-      protected:
+    protected:
         CefRefPtr<CefBrowser> m_browser = nullptr;
 
-      public:
+    public:
         IPCLogSink(CefRefPtr<CefBrowser> a_browser)
         {
             m_browser = a_browser;
@@ -23,7 +23,7 @@ namespace NL::Log
             m_browser = a_browser;
         }
 
-      protected:
+    protected:
         void sink_it_(const spdlog::details::log_msg& msg) override
         {
             if (m_browser != nullptr && m_browser->IsValid())
@@ -39,9 +39,9 @@ namespace NL::Log
                 }
             }
         }
-        void flush_() override{};
-        void set_pattern_(const std::string& pattern) override{};
-        void set_formatter_(std::unique_ptr<spdlog::formatter> sink_formatter) override{};
+        void flush_() override {};
+        void set_pattern_(const std::string& pattern) override {};
+        void set_formatter_(std::unique_ptr<spdlog::formatter> sink_formatter) override {};
     };
 
     using IPCLogSink_mt = IPCLogSink<std::mutex>;

@@ -3,6 +3,8 @@
 #include "PCH.h"
 #include "IRenderLayer.h"
 #include "Common/SpinLock.h"
+#include "d3d11.h"
+#include "dxsdk-d3dx/D3DX11tex.h"
 
 namespace NL::Render
 {
@@ -11,18 +13,18 @@ namespace NL::Render
     {
         IMPLEMENT_REFCOUNTING(CEFCopyRenderLayer);
 
-      public:
+    public:
         static std::shared_ptr<CEFCopyRenderLayer> make_shared();
         static void release_shared(CEFCopyRenderLayer* a_render);
 
-      protected:
+    protected:
         HANDLE m_sharedTextureHandle = nullptr;
         Microsoft::WRL::ComPtr<ID3D11Texture2D> m_cefTexture;
         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_cefSRV;
         Microsoft::WRL::ComPtr<ID3D11Device1> m_device1 = nullptr;
         Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_deferredContext;
 
-      public:
+    public:
         ~CEFCopyRenderLayer() override = default;
 
         // IRenderLayer

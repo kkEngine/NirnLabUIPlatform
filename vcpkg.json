@@ -11,6 +11,7 @@
       "host": true
     },
     "cef-prebuilt",
+    "dxsdk-d3dx",
     {
       "name": "directxtk",
       "platform": "windows"

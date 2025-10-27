@@ -171,19 +171,22 @@ namespace NL::CEF
         m_logSink->SetBrowser(browser);
         m_extraInfo = extra_info;
 
-        spdlog::info("{}[{}]: browser created with id {}", NameOf(NirnLabSubprocessCefApp), ::GetCurrentProcessId(), browser->GetIdentifier());
+        spdlog::info("{}[{}]: browser created with id {}, using CEF {}", NameOf(NirnLabSubprocessCefApp), ::GetCurrentProcessId(), browser->GetIdentifier(), CEF_VERSION);
     }
 
     void NirnLabSubprocessCefApp::OnBrowserDestroyed(CefRefPtr<CefBrowser> browser)
     {
         spdlog::info("{}[{}]: browser destroyed with id {}", NameOf(NirnLabSubprocessCefApp), ::GetCurrentProcessId(), browser->GetIdentifier());
         m_logSink->SetBrowser(nullptr);
+        m_extraInfo = nullptr;
     }
 
     void NirnLabSubprocessCefApp::OnContextCreated(CefRefPtr<CefBrowser> browser,
                                                    CefRefPtr<CefFrame> frame,
                                                    CefRefPtr<CefV8Context> context)
     {
+        spdlog::info("{}[{}]: context with id {} created on browser id {}", NameOf(NirnLabSubprocessCefApp), ::GetCurrentProcessId(), frame->GetIdentifier().ToString().data(), browser->GetIdentifier());
+
         if (frame->IsMain())
         {
             auto message = CefProcessMessage::Create(IPC_JS_CONTEXT_CREATED);
