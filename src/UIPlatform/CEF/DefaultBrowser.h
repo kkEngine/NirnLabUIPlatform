@@ -63,10 +63,9 @@ namespace NL::CEF
         sigslot::scoped_connection m_onMainFrameLoadEnd_Connection;
 
     public:
-        DefaultBrowser(
-            std::shared_ptr<spdlog::logger> a_logger,
-            CefRefPtr<NirnLabCefClient> a_cefClient,
-            std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage);
+        DefaultBrowser(std::shared_ptr<spdlog::logger> a_logger,
+                       CefRefPtr<NirnLabCefClient> a_cefClient,
+                       std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage);
         ~DefaultBrowser() override;
 
         void UpdateCefKeyModifiers(const RE::ButtonEvent* a_event, const cef_event_flags_t a_flags);

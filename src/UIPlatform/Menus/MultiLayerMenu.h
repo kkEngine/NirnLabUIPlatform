@@ -12,7 +12,7 @@ namespace NL::Menus
                                  public RE::BSTEventSink<RE::MenuOpenCloseEvent>,
                                  public RE::BSTEventSink<RE::InputEvent*>
     {
-      private:
+    private:
         std::shared_ptr<spdlog::logger> m_logger = nullptr;
 
         NL::Render::RenderData m_renderData;
@@ -21,7 +21,7 @@ namespace NL::Menus
 
         bool m_isKeepOpen = true;
 
-      public:
+    public:
         using RE::IMenu::operator new;
         using RE::IMenu::operator delete;
         MultiLayerMenu(std::shared_ptr<spdlog::logger> a_logger);
@@ -33,7 +33,7 @@ namespace NL::Menus
         bool RemoveSubMenu(const std::string& a_menuName);
         void ClearAllSubMenu();
 
-      public:
+    public:
         constexpr static std::string_view MENU_NAME = "NirnLabMultiLayerMenu";
 
         // RE::IMenu

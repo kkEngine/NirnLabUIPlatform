@@ -47,6 +47,7 @@ namespace NL::Menus
         NL::Utils::PushFront<RE::BSTEventSink<RE::InputEvent*>>(RE::BSInputDeviceManager::GetSingleton()->sinks, this);
         inputEventSource->lock.Unlock();
 
+        // todo: move to settings
         NL::Services::InputLangSwitchService::GetSingleton().SetActive(true);
     }
 
@@ -204,7 +205,6 @@ namespace NL::Menus
         }
 
         auto inputEvent = *a_event;
-        RE::InputEvent* nextEvent = nullptr;
         auto result = RE::BSEventNotifyControl::kContinue;
         if (!CanProcess(inputEvent)) [[unlikely]]
         {
@@ -214,9 +214,6 @@ namespace NL::Menus
         std::lock_guard<std::mutex> lock(m_mapMenuMutex);
         while (inputEvent != nullptr)
         {
-            nextEvent = inputEvent->next;
-            inputEvent->next = nullptr;
-
             for (const auto& subMenu : m_menuMap)
             {
                 switch (inputEvent->GetEventType())
@@ -240,7 +237,6 @@ namespace NL::Menus
                 }
             }
 
-            inputEvent->next = nextEvent;
             inputEvent = inputEvent->next;
         }
 

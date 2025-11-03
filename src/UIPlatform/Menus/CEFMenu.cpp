@@ -2,10 +2,9 @@
 
 namespace NL::Menus
 {
-    CEFMenu::CEFMenu(
-        std::shared_ptr<spdlog::logger> a_logger,
-        std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage,
-        NL::JS::JSEventFuncInfo& a_eventFuncInfo)
+    CEFMenu::CEFMenu(std::shared_ptr<spdlog::logger> a_logger,
+                     std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage,
+                     NL::JS::JSEventFuncInfo& a_eventFuncInfo)
     {
         ThrowIfNullptr(CEFMenu, a_logger);
         m_logger = a_logger;

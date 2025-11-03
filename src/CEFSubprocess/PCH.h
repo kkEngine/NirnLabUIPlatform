@@ -21,6 +21,7 @@
 #include <filesystem>
 #include <deque>
 #include <type_traits>
+#include <queue>
 
 // spdlog
 #include <spdlog/spdlog.h>
