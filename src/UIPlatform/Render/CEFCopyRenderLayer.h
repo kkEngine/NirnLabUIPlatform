@@ -3,8 +3,6 @@
 #include "PCH.h"
 #include "IRenderLayer.h"
 #include "Common/SpinLock.h"
-#include "d3d11.h"
-#include "dxsdk-d3dx/D3DX11tex.h"
 
 namespace NL::Render
 {

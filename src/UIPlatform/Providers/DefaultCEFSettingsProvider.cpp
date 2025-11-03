@@ -12,6 +12,7 @@ namespace NL::Providers
         settings.multi_threaded_message_loop = true;
         settings.windowless_rendering_enabled = true;
         // CefString(&settings.user_agent).FromString(L"NirnLabUIPlatform");
+        // To open devtools use "chrome://inspect"
         settings.remote_debugging_port = 9009;
 
 #ifdef _DEBUG
@@ -30,11 +31,8 @@ namespace NL::Providers
         CefString(&settings.log_file).FromWString(cefLogFilePath.wstring());
         CefString(&settings.cache_path).FromWString(cefCachePath.wstring());
         CefString(&settings.browser_subprocess_path).FromWString(subprocPath.wstring());
-        // CefString(&settings.framework_dir_path).FromWString(cefFilesRoot / L"CEF");
         CefString(&settings.framework_dir_path).FromWString(cefFilesRoot);
-        // CefString(&settings.resources_dir_path).FromWString(cefFilesRoot / L"CEF");
         CefString(&settings.resources_dir_path).FromWString(cefFilesRoot);
-        // CefString(&settings.locales_dir_path).FromWString(cefFilesRoot / L"CEF" / L"locales");
         CefString(&settings.locales_dir_path).FromWString(cefFilesRoot / L"locales");
 
         return settings;

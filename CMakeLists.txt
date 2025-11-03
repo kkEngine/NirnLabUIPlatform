@@ -65,8 +65,6 @@ find_package(directxtk CONFIG REQUIRED)
 find_package(directxmath CONFIG REQUIRED)
 find_package(PalSigslot CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
-#find_package(directxsdk REQUIRED)
-find_package(dxsdk-d3dx CONFIG REQUIRED)
 
 # Paths
 set(API_FOLDER_PATH ${CMAKE_CURRENT_SOURCE_DIR}/src/UIPlatform/NirnLabUIPlatformAPI)
@@ -93,7 +91,6 @@ find_path(CEF_INCLUDE_DIR include/cef_app.h)
 find_path(CEF_SHARE share/cef-prebuilt)
 set(CEF_SHARE "${CEF_SHARE}/share/cef-prebuilt")
 target_link_libraries(cef INTERFACE "$<IF:$<CONFIG:Debug>,${CEF_LIBRARY_DEBUG},${CEF_LIBRARY_RELEASE}>")
-#target_link_libraries(cef INTERFACE "${CEF_SHARE}/$<CONFIG>/cef_sandbox.lib")
 target_link_libraries(cef INTERFACE "${CEF_SHARE}/$<CONFIG>/libcef.lib")
 target_include_directories(cef INTERFACE ${CEF_INCLUDE_DIR})
 set(cef_files_path "${CEF_SHARE}/$<IF:$<CONFIG:Debug>,Debug,Release>")
@@ -108,7 +105,6 @@ add_custom_target(
     COMMAND ${CMAKE_COMMAND} -E copy ${cef_files_path}/libcef.dll                               ${NL_UI_PATH}
     COMMAND ${CMAKE_COMMAND} -E copy ${cef_files_path}/libEGL.dll                               ${NL_UI_PATH}
     COMMAND ${CMAKE_COMMAND} -E copy ${cef_files_path}/libGLESv2.dll                            ${NL_UI_PATH}
-    #COMMAND ${CMAKE_COMMAND} -E copy ${cef_files_path}/snapshot_blob.bin                        ${NL_UI_PATH}
     COMMAND ${CMAKE_COMMAND} -E copy ${cef_files_path}/v8_context_snapshot.bin                  ${NL_UI_PATH}
     COMMAND ${CMAKE_COMMAND} -E copy ${cef_files_path}/vk_swiftshader.dll                       ${NL_UI_PATH}
     COMMAND ${CMAKE_COMMAND} -E copy ${cef_files_path}/vk_swiftshader_icd.json                  ${NL_UI_PATH}
@@ -248,7 +244,6 @@ target_link_libraries(
         "d3d11.lib"
         "dxguid.lib"
         Microsoft::DirectXTK
-        Microsoft::D3DX11
         cef
         nlohmann_json::nlohmann_json
 )

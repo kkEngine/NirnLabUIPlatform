@@ -45,9 +45,10 @@ namespace NL::Menus
                                                         a_cefBrowserSettings);
             if (!createBrowserResult)
             {
-                m_logger->error("{}: failed to create browser", NameOf(DefaultBrowser));
+                m_logger->error("{}: failed to create browser", NameOf(CEFMenu));
                 return false;
             }
+
             m_started = true;
         }
         else

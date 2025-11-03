@@ -40,15 +40,12 @@ namespace NL::Services
                                    const CefWindowInfo& a_cefWindowInfo,
                                    const CefBrowserSettings& a_cefBrowserSettings)
     {
-        const auto isCreated = CefBrowserHost::CreateBrowser(
+        return CefBrowserHost::CreateBrowser(
             a_cefWindowInfo,
             a_client,
             a_url,
             a_cefBrowserSettings,
             a_jsFuncInfo,
             nullptr);
-
-        spdlog::info("CEFService::CreateBrowser: {}", isCreated ? "true" : "false");
-        return isCreated;
     }
 }

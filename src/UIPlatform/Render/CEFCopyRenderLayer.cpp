@@ -1,8 +1,5 @@
 #include "CEFCopyRenderLayer.h"
 
-#include <d3d11.h>
-#include <dxgi1_2.h>
-
 namespace NL::Render
 {
     std::shared_ptr<CEFCopyRenderLayer> CEFCopyRenderLayer::make_shared()
@@ -104,7 +101,7 @@ namespace NL::Render
         int width,
         int height)
     {
-        spdlog::info("CEFCopyRenderLayer::OnPaint");
+        spdlog::error("CEFCopyRenderLayer::OnPaint called");
     }
 
     void CEFCopyRenderLayer::OnAcceleratedPaint(
@@ -123,11 +120,6 @@ namespace NL::Render
         ID3D11Texture2D* tex = nullptr;
         auto hr = m_device1->OpenSharedResource1(info.shared_texture_handle, IID_PPV_ARGS(&tex));
         CHECK_HRESULT_LOG_AND_RETURN(hr, fmt::format("{}: failed OpenSharedResource for texture (different gpus?)", NameOf(CEFCopyRenderLayer)));
-
-        // https://learn.microsoft.com/ru-ru/windows/win32/direct3d11/d3dx11savetexturetofile
-        // static int i = 1;
-        // hr = D3DX11SaveTextureToFileA(m_renderData->deviceContext, m_cefTexture.Get(), D3DX11_IFF_PNG, std::format("G://screen{}.png", i++).c_str());
-        // CHECK_HRESULT_LOG_AND_RETURN(hr, fmt::format("{}: failed to D3DX11SaveTextureToFileA", NameOf(CEFCopyRenderLayer)));
 
         m_renderData->drawLock.Lock();
 

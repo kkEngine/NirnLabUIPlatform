@@ -48,16 +48,12 @@ namespace NL::CEF
 
     void NirnLabCefClient::OnAfterCreated(CefRefPtr<CefBrowser> browser)
     {
-        spdlog::info("NirnLabCefClient::OnAfterCreated");
-
         m_cefBrowser = browser;
         onAfterBrowserCreated(browser);
     }
 
     void NirnLabCefClient::OnBeforeClose(CefRefPtr<CefBrowser> browser)
     {
-        spdlog::info("NirnLabCefClient::OnBeforeClose");
-
         onBeforeBrowserClose(browser);
         m_cefBrowser = nullptr;
     }
@@ -66,8 +62,6 @@ namespace NL::CEF
                                        CefRefPtr<CefFrame> frame,
                                        TransitionType transition_type)
     {
-        spdlog::info("NirnLabCefClient::OnLoadStart");
-
         if (browser->IsSame(m_cefBrowser) && frame->IsMain())
         {
             onMainFrameLoadStart();
@@ -78,8 +72,6 @@ namespace NL::CEF
                                      CefRefPtr<CefFrame> frame,
                                      int httpStatusCode)
     {
-        spdlog::info("NirnLabCefClient::OnLoadEnd");
-
         // YES, httpStatusCode can be negative o_O
         if (browser->IsSame(m_cefBrowser) && frame->IsMain() && httpStatusCode >= 0)
         {
