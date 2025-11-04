@@ -1,4 +1,7 @@
 #include "CEF/NirnLabSubprocessCefApp.h"
+#include "ProcessDownDetector.h"
+
+std::unique_ptr<NL::ProcessDownDetector> g_mainProcessDownDetector = nullptr;
 
 int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nShowCmd)
 {
@@ -9,6 +12,17 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
     CefScopedSandboxInfo scoped_sandbox;
     sandbox_info = scoped_sandbox.sandbox_info();
 #endif
+
+    auto cmdLine = CefCommandLine::CreateCommandLine();
+    cmdLine->InitFromString(GetCommandLineW());
+
+    DWORD mainProcessId = std::stoi(cmdLine->GetSwitchValue(IPC_CL_PROCESS_ID_NAME).ToWString());
+    if (mainProcessId > 0)
+    {
+        g_mainProcessDownDetector = std::make_unique<NL::ProcessDownDetector>(mainProcessId, []() {
+            CefShutdown();
+        });
+    }
 
     CefMainArgs main_args(hInstance);
     CefRefPtr<NL::CEF::NirnLabSubprocessCefApp> app(new NL::CEF::NirnLabSubprocessCefApp());

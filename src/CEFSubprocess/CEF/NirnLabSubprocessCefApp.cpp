@@ -139,25 +139,6 @@ namespace NL::CEF
     {
         m_processType = process_type;
         InitLog(nullptr);
-
-        DWORD mainProcessId = std::stoi(command_line->GetSwitchValue(IPC_CL_PROCESS_ID_NAME).ToWString());
-        if (mainProcessId && process_type == RENDER_PROCESS_TYPE)
-        {
-            new std::thread([=]() {
-                const auto procHandle = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, mainProcessId);
-                ::WaitForSingleObject(procHandle, INFINITE);
-
-                // Commented for possible future use
-                // DWORD mainProcessExitCode = 0;
-                // if (::GetExitCodeProcess(procHandle, &mainProcessExitCode))
-                // {
-                //     // log or email to sportloto?
-                // }
-
-                std::this_thread::sleep_for(1.42s);
-                ::TerminateProcess(::GetCurrentProcess(), EXIT_SUCCESS);
-            });
-        }
     }
 
     CefRefPtr<CefRenderProcessHandler> NirnLabSubprocessCefApp::GetRenderProcessHandler()
