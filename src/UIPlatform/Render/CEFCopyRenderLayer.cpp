@@ -30,7 +30,7 @@ namespace NL::Render
         textDesc.Height = m_renderData->height;
         textDesc.MipLevels = 1;
         textDesc.ArraySize = 1;
-        textDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        textDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
         textDesc.SampleDesc.Count = 1;
         textDesc.SampleDesc.Quality = 0;
         textDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -101,6 +101,7 @@ namespace NL::Render
         int width,
         int height)
     {
+        spdlog::error("CEFCopyRenderLayer::OnPaint called");
     }
 
     void CEFCopyRenderLayer::OnAcceleratedPaint(

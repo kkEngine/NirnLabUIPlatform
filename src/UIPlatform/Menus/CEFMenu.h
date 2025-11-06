@@ -25,10 +25,9 @@ namespace NL::Menus
         std::shared_ptr<NL::CEF::DefaultBrowser> m_browser = nullptr;
 
     public:
-        CEFMenu(
-            std::shared_ptr<spdlog::logger> a_logger,
-            std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage,
-            NL::JS::JSEventFuncInfo& a_eventFuncInfo);
+        CEFMenu(std::shared_ptr<spdlog::logger> a_logger,
+                std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage,
+                NL::JS::JSEventFuncInfo& a_eventFuncInfo);
         ~CEFMenu() override;
 
         bool LoadBrowser(std::string_view a_url,

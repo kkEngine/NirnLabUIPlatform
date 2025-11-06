@@ -139,25 +139,6 @@ namespace NL::CEF
     {
         m_processType = process_type;
         InitLog(nullptr);
-
-        DWORD mainProcessId = std::stoi(command_line->GetSwitchValue(IPC_CL_PROCESS_ID_NAME).ToWString());
-        if (mainProcessId && process_type == RENDER_PROCESS_TYPE)
-        {
-            new std::thread([=]() {
-                const auto procHandle = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, mainProcessId);
-                ::WaitForSingleObject(procHandle, INFINITE);
-
-                // Commented for possible future use
-                // DWORD mainProcessExitCode = 0;
-                // if (::GetExitCodeProcess(procHandle, &mainProcessExitCode))
-                // {
-                //     // log or email to sportloto?
-                // }
-
-                std::this_thread::sleep_for(1.42s);
-                ::TerminateProcess(::GetCurrentProcess(), EXIT_SUCCESS);
-            });
-        }
     }
 
     CefRefPtr<CefRenderProcessHandler> NirnLabSubprocessCefApp::GetRenderProcessHandler()
@@ -171,21 +152,29 @@ namespace NL::CEF
         m_logSink->SetBrowser(browser);
         m_extraInfo = extra_info;
 
-        spdlog::info("{}[{}]: browser created with id {}", NameOf(NirnLabSubprocessCefApp), ::GetCurrentProcessId(), browser->GetIdentifier());
+        if (!m_browserCreatedMsgSent)
+        {
+            spdlog::info("{}[{}]: browser created with id {}, using CEF {}", NameOf(NirnLabSubprocessCefApp), ::GetCurrentProcessId(), browser->GetIdentifier(), CEF_VERSION);
+            m_browserCreatedMsgSent = true;
+        }
     }
 
     void NirnLabSubprocessCefApp::OnBrowserDestroyed(CefRefPtr<CefBrowser> browser)
     {
-        spdlog::info("{}[{}]: browser destroyed with id {}", NameOf(NirnLabSubprocessCefApp), ::GetCurrentProcessId(), browser->GetIdentifier());
         m_logSink->SetBrowser(nullptr);
+        m_extraInfo = nullptr;
     }
 
     void NirnLabSubprocessCefApp::OnContextCreated(CefRefPtr<CefBrowser> browser,
                                                    CefRefPtr<CefFrame> frame,
                                                    CefRefPtr<CefV8Context> context)
     {
+        spdlog::default_logger()->flush();
+
         if (frame->IsMain())
         {
+            spdlog::info("{}[{}]: main context with id {} created in browser id {}", NameOf(NirnLabSubprocessCefApp), ::GetCurrentProcessId(), frame->GetIdentifier().ToString().data(), browser->GetIdentifier());
+
             auto message = CefProcessMessage::Create(IPC_JS_CONTEXT_CREATED);
             frame->SendProcessMessage(PID_BROWSER, message);
 

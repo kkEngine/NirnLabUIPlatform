@@ -17,6 +17,7 @@ namespace NL::Services
             throw std::runtime_error(fmt::format("{}: failed to initialize CEF, code {}", NameOf(CEFService), CefGetExitCode()));
         }
 
+        spdlog::info("CEFService::CEFInitialize successfully");
         s_cefApp = a_cefApp;
     }
 

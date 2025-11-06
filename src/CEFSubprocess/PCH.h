@@ -2,6 +2,11 @@
 
 #define NameOf(name) #name
 
+/* disable headers in Windows.h */
+#define WIN32_LEAN_AND_MEAN
+#define NOGDI
+#define NOMINMAX
+
 #include <algorithm>
 #include <atomic>
 #include <condition_variable>
@@ -16,6 +21,7 @@
 #include <filesystem>
 #include <deque>
 #include <type_traits>
+#include <queue>
 
 // spdlog
 #include <spdlog/spdlog.h>

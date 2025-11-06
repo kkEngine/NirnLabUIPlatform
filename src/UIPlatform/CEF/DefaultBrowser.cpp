@@ -2,10 +2,9 @@
 
 namespace NL::CEF
 {
-    DefaultBrowser::DefaultBrowser(
-        std::shared_ptr<spdlog::logger> a_logger,
-        CefRefPtr<NirnLabCefClient> a_cefClient,
-        std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage)
+    DefaultBrowser::DefaultBrowser(std::shared_ptr<spdlog::logger> a_logger,
+                                   CefRefPtr<NirnLabCefClient> a_cefClient,
+                                   std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage)
     {
         ThrowIfNullptr(DefaultBrowser, a_logger);
         m_logger = a_logger;
@@ -18,6 +17,7 @@ namespace NL::CEF
 
         ZeroMemory(&m_lastCefMouseEvent, sizeof(CefMouseEvent));
         ZeroMemory(&m_lastCharCefKeyEvent, sizeof(CefKeyEvent));
+        m_lastCharCefKeyEvent.size = sizeof(m_lastCharCefKeyEvent);
 
         m_onWndInactive_Connection = NL::Hooks::WinProcHook::OnWndInactive.connect([&]() {
             ClearCefKeyModifiers();

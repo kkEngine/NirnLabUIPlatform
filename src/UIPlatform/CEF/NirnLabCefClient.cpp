@@ -37,6 +37,11 @@ namespace NL::CEF
         return m_cefRenderLayer.get();
     }
 
+    CefRefPtr<CefJSDialogHandler> NirnLabCefClient::GetJSDialogHandler()
+    {
+        return this;
+    }
+
     bool NirnLabCefClient::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
                                                     CefRefPtr<CefFrame> frame,
                                                     CefProcessId source_process,
@@ -78,4 +83,26 @@ namespace NL::CEF
             onMainFrameLoadEnd();
         }
     }
+
+    void NirnLabCefClient::OnLoadError(CefRefPtr<CefBrowser> browser,
+                                       CefRefPtr<CefFrame> frame,
+                                       ErrorCode errorCode,
+                                       const CefString& errorText,
+                                       const CefString& failedUrl)
+    {
+        spdlog::error("NirnLabCefClient::OnLoadError, url {}, text {}", failedUrl.ToString().data(), errorText.ToString().data());
+    }
+
+    bool NirnLabCefClient::OnJSDialog(CefRefPtr<CefBrowser> browser,
+                                      const CefString& origin_url,
+                                      JSDialogType dialog_type,
+                                      const CefString& message_text,
+                                      const CefString& default_prompt_text,
+                                      CefRefPtr<CefJSDialogCallback> callback,
+                                      bool& suppress_message)
+    {
+        suppress_message = false;
+        return false;
+    }
+
 }
