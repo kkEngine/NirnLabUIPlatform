@@ -483,7 +483,11 @@ namespace NL::CEF
             return false;
         }
 
-        RE::MenuControls::GetSingleton()->ProcessEvent(reinterpret_cast<RE::InputEvent**>(&a_event), nullptr);
+        auto cursor = RE::UI::GetSingleton()->GetMenu<RE::CursorMenu>(RE::CursorMenu::MENU_NAME);
+        if (cursor.get())
+        {
+            cursor->ProcessMouseMove(a_event);
+        }
 
         m_lastCefMouseEvent.x = static_cast<int>(m_currentMousePosX);
         m_lastCefMouseEvent.y = static_cast<int>(m_currentMousePosY);
