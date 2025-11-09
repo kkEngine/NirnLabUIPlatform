@@ -2,8 +2,31 @@
 
 namespace NL::Converters
 {
+    void KeyInputConverter::KeyDown(const std::uint32_t a_scanCode, const std::uint32_t a_vkCode)
+    {
+        CefKeyEvent keyEvent{};
+        keyEvent.windows_key_code = a_vkCode;
+        keyEvent.native_key_code = a_scanCode;
+        keyEvent.modifiers = m_currentModifiers;
+        keyEvent.type = KEYEVENT_RAWKEYDOWN;
+        OnKeyDown(keyEvent);
+
+        const auto wchar = VkCodeToChar(a_scanCode, a_vkCode, m_currentModifiers & (EVENTFLAG_SHIFT_DOWN | EVENTFLAG_CAPS_LOCK_ON));
+        if (wchar != 0)
+        {
+            keyEvent.type = KEYEVENT_CHAR;
+            keyEvent.windows_key_code = wchar;
+            OnChar(keyEvent);
+        }
+    }
+
     std::uint32_t KeyInputConverter::GetVirtualKey(const std::uint32_t a_scanCode)
     {
+        if (a_scanCode == RE::BSKeyboardDevice::Keys::kKP_Enter)
+        {
+            return VK_RETURN;
+        }
+
         std::uint32_t vkCode = 0;
         RE::BSInputDeviceManager::GetSingleton()->GetDeviceMappedKeycode(RE::INPUT_DEVICES::kKeyboard, a_scanCode, vkCode);
         return vkCode;
@@ -122,20 +145,7 @@ namespace NL::Converters
                 m_lastScanCode = scanCode;
                 m_lastKeyHeldDuration = KEY_FIRST_CHAR_DELAY;
 
-                CefKeyEvent keyEvent{};
-                keyEvent.windows_key_code = vkCode;
-                keyEvent.native_key_code = scanCode;
-                keyEvent.modifiers = m_currentModifiers;
-                keyEvent.type = KEYEVENT_RAWKEYDOWN;
-                OnKeyDown(keyEvent);
-
-                const auto wchar = VkCodeToChar(scanCode, vkCode, m_currentModifiers & (EVENTFLAG_SHIFT_DOWN | EVENTFLAG_CAPS_LOCK_ON));
-                if (wchar != 0)
-                {
-                    keyEvent.type = KEYEVENT_CHAR;
-                    keyEvent.windows_key_code = wchar;
-                    OnChar(keyEvent);
-                }
+                KeyDown(scanCode, vkCode);
             }
             else
             {
@@ -144,6 +154,7 @@ namespace NL::Converters
                 keyEvent.native_key_code = scanCode;
                 keyEvent.modifiers = m_currentModifiers;
                 keyEvent.type = KEYEVENT_KEYUP;
+
                 OnKeyUp(keyEvent);
             }
         }
@@ -151,19 +162,27 @@ namespace NL::Converters
         {
             m_lastKeyHeldDuration = a_event->HeldDuration();
 
-            const auto vkCode = GetVirtualKey(m_lastScanCode);
-            const auto wchar = VkCodeToChar(m_lastScanCode, vkCode, m_currentModifiers & (EVENTFLAG_SHIFT_DOWN | EVENTFLAG_CAPS_LOCK_ON));
-            if (wchar != 0)
-            {
-                CefKeyEvent keyEvent{};
-                keyEvent.size = sizeof(keyEvent);
-                keyEvent.type = KEYEVENT_CHAR;
-                keyEvent.windows_key_code = wchar;
-                keyEvent.native_key_code = m_lastScanCode;
-                keyEvent.modifiers = m_currentModifiers;
-
-                OnChar(keyEvent);
-            }
+            KeyDown(a_event->GetIDCode(), GetVirtualKey(m_lastScanCode));
         }
+    }
+
+    void KeyInputConverter::ProcessAltTab()
+    {
+        Clear();
+
+        if (!m_fakeAltTabButtonEvent)
+        {
+            m_fakeAltTabButtonEvent = RE::ButtonEvent::Create(RE::INPUT_DEVICE::kKeyboard,
+                                                              "",
+                                                              0,
+                                                              0.0f,
+                                                              1.0f);
+        }
+
+        m_fakeAltTabButtonEvent->idCode = RE::BSKeyboardDevice::Keys::kLeftAlt;
+        ProcessButton(m_fakeAltTabButtonEvent);
+
+        m_fakeAltTabButtonEvent->idCode = RE::BSKeyboardDevice::Keys::kTab;
+        ProcessButton(m_fakeAltTabButtonEvent);
     }
 }

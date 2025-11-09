@@ -29,8 +29,9 @@ namespace NL::CEF
             m_cefClient->GetBrowser()->GetHost()->SendKeyEvent(a_keyEvent);
         });
 
+        // todo: this event even fires when the game is closed and most of the game resources are free, CTD.
         m_onWndInactive_Connection = NL::Hooks::WinProcHook::OnWndInactive.connect([&]() {
-            m_keyInputConverter.Clear();
+            // m_keyInputConverter.ProcessAltTab();
         });
 
         m_onIPCMessageReceived_Connection = m_cefClient->onIPCMessageReceived.connect([&, a_jsFuncStorage](CefRefPtr<CefProcessMessage> a_message) {

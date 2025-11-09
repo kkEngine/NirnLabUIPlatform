@@ -12,6 +12,9 @@ namespace NL::Converters
         std::uint32_t m_currentModifiers = 0;
         std::uint32_t m_lastScanCode = 0;
         float m_lastKeyHeldDuration = 0.0f;
+        RE::ButtonEvent* m_fakeAltTabButtonEvent = nullptr;
+
+        void KeyDown(const std::uint32_t a_scanCode, const std::uint32_t a_vkCode);
 
     public:
         static std::uint32_t GetVirtualKey(const std::uint32_t a_scanCode);
@@ -27,5 +30,6 @@ namespace NL::Converters
         void UpdateModifiersFromVK(const std::uint32_t a_vkCode, bool a_isKeyDown);
         std::uint32_t GetCurrentModifiers();
         void ProcessButton(const RE::ButtonEvent* a_event);
+        void ProcessAltTab();
     };
 }
