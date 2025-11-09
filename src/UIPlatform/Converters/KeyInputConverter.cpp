@@ -113,7 +113,7 @@ namespace NL::Converters
             CefKeyEvent keyEvent{};
             keyEvent.size = sizeof(keyEvent);
             keyEvent.windows_key_code = vkCode;
-            // keyEvent.native_key_code = scanCode;
+            keyEvent.native_key_code = scanCode;
             keyEvent.modifiers = m_currentModifiers;
 
             if (a_event->IsDown())
