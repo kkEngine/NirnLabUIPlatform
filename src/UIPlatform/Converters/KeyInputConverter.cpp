@@ -23,7 +23,7 @@ namespace NL::Converters
         wchar_t unicodeChar;
         if (ToUnicodeEx(a_vkCode, a_scanCode, s_state, &unicodeChar, 1, 0, s_currentHKL) != 1)
         {
-            return L'\0';
+            return 0;
         }
 
         return unicodeChar;
@@ -32,6 +32,8 @@ namespace NL::Converters
     void KeyInputConverter::Clear()
     {
         m_currentModifiers = 0;
+        m_lastScanCode = 0;
+        m_lastKeyHeldDuration = 0.0f;
     }
 
     void KeyInputConverter::UpdateCefKeyModifiers(const cef_event_flags_t a_flags, bool a_isKeyDown)
@@ -101,6 +103,11 @@ namespace NL::Converters
         }
     }
 
+    std::uint32_t KeyInputConverter::GetCurrentModifiers()
+    {
+        return m_currentModifiers;
+    }
+
     void KeyInputConverter::ProcessButton(const RE::ButtonEvent* a_event)
     {
         const auto isKeyStateChanged = a_event->IsDown() || a_event->IsUp();
@@ -110,19 +117,20 @@ namespace NL::Converters
             const auto vkCode = GetVirtualKey(scanCode);
             UpdateModifiersFromVK(vkCode, a_event->IsDown());
 
-            CefKeyEvent keyEvent{};
-            keyEvent.size = sizeof(keyEvent);
-            keyEvent.windows_key_code = vkCode;
-            keyEvent.native_key_code = scanCode;
-            keyEvent.modifiers = m_currentModifiers;
-
             if (a_event->IsDown())
             {
+                m_lastScanCode = scanCode;
+                m_lastKeyHeldDuration = KEY_FIRST_CHAR_DELAY;
+
+                CefKeyEvent keyEvent{};
+                keyEvent.windows_key_code = vkCode;
+                keyEvent.native_key_code = scanCode;
+                keyEvent.modifiers = m_currentModifiers;
                 keyEvent.type = KEYEVENT_RAWKEYDOWN;
                 OnKeyDown(keyEvent);
 
                 const auto wchar = VkCodeToChar(scanCode, vkCode, m_currentModifiers & (EVENTFLAG_SHIFT_DOWN | EVENTFLAG_CAPS_LOCK_ON));
-                if (wchar != '\0')
+                if (wchar != 0)
                 {
                     keyEvent.type = KEYEVENT_CHAR;
                     keyEvent.windows_key_code = wchar;
@@ -131,8 +139,30 @@ namespace NL::Converters
             }
             else
             {
+                CefKeyEvent keyEvent{};
+                keyEvent.windows_key_code = vkCode;
+                keyEvent.native_key_code = scanCode;
+                keyEvent.modifiers = m_currentModifiers;
                 keyEvent.type = KEYEVENT_KEYUP;
                 OnKeyUp(keyEvent);
+            }
+        }
+        else if (a_event->GetIDCode() == m_lastScanCode && (a_event->HeldDuration() - m_lastKeyHeldDuration) > KEY_CHAR_REPEAT_DELAY)
+        {
+            m_lastKeyHeldDuration = a_event->HeldDuration();
+
+            const auto vkCode = GetVirtualKey(m_lastScanCode);
+            const auto wchar = VkCodeToChar(m_lastScanCode, vkCode, m_currentModifiers & (EVENTFLAG_SHIFT_DOWN | EVENTFLAG_CAPS_LOCK_ON));
+            if (wchar != 0)
+            {
+                CefKeyEvent keyEvent{};
+                keyEvent.size = sizeof(keyEvent);
+                keyEvent.type = KEYEVENT_CHAR;
+                keyEvent.windows_key_code = wchar;
+                keyEvent.native_key_code = m_lastScanCode;
+                keyEvent.modifiers = m_currentModifiers;
+
+                OnChar(keyEvent);
             }
         }
     }

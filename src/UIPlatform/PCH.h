@@ -71,7 +71,6 @@ inline constexpr float KEY_CHAR_REPEAT_DELAY = 0.06f;
 #include "NirnLabUIPlatformAPI/API.h"
 #include "Utils/BSTArrayExtension.h"
 #include "Utils/CheckHresult.h"
-#include "Utils/InputConverter.h"
 #include "Utils/PathUtils.h"
 
 // utils

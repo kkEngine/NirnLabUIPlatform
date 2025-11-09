@@ -40,7 +40,7 @@ namespace NL::Services
                 ((kbState[RE::BSKeyboardDevice::Keys::kLeftControl] & 0x80) != 0 ||
                  (kbState[RE::BSKeyboardDevice::Keys::kLeftAlt] & 0x80) != 0))
             {
-                NL::Utils::InputConverter::NextKeyboardLayout();
+                NL::Converters::KeyInputConverter::NextKeyboardLayout();
             }
         }
 

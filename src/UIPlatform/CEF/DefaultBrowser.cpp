@@ -16,11 +16,21 @@ namespace NL::CEF
         m_jsFuncStorage = a_jsFuncStorage;
 
         ZeroMemory(&m_lastCefMouseEvent, sizeof(CefMouseEvent));
-        ZeroMemory(&m_lastCharCefKeyEvent, sizeof(CefKeyEvent));
-        m_lastCharCefKeyEvent.size = sizeof(m_lastCharCefKeyEvent);
+
+        m_keyInputConverter.OnKeyDown.connect([&](CefKeyEvent& a_keyEvent) {
+            m_cefClient->GetBrowser()->GetHost()->SendKeyEvent(a_keyEvent);
+        });
+
+        m_keyInputConverter.OnKeyUp.connect([&](CefKeyEvent& a_keyEvent) {
+            m_cefClient->GetBrowser()->GetHost()->SendKeyEvent(a_keyEvent);
+        });
+
+        m_keyInputConverter.OnChar.connect([&](CefKeyEvent& a_keyEvent) {
+            m_cefClient->GetBrowser()->GetHost()->SendKeyEvent(a_keyEvent);
+        });
 
         m_onWndInactive_Connection = NL::Hooks::WinProcHook::OnWndInactive.connect([&]() {
-            ClearCefKeyModifiers();
+            m_keyInputConverter.Clear();
         });
 
         m_onIPCMessageReceived_Connection = m_cefClient->onIPCMessageReceived.connect([&, a_jsFuncStorage](CefRefPtr<CefProcessMessage> a_message) {
@@ -115,68 +125,6 @@ namespace NL::CEF
         }
 
         m_jsFuncStorage->ClearFunctionCallback();
-    }
-
-    void DefaultBrowser::UpdateCefKeyModifiers(const RE::ButtonEvent* a_event, const cef_event_flags_t a_flags)
-    {
-        if (a_event->IsDown())
-        {
-            m_cefKeyModifiers |= a_flags;
-        }
-        else if (a_event->IsUp())
-        {
-            m_cefKeyModifiers &= ~a_flags;
-        }
-        m_lastCefMouseEvent.modifiers = m_cefKeyModifiers;
-        m_lastCharCefKeyEvent.modifiers = m_cefKeyModifiers;
-    }
-
-    void DefaultBrowser::ClearCefKeyModifiers()
-    {
-        m_cefKeyModifiers = 0;
-        m_lastCefMouseEvent.modifiers = 0;
-        m_lastCharCefKeyEvent.modifiers = 0;
-    }
-
-    void DefaultBrowser::UpdateCefKeyModifiersFromVK(const RE::ButtonEvent* a_event, const std::uint32_t a_vkCode)
-    {
-        if (a_vkCode >= VK_NUMPAD0 && a_vkCode <= VK_DIVIDE)
-        {
-            UpdateCefKeyModifiers(a_event, EVENTFLAG_IS_KEY_PAD);
-        }
-        else
-        {
-            switch (a_vkCode)
-            {
-            case VK_CAPITAL:
-                UpdateCefKeyModifiers(a_event, EVENTFLAG_CAPS_LOCK_ON);
-                break;
-            case VK_SHIFT:
-                UpdateCefKeyModifiers(a_event, EVENTFLAG_SHIFT_DOWN);
-                break;
-            case VK_CONTROL:
-                UpdateCefKeyModifiers(a_event, EVENTFLAG_CONTROL_DOWN);
-                break;
-            case VK_MENU:
-                UpdateCefKeyModifiers(a_event, EVENTFLAG_ALT_DOWN);
-                break;
-            case VK_NUMLOCK:
-                UpdateCefKeyModifiers(a_event, EVENTFLAG_NUM_LOCK_ON);
-                break;
-            case VK_LCONTROL:
-            case VK_LMENU:
-            case VK_LSHIFT:
-                UpdateCefKeyModifiers(a_event, EVENTFLAG_IS_LEFT);
-                break;
-            case VK_RCONTROL:
-            case VK_RMENU:
-            case VK_RSHIFT:
-                UpdateCefKeyModifiers(a_event, EVENTFLAG_IS_RIGHT);
-                break;
-            default:
-                break;
-            }
-        }
     }
 
     void DefaultBrowser::CheckToggleFocusKeys(const RE::ButtonEvent* a_event)
@@ -519,21 +467,26 @@ namespace NL::CEF
             switch (scanCode)
             {
             case RE::BSWin32MouseDevice::Keys::kWheelUp:
+                m_lastCefMouseEvent.modifiers = m_keyInputConverter.GetCurrentModifiers();
                 browserHost->SendMouseWheelEvent(m_lastCefMouseEvent, 0, MOUSE_WHEEL_DELTA);
                 break;
             case RE::BSWin32MouseDevice::Keys::kWheelDown:
+                m_lastCefMouseEvent.modifiers = m_keyInputConverter.GetCurrentModifiers();
                 browserHost->SendMouseWheelEvent(m_lastCefMouseEvent, 0, -MOUSE_WHEEL_DELTA);
                 break;
             case RE::BSWin32MouseDevice::Key::kLeftButton:
-                UpdateCefKeyModifiers(a_event, EVENTFLAG_LEFT_MOUSE_BUTTON);
+                m_keyInputConverter.UpdateCefKeyModifiers(EVENTFLAG_LEFT_MOUSE_BUTTON, a_event->IsDown());
+                m_lastCefMouseEvent.modifiers = m_keyInputConverter.GetCurrentModifiers();
                 browserHost->SendMouseClickEvent(m_lastCefMouseEvent, CefBrowserHost::MouseButtonType::MBT_LEFT, a_event->IsUp(), 1);
                 break;
             case RE::BSWin32MouseDevice::Key::kRightButton:
-                UpdateCefKeyModifiers(a_event, EVENTFLAG_RIGHT_MOUSE_BUTTON);
+                m_keyInputConverter.UpdateCefKeyModifiers(EVENTFLAG_RIGHT_MOUSE_BUTTON, a_event->IsDown());
+                m_lastCefMouseEvent.modifiers = m_keyInputConverter.GetCurrentModifiers();
                 browserHost->SendMouseClickEvent(m_lastCefMouseEvent, CefBrowserHost::MouseButtonType::MBT_RIGHT, a_event->IsUp(), 1);
                 break;
             case RE::BSWin32MouseDevice::Key::kMiddleButton:
-                UpdateCefKeyModifiers(a_event, EVENTFLAG_MIDDLE_MOUSE_BUTTON);
+                m_keyInputConverter.UpdateCefKeyModifiers(EVENTFLAG_MIDDLE_MOUSE_BUTTON, a_event->IsDown());
+                m_lastCefMouseEvent.modifiers = m_keyInputConverter.GetCurrentModifiers();
                 browserHost->SendMouseClickEvent(m_lastCefMouseEvent, CefBrowserHost::MouseButtonType::MBT_MIDDLE, a_event->IsUp(), 1);
                 break;
             default:
@@ -542,54 +495,7 @@ namespace NL::CEF
             break;
         case RE::INPUT_DEVICE::kVirtualKeyboard:
         case RE::INPUT_DEVICE::kKeyboard: {
-            const auto isKeyStateChanged = a_event->IsDown() || a_event->IsUp();
-            if (isKeyStateChanged)
-            {
-                const auto vkCode = NL::Utils::InputConverter::GetVirtualKey(scanCode);
-                UpdateCefKeyModifiersFromVK(a_event, vkCode);
-                m_lastCharCefKeyEvent.native_key_code = scanCode;
-
-                if (a_event->IsDown())
-                {
-                    m_lastScanCode = scanCode;
-                    m_lastCharCefKeyEvent.type = cef_key_event_type_t::KEYEVENT_KEYDOWN;
-                    m_lastCharCefKeyEvent.windows_key_code = vkCode;
-                    m_keyHeldDuration = KEY_FIRST_CHAR_DELAY;
-                    browserHost->SendKeyEvent(m_lastCharCefKeyEvent);
-
-                    if (NL::Utils::InputConverter::ShouldConvertToChar(scanCode, vkCode))
-                    {
-                        m_lastCharCefKeyEvent.type = cef_key_event_type_t::KEYEVENT_CHAR;
-                        m_lastCharCefKeyEvent.windows_key_code = NL::Utils::InputConverter::VkCodeToChar(scanCode, vkCode, m_cefKeyModifiers & (EVENTFLAG_SHIFT_DOWN | EVENTFLAG_CAPS_LOCK_ON));
-                        browserHost->SendKeyEvent(m_lastCharCefKeyEvent);
-                    }
-                }
-                else if (a_event->IsUp())
-                {
-                    m_lastCharCefKeyEvent.type = cef_key_event_type_t::KEYEVENT_KEYUP;
-                    m_lastCharCefKeyEvent.windows_key_code = vkCode;
-                    browserHost->SendKeyEvent(m_lastCharCefKeyEvent);
-                    m_lastScanCode = 0;
-                }
-            }
-
-            if (scanCode == m_lastScanCode && a_event->IsPressed() && (a_event->HeldDuration() - m_keyHeldDuration) > KEY_CHAR_REPEAT_DELAY)
-            {
-                m_keyHeldDuration = a_event->HeldDuration();
-
-                const auto vkCode = NL::Utils::InputConverter::GetVirtualKey(scanCode);
-                m_lastScanCode = scanCode;
-                m_lastCharCefKeyEvent.type = cef_key_event_type_t::KEYEVENT_KEYDOWN;
-                m_lastCharCefKeyEvent.windows_key_code = vkCode;
-                browserHost->SendKeyEvent(m_lastCharCefKeyEvent);
-
-                if (NL::Utils::InputConverter::ShouldConvertToChar(scanCode, vkCode))
-                {
-                    m_lastCharCefKeyEvent.type = cef_key_event_type_t::KEYEVENT_CHAR;
-                    m_lastCharCefKeyEvent.windows_key_code = NL::Utils::InputConverter::VkCodeToChar(scanCode, vkCode, m_cefKeyModifiers & (EVENTFLAG_SHIFT_DOWN | EVENTFLAG_CAPS_LOCK_ON));
-                    browserHost->SendKeyEvent(m_lastCharCefKeyEvent);
-                }
-            }
+            m_keyInputConverter.ProcessButton(a_event);
             break;
         }
         default:
