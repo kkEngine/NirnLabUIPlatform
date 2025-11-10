@@ -2,7 +2,7 @@
 
 #include "PCH.h"
 #include "Common/Singleton.h"
-#include "Utils/InputConverter.h"
+#include "Converters/KeyInputConverter.h"
 
 namespace NL::Services
 {

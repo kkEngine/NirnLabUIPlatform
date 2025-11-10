@@ -6,7 +6,7 @@ namespace NL::Hooks
     {
         if (uMsg == WM_ACTIVATE && wParam == WA_INACTIVE)
         {
-            OnWndInactive();
+            OnWindowInactive(ShutdownHook::IsGameClosing);
         }
 
         if (uMsg == WM_INPUTLANGCHANGE || uMsg == WM_INPUTLANGCHANGEREQUEST)
