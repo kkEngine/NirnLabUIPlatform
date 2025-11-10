@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PCH.h"
+#include "Hooks/ShutdownHook.hpp"
 
 #define WNDPROC_CONTINUE 0
 #define WNDPROC_PROCESSED 1
@@ -17,8 +18,7 @@ namespace NL::Hooks
         static ATOM CALLBACK RegisterClassAHook(WNDCLASSA* lpWndClass);
 
     public:
-        // ALT + TAB
-        static inline sigslot::signal<> OnWndInactive;
+        static inline sigslot::signal<bool> OnWindowInactive;
         static inline sigslot::signal<> OnWndInputLangChange;
         static bool Install();
     };
