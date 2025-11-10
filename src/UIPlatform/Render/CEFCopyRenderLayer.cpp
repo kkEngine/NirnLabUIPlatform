@@ -119,7 +119,13 @@ namespace NL::Render
 
         ID3D11Texture2D* tex = nullptr;
         auto hr = m_device1->OpenSharedResource1(info.shared_texture_handle, IID_PPV_ARGS(&tex));
-        CHECK_HRESULT_LOG_AND_RETURN(hr, fmt::format("{}: failed OpenSharedResource for texture (different gpus?)", NameOf(CEFCopyRenderLayer)));
+        if (FAILED(hr))
+        {
+            _com_error err(hr);
+            LPCTSTR errMsg = err.ErrorMessage();
+            spdlog::error("OpenSharedResource1: unexpected HRESULT {:#X}: {}", static_cast<unsigned long>(hr), errMsg);
+            return;
+        }
 
         m_renderData->drawLock.Lock();
 
