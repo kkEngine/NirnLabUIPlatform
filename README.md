@@ -56,6 +56,9 @@ SKSE::GetMessagingInterface()->RegisterListener(LibVersion::PROJECT_NAME, [](SKS
 });
 ```
 
+There are two helper headers for loading the API: SKSELoader.h (loads via SKSE messaging), DllLoader.h (loads via LoadLibrary win function).
+See the example solution in main.cpp for how to use these loaders (Init1stMethodToGetAPI(), Init2ndMethodToGetAPI(), Init3rdMethodToGetAPI()).
+
 # Create browser
 ```cpp
 NL::CEF::IBrowser* g_browser = nullptr;
