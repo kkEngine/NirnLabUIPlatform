@@ -14,11 +14,35 @@ namespace NL::UI::SKSELoader
         static inline APIReadyFunc_t s_apiReadyCallback = nullptr;
     };
 
-    inline void GetUIPlatformAPIWithVersionCheck(APIReadyFunc_t a_apiReadyCallback)
+    inline void ProcessSKSEMessage(const SKSE::MessagingInterface::Message* a_msg, NL::UI::Settings* settings = nullptr)
     {
-        LoaderData::s_apiReadyCallback = a_apiReadyCallback;
+        if (std::strcmp(a_msg->sender, "SKSE") == 0)
+        {
+            switch (a_msg->type)
+            {
+            case SKSE::MessagingInterface::kPostPostLoad:
+                // All plugins are loaded. Request lib version.
+                SKSE::GetMessagingInterface()->Dispatch(NL::UI::APIMessageType::RequestVersion, nullptr, 0, NL::UI::LibVersion::PROJECT_NAME);
+                break;
+            case SKSE::MessagingInterface::kInputLoaded:
+                if (LoaderData::s_canUseAPI)
+                {
+                    NL::UI::Settings defaultSettings;
+                    if (settings == nullptr)
+                    {
+                        settings = &defaultSettings;
+                    }
 
-        SKSE::GetMessagingInterface()->RegisterListener(NL::UI::LibVersion::PROJECT_NAME, [](SKSE::MessagingInterface::Message* a_msg) {
+                    // API version is ok. Request interface.
+                    SKSE::GetMessagingInterface()->Dispatch(NL::UI::APIMessageType::RequestAPI, settings, sizeof(*settings), NL::UI::LibVersion::PROJECT_NAME);
+                }
+                break;
+            default:
+                break;
+            }
+        }
+        else if (std::strcmp(a_msg->sender, NL::UI::LibVersion::PROJECT_NAME) == 0)
+        {
             switch (a_msg->type)
             {
             case NL::UI::APIMessageType::ResponseVersion: {
@@ -62,32 +86,15 @@ namespace NL::UI::SKSELoader
             default:
                 break;
             }
-        });
+        }
     }
 
-    inline void ProcessSKSEMessage(const SKSE::MessagingInterface::Message* a_msg, NL::UI::Settings* settings = nullptr)
+    inline void GetUIPlatformAPIWithVersionCheck(APIReadyFunc_t a_apiReadyCallback)
     {
-        switch (a_msg->type)
-        {
-        case SKSE::MessagingInterface::kPostPostLoad:
-            // All plugins are loaded. Request lib version.
-            SKSE::GetMessagingInterface()->Dispatch(NL::UI::APIMessageType::RequestVersion, nullptr, 0, NL::UI::LibVersion::PROJECT_NAME);
-            break;
-        case SKSE::MessagingInterface::kInputLoaded:
-            if (LoaderData::s_canUseAPI)
-            {
-                NL::UI::Settings defaultSettings;
-                if (settings == nullptr)
-                {
-                    settings = &defaultSettings;
-                }
+        LoaderData::s_apiReadyCallback = a_apiReadyCallback;
 
-                // API version is ok. Request interface.
-                SKSE::GetMessagingInterface()->Dispatch(NL::UI::APIMessageType::RequestAPI, settings, sizeof(*settings), NL::UI::LibVersion::PROJECT_NAME);
-            }
-            break;
-        default:
-            break;
-        }
+        SKSE::GetMessagingInterface()->RegisterListener(NL::UI::LibVersion::PROJECT_NAME, [](SKSE::MessagingInterface::Message* a_msg) {
+            ProcessSKSEMessage(a_msg);
+        });
     }
 }
