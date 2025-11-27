@@ -43,6 +43,17 @@ namespace NL::Controllers
             NL::Services::UIPlatformService::GetSingleton().Shutdown();
         });
 
+        SKSE::GetMessagingInterface()->RegisterListener([](SKSE::MessagingInterface::Message* a_msg) {
+            switch (a_msg->type)
+            {
+            case SKSE::MessagingInterface::kInputLoaded:
+                NL::Converters::KeyInputConverter::UpdateKeyboardLayouts();
+                break;
+            default:
+                break;
+            }
+        });
+
         SKSE::GetMessagingInterface()->RegisterListener(nullptr, [](SKSE::MessagingInterface::Message* a_msg) {
             if (std::strcmp(a_msg->sender, "SKSE") == 0)
             {

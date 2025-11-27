@@ -32,11 +32,6 @@ namespace NL::Converters
         return vkCode;
     }
 
-    void KeyInputConverter::NextKeyboardLayout()
-    {
-        s_currentHKL = ActivateKeyboardLayout((HKL)HKL_NEXT, 0);
-    }
-
     wchar_t KeyInputConverter::VkCodeToChar(const std::uint32_t a_scanCode, const std::uint32_t a_vkCode, const bool a_shift)
     {
         // auto keyboard = RE::BSInputDeviceManager::GetSingleton()->GetKeyboard();
@@ -50,6 +45,44 @@ namespace NL::Converters
         }
 
         return unicodeChar;
+    }
+
+    void KeyInputConverter::UpdateKeyboardLayouts()
+    {
+        const auto hr = GetKeyboardLayoutList(HKL_ARRAY_MAX_COUNT, s_hklArray.data());
+        if (hr <= 0)
+        {
+            s_hklArrayCount = 0;
+            spdlog::error("GetKeyboardLayoutList returns fail, {}", GetLastErrorAsString().data());
+            return;
+        }
+        spdlog::info("KeyInputConverter: Found {} keyboard layouts", hr);
+
+        s_hklArrayCount = hr;
+
+        const auto currentHKL = GetKeyboardLayout(0);
+        for (auto i = 0; i < s_hklArrayCount; ++i)
+        {
+            if (s_hklArray[i] == currentHKL)
+            {
+                s_hklArrayIndex = i;
+                s_currentHKL = s_hklArray[i];
+                return;
+            }
+        }
+
+        s_hklArrayIndex = 0;
+        s_currentHKL = s_hklArray[s_hklArrayIndex];
+    }
+
+    void KeyInputConverter::NextKeyboardLayout()
+    {
+        if (s_hklArrayIndex + 1 > s_hklArrayCount)
+        {
+            s_hklArrayIndex = 0;
+        }
+        s_currentHKL = s_hklArrayCount > 0 ? s_hklArray[++s_hklArrayIndex] : (HKL)HKL_NEXT;
+        ActivateKeyboardLayout(s_currentHKL, KLF_SETFORPROCESS);
     }
 
     void KeyInputConverter::Clear()

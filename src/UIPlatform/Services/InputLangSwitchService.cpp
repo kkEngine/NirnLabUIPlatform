@@ -32,7 +32,10 @@ namespace NL::Services
         }
 
         const auto inputEvent = *a_event;
-        if (inputEvent->GetEventType() == RE::INPUT_EVENT_TYPE::kButton && inputEvent->AsButtonEvent()->IsDown())
+        if (const auto buttonEvent = inputEvent->AsButtonEvent();
+            buttonEvent &&
+            (buttonEvent->idCode == RE::BSKeyboardDevice::Keys::kLeftShift || buttonEvent->idCode == RE::BSKeyboardDevice::Keys::kLeftAlt || buttonEvent->idCode == RE::BSKeyboardDevice::Keys::kLeftControl) &&
+            buttonEvent->IsDown())
         {
             const auto kb = RE::BSInputDeviceManager::GetSingleton()->GetKeyboard();
             const std::uint8_t* kbState = kb == nullptr ? nullptr : kb->curState;

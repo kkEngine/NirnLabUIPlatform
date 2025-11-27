@@ -7,7 +7,11 @@ namespace NL::Converters
     class KeyInputConverter
     {
     protected:
-        static inline HKL s_currentHKL = GetKeyboardLayout(0);
+        static constexpr size_t HKL_ARRAY_MAX_COUNT = 10;
+        static inline std::array<HKL, HKL_ARRAY_MAX_COUNT> s_hklArray;
+        static inline size_t s_hklArrayCount = 0;
+        static inline size_t s_hklArrayIndex = 0;
+        static inline HKL s_currentHKL = (HKL)HKL_NEXT;
 
         std::uint32_t m_currentModifiers = 0;
         std::uint32_t m_lastScanCode = 0;
@@ -17,8 +21,10 @@ namespace NL::Converters
         void KeyDown(const std::uint32_t a_scanCode, const std::uint32_t a_vkCode);
 
     public:
-        static std::uint32_t GetVirtualKey(const std::uint32_t a_scanCode);
+        static void UpdateKeyboardLayouts();
         static void NextKeyboardLayout();
+
+        static std::uint32_t GetVirtualKey(const std::uint32_t a_scanCode);
         static wchar_t VkCodeToChar(const std::uint32_t a_scanCode, const std::uint32_t a_vkCode, const bool a_shift);
 
         sigslot::signal_st<CefKeyEvent&> OnKeyDown;

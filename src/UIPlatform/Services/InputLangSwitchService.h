@@ -9,12 +9,12 @@ namespace NL::Services
     class InputLangSwitchService : public NL::Common::Singleton<InputLangSwitchService>,
                                    public RE::BSTEventSink<RE::InputEvent*>
     {
-      private:
+    private:
         friend class NL::Common::Singleton<InputLangSwitchService>;
         std::mutex m_switchActiveMutex;
         bool m_isSwitchActive = false;
 
-      public:
+    public:
         void SetActive(bool a_value);
 
         // RE::BSTEventSink<RE::InputEvent*>
