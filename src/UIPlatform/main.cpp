@@ -132,9 +132,10 @@ extern "C"
         spdlog::info("NirnLabUIPlatform version: {}.{}", NL::UI::LibVersion::GetMajorVersion(thisLibVer.libVersion), NL::UI::LibVersion::GetMinorVersion(thisLibVer.libVersion));
 
         const auto requestMajorVer = NL::UI::APIVersion::GetMajorVersion(a_requestLibVersion);
-        if (requestMajorVer != NL::UI::APIVersion::MAJOR)
+        const auto requestMinorVer = NL::UI::APIVersion::GetMajorVersion(a_requestLibVersion);
+        if (requestMajorVer != NL::UI::APIVersion::MAJOR || requestMinorVer > NL::UI::APIVersion::MINOR)
         {
-            spdlog::error("Can't return API for \"{}\", this ver is {}.{} and their ver is {}.{}",
+            spdlog::error("Can't return API for \"{}\", our ver is {}.{} and their ver is {}.{}",
                           a_requestLibName == nullptr ? "null" : a_requestLibName,
                           NL::UI::APIVersion::MAJOR,
                           NL::UI::APIVersion::MINOR,
@@ -143,7 +144,7 @@ extern "C"
             return false;
         }
 
-        spdlog::info("API requested by \"{}\", this ver is {}.{} and thier ver is {}.{}",
+        spdlog::info("API requested by \"{}\", our ver is {}.{} and their ver is {}.{}",
                      a_requestLibName == nullptr ? "null" : a_requestLibName,
                      NL::UI::APIVersion::MAJOR,
                      NL::UI::APIVersion::MINOR,
