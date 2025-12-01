@@ -52,10 +52,10 @@ namespace NL::UI::SKSELoader
                 const auto majorAPIVersion = NL::UI::APIVersion::GetMajorVersion(versionInfo->apiVersion);
                 const auto minorAPIVersion = NL::UI::APIVersion::GetMinorVersion(versionInfo->apiVersion);
                 // Different major version can cause serious compatibility issues. Older minor version may have missing methods
-                if (majorAPIVersion != NL::UI::APIVersion::MAJOR || minorAPIVersion != NL::UI::APIVersion::MINOR)
+                if (majorAPIVersion != NL::UI::APIVersion::MAJOR || minorAPIVersion < NL::UI::APIVersion::MINOR)
                 {
                     LoaderData::s_canUseAPI = false;
-                    spdlog::error("NirnLabUIPlatform loader: can't use using this API version. We have {}.{}, but {}.{} is installed",
+                    spdlog::error("NirnLabUIPlatform loader: can't use this API version. We have {}.{}, but {}.{} is installed",
                                   NL::UI::APIVersion::MAJOR,
                                   NL::UI::APIVersion::MINOR,
                                   NL::UI::APIVersion::GetMajorVersion(versionInfo->apiVersion),
