@@ -82,7 +82,10 @@ namespace NL::Converters
             s_hklArrayIndex = 0;
         }
         s_currentHKL = s_hklArrayCount > 0 ? s_hklArray[++s_hklArrayIndex] : (HKL)HKL_NEXT;
-        ActivateKeyboardLayout(s_currentHKL, KLF_SETFORPROCESS);
+
+        SKSE::GetTaskInterface()->AddUITask([]() {
+            ActivateKeyboardLayout(s_currentHKL, 0);
+        });
     }
 
     void KeyInputConverter::Clear()
