@@ -163,7 +163,7 @@ namespace NL::Controllers
                                                                   const char* a_startUrl,
                                                                   NL::CEF::IBrowser*& a_outBrowser)
     {
-        NL::UI::BrowserSettings defaultSettings;
+        NL::UI::BrowserSettings defaultSettings{};
         return AddOrGetBrowser(a_browserName, a_funcInfoArr, a_funcInfoArrSize, a_startUrl, &defaultSettings, a_outBrowser);
     }
 

@@ -27,7 +27,7 @@ namespace NL::UI::SKSELoader
             case SKSE::MessagingInterface::kInputLoaded:
                 if (LoaderData::s_canUseAPI)
                 {
-                    NL::UI::Settings defaultSettings;
+                    NL::UI::Settings defaultSettings{};
                     if (settings == nullptr)
                     {
                         settings = &defaultSettings;
