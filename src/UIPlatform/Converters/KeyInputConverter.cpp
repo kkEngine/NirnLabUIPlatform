@@ -49,43 +49,64 @@ namespace NL::Converters
 
     void KeyInputConverter::UpdateKeyboardLayouts()
     {
-        const auto hr = GetKeyboardLayoutList(HKL_ARRAY_MAX_COUNT, s_hklArray.data());
-        if (hr <= 0)
+        const auto clearHKLs = []() {
+            s_hklVector.clear();
+            s_hklVectorIndex = 0;
+            s_currentHKL = (HKL)HKL_NEXT;
+        };
+
+        const auto hklCount = GetKeyboardLayoutList(0, nullptr);
+        if (hklCount <= 0)
         {
-            s_hklArrayCount = 0;
-            spdlog::error("GetKeyboardLayoutList returns fail, {}", GetLastErrorAsString().data());
+            spdlog::error("GetKeyboardLayoutList failed, {}", GetLastErrorAsString().data());
+            clearHKLs();
             return;
         }
-        spdlog::info("KeyInputConverter: Found {} keyboard layouts", hr);
 
-        s_hklArrayCount = hr;
-
-        const auto currentHKL = GetKeyboardLayout(0);
-        for (auto i = 0; i < s_hklArrayCount; ++i)
+        s_hklVector.resize(hklCount);
+        const auto hklCount2 = GetKeyboardLayoutList(hklCount, s_hklVector.data());
+        if (hklCount2 <= 0)
         {
-            if (s_hklArray[i] == currentHKL)
-            {
-                s_hklArrayIndex = i;
-                s_currentHKL = s_hklArray[i];
-                return;
-            }
+            spdlog::error("Second call of GetKeyboardLayoutList failed, {}", GetLastErrorAsString().data());
+            clearHKLs();
+            return;
+        }
+        else if (hklCount2 != hklCount)
+        {
+            spdlog::error("GetKeyboardLayoutList returned a different value than the previous call");
+            clearHKLs();
+            return;
         }
 
-        s_hklArrayIndex = 0;
-        s_currentHKL = s_hklArray[s_hklArrayIndex];
+        spdlog::info("KeyInputConverter: Found {} keyboard layouts", s_hklVector.size());
+
+        s_hklVectorIndex = 0;
+        s_currentHKL = s_hklVector[s_hklVectorIndex];
     }
 
     void KeyInputConverter::NextKeyboardLayout()
     {
-        if (s_hklArrayIndex + 1 > s_hklArrayCount)
+        if (s_hklVector.empty())
         {
-            s_hklArrayIndex = 0;
+            s_currentHKL = (HKL)HKL_NEXT;
+            return;
         }
-        s_currentHKL = s_hklArrayCount > 0 ? s_hklArray[++s_hklArrayIndex] : (HKL)HKL_NEXT;
+
+        ++s_hklVectorIndex;
+        if (s_hklVectorIndex >= s_hklVector.size())
+        {
+            s_hklVectorIndex = 0;
+        }
+        s_currentHKL = s_hklVector[s_hklVectorIndex];
 
         SKSE::GetTaskInterface()->AddUITask([]() {
             ActivateKeyboardLayout(s_currentHKL, 0);
         });
+    }
+
+    HKL KeyInputConverter::GetCurrentKeyboardLayout()
+    {
+        return s_currentHKL;
     }
 
     void KeyInputConverter::Clear()

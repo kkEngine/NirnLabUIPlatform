@@ -49,6 +49,10 @@ namespace NL::Controllers
             case SKSE::MessagingInterface::kInputLoaded:
                 NL::Converters::KeyInputConverter::UpdateKeyboardLayouts();
                 break;
+            case SKSE::MessagingInterface::kPostPostLoad:
+                // Some plugins (like SkyrimSouls) hook necessary functions, we need to hook them after all plugins
+                NL::Hooks::CharGeneratorHook::Install();
+                break;
             default:
                 break;
             }

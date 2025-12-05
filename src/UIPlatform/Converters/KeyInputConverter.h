@@ -7,10 +7,8 @@ namespace NL::Converters
     class KeyInputConverter
     {
     protected:
-        static constexpr size_t HKL_ARRAY_MAX_COUNT = 10;
-        static inline std::array<HKL, HKL_ARRAY_MAX_COUNT> s_hklArray;
-        static inline size_t s_hklArrayCount = 0;
-        static inline size_t s_hklArrayIndex = 0;
+        static inline std::vector<HKL> s_hklVector{};
+        static inline size_t s_hklVectorIndex = 0;
         static inline HKL s_currentHKL = (HKL)HKL_NEXT;
 
         std::uint32_t m_currentModifiers = 0;
@@ -23,6 +21,7 @@ namespace NL::Converters
     public:
         static void UpdateKeyboardLayouts();
         static void NextKeyboardLayout();
+        static HKL GetCurrentKeyboardLayout();
 
         static std::uint32_t GetVirtualKey(const std::uint32_t a_scanCode);
         static wchar_t VkCodeToChar(const std::uint32_t a_scanCode, const std::uint32_t a_vkCode, const bool a_shift);

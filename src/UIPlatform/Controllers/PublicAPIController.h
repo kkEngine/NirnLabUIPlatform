@@ -2,6 +2,7 @@
 
 #include "PCH.h"
 #include "Hooks/ShutdownHook.hpp"
+#include "Hooks/CharGeneratorHook.h"
 #include "Common/Singleton.h"
 #include "Services/UIPlatformService.h"
 #include "Providers/CustomCEFSettingsProvider.h"
