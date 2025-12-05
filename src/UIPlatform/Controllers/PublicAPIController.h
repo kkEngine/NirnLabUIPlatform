@@ -6,6 +6,7 @@
 #include "Common/Singleton.h"
 #include "Services/UIPlatformService.h"
 #include "Providers/CustomCEFSettingsProvider.h"
+#include "Converters/KeyInputConverter.h"
 
 namespace NL::Controllers
 {

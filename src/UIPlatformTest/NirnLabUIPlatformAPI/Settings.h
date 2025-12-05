@@ -11,8 +11,13 @@ namespace NL::UI
         /// Cef debugging port (http://localhost:9009)
         /// </summary>
         int remoteDebuggingPort = 9009;
-        int reservPad = 0;
+        /// <summary>
+        /// Set to true to allow language switching in the game native menus (console, race, etc.)
+        /// </summary>
+        bool nativeMenuLangSwitching = true;
+        char pad1[3];
     };
+    static_assert(sizeof(Settings) == 8);
 
     /// <summary>
     /// Browser settings
@@ -25,4 +30,5 @@ namespace NL::UI
         int frameRate = 60;
         int reservPad = 0;
     };
+    static_assert(sizeof(BrowserSettings) == 8);
 }

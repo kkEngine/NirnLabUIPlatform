@@ -99,14 +99,22 @@ namespace NL::Converters
         }
         s_currentHKL = s_hklVector[s_hklVectorIndex];
 
-        SKSE::GetTaskInterface()->AddUITask([]() {
-            ActivateKeyboardLayout(s_currentHKL, 0);
-        });
+        if (s_nativeMenuLangSwitching)
+        {
+            SKSE::GetTaskInterface()->AddUITask([]() {
+                ActivateKeyboardLayout(s_currentHKL, 0);
+            });
+        }
     }
 
     HKL KeyInputConverter::GetCurrentKeyboardLayout()
     {
         return s_currentHKL;
+    }
+
+    void KeyInputConverter::SetNativeMenuLangSwitching(bool a_allow)
+    {
+        s_nativeMenuLangSwitching = a_allow;
     }
 
     void KeyInputConverter::Clear()

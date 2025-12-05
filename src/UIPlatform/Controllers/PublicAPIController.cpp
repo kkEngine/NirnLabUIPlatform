@@ -43,21 +43,6 @@ namespace NL::Controllers
             NL::Services::UIPlatformService::GetSingleton().Shutdown();
         });
 
-        SKSE::GetMessagingInterface()->RegisterListener([](SKSE::MessagingInterface::Message* a_msg) {
-            switch (a_msg->type)
-            {
-            case SKSE::MessagingInterface::kInputLoaded:
-                NL::Converters::KeyInputConverter::UpdateKeyboardLayouts();
-                break;
-            case SKSE::MessagingInterface::kPostPostLoad:
-                // Some plugins (like SkyrimSouls) hook necessary functions, we need to hook them after all plugins
-                NL::Hooks::CharGeneratorHook::Install();
-                break;
-            default:
-                break;
-            }
-        });
-
         SKSE::GetMessagingInterface()->RegisterListener(nullptr, [](SKSE::MessagingInterface::Message* a_msg) {
             if (std::strcmp(a_msg->sender, "SKSE") == 0)
             {
@@ -110,6 +95,14 @@ namespace NL::Controllers
         if (platformService.IsInited())
         {
             return true;
+        }
+
+        NL::Converters::KeyInputConverter::UpdateKeyboardLayouts();
+        NL::Converters::KeyInputConverter::SetNativeMenuLangSwitching(a_settings->nativeMenuLangSwitching);
+        if (a_settings->nativeMenuLangSwitching)
+        {
+            // Some plugins (like SkyrimSouls) can hook translate functions, we need to hook them after all plugins
+            NL::Hooks::CharGeneratorHook::Install();
         }
 
         SetSettingsProvider(a_settings);
