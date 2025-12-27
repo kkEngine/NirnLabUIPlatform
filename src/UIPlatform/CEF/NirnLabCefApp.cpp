@@ -66,6 +66,9 @@ namespace NL::CEF
 
         // Allow remote debugging
         command_line->AppendSwitchWithValue("remote-allow-origins", "*");
+
+        // Allow subprocesses to run with inherited admin privileges
+        command_line->AppendSwitch("do-not-de-elevate");
     }
 
     CefRefPtr<CefBrowserProcessHandler> CEF::NirnLabCefApp::GetBrowserProcessHandler()
