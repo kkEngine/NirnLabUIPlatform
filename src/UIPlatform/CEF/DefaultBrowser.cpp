@@ -265,7 +265,7 @@ namespace NL::CEF
         const auto uiMsgQ = RE::UIMessageQueue::GetSingleton();
         if (a_value)
         {
-            m_wasCursorOpen = RE::UI::GetSingleton()->pad17D;
+            m_wasCursorOpen = RE::UI::GetSingleton()->IsMenuOpen(RE::CursorMenu::MENU_NAME);
             if (uiMsgQ != nullptr)
             {
                 uiMsgQ->AddMessage(RE::CursorMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kShow, NULL);
