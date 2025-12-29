@@ -14,6 +14,72 @@ namespace NL::Render
         a_render->Release();
     }
 
+    void CEFSyncCopyRenderLayer::CopySharedTexure()
+    {
+        Microsoft::WRL::ComPtr<ID3D11Texture2D> sharedTexture = nullptr;
+        auto hr = m_device1->OpenSharedResource1(m_acceleratedPaintInfo->shared_texture_handle, IID_PPV_ARGS(sharedTexture.ReleaseAndGetAddressOf()));
+        FAST_CHECK_HRESULT_LOG_AND_RETURN(hr, "CEFSyncCopyRenderLayer::CopySharedTexure() - OpenSharedResource1()");
+
+        if (m_cefSRV == nullptr)
+        {
+            D3D11_TEXTURE2D_DESC sharedTextureDesc = {};
+            sharedTexture->GetDesc(&sharedTextureDesc);
+
+            hr = m_renderData->device->CreateTexture2D(&sharedTextureDesc, nullptr, m_cefTexture.ReleaseAndGetAddressOf());
+            FAST_CHECK_HRESULT_LOG_AND_RETURN(hr, "CEFSyncCopyRenderLayer::CopySharedTexure() - CreateTexture2D()");
+
+            D3D11_SHADER_RESOURCE_VIEW_DESC sharedResourceViewDesc = {};
+            sharedResourceViewDesc.Format = sharedTextureDesc.Format;
+            sharedResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+            sharedResourceViewDesc.Texture2D.MostDetailedMip = 0;
+            sharedResourceViewDesc.Texture2D.MipLevels = 1;
+
+            hr = m_renderData->device->CreateShaderResourceView(m_cefTexture.Get(), &sharedResourceViewDesc, m_cefSRV.ReleaseAndGetAddressOf());
+            FAST_CHECK_HRESULT_LOG_AND_RETURN(hr, "CEFSyncCopyRenderLayer::CopySharedTexure() - CreateShaderResourceView()");
+
+            spdlog::info("CEFSyncCopyRenderLayer: texture created");
+        }
+
+        spdlog::info("Dirty rect - {}:{}:{}:{}",
+                     m_acceleratedPaintInfo->extra.capture_update_rect.x,
+                     m_acceleratedPaintInfo->extra.capture_update_rect.y,
+                     m_acceleratedPaintInfo->extra.capture_update_rect.width,
+                     m_acceleratedPaintInfo->extra.capture_update_rect.height);
+
+        D3D11_BOX dirtyRect{};
+        dirtyRect.left = m_acceleratedPaintInfo->extra.capture_update_rect.x;
+        dirtyRect.top = m_acceleratedPaintInfo->extra.capture_update_rect.y;
+        dirtyRect.right = m_acceleratedPaintInfo->extra.capture_update_rect.x + m_acceleratedPaintInfo->extra.capture_update_rect.width;
+        dirtyRect.bottom = m_acceleratedPaintInfo->extra.capture_update_rect.y + m_acceleratedPaintInfo->extra.capture_update_rect.height;
+        dirtyRect.front = 0;
+        dirtyRect.back = 1;
+
+        m_renderData->deviceContext->CopySubresourceRegion(m_cefTexture.Get(),
+                                                           0,
+                                                           m_acceleratedPaintInfo->extra.capture_update_rect.x,
+                                                           m_acceleratedPaintInfo->extra.capture_update_rect.y,
+                                                           0,
+                                                           sharedTexture.Get(),
+                                                           0,
+                                                           &dirtyRect);
+        // The CopyResource call is asynchronous by default
+        m_renderData->deviceContext->Flush();
+
+        D3D11_QUERY_DESC queryDesc = {};
+        queryDesc.Query = D3D11_QUERY_EVENT;
+        queryDesc.MiscFlags = 0;
+
+        Microsoft::WRL::ComPtr<ID3D11Query> query;
+        hr = m_device1->CreateQuery(&queryDesc, &query);
+        FAST_CHECK_HRESULT_LOG_AND_RETURN(hr, "CEFSyncCopyRenderLayer::CopySharedTexure() - CreateQuery()");
+
+        m_renderData->deviceContext->End(query.Get());
+
+        while (S_FALSE == m_renderData->deviceContext->GetData(query.Get(), NULL, 0, 0))
+        {
+        }
+    }
+
     void CEFSyncCopyRenderLayer::Init(RenderData* a_renderData)
     {
         IRenderLayer::Init(a_renderData);
@@ -28,124 +94,22 @@ namespace NL::Render
     const inline ::DirectX::SimpleMath::Vector2 _Cef_Menu_Draw_Vector = {0.f, 0.f};
     void CEFSyncCopyRenderLayer::Draw()
     {
-        if (!m_isVisible)
+        if (m_acceleratedPaintReady.test(std::memory_order_acquire))
         {
-            return;
-        }
-
-        if (m_renderData->deviceContext->GetType() == D3D11_DEVICE_CONTEXT_DEFERRED)
-        {
-            spdlog::error("D3D11_DEVICE_CONTEXT_DEFERRED_____________________");
-            return;
-        }
-
-        if (!m_acceleratedPaintReady.test(std::memory_order_acquire))
-        {
-            if (m_cefSRV != nullptr)
-            {
-                m_renderData->spriteBatch->Draw(
-                    m_cefSRV.Get(),
-                    _Cef_Menu_Draw_Vector,
-                    nullptr,
-                    ::DirectX::Colors::White,
-                    0.f);
-            }
-
-            return;
-        }
-
-        Microsoft::WRL::ComPtr<ID3D11Texture2D> sharedTexture = nullptr;
-        auto hr = m_device1->OpenSharedResource1(m_acceleratedPaintInfo->shared_texture_handle, IID_PPV_ARGS(sharedTexture.ReleaseAndGetAddressOf()));
-        if (FAILED(hr))
-        {
-            _com_error err(hr);
-            LPCTSTR errMsg = err.ErrorMessage();
-            spdlog::error("CEFSyncCopyRenderLayer::Draw() - failed to OpenSharedResource1(), unexpected HRESULT {:#X}: {}", static_cast<unsigned long>(hr), errMsg);
+            CopySharedTexure();
             m_acceleratedPaintReady.clear(std::memory_order_release);
             m_acceleratedPaintReady.notify_all();
-            return;
         }
 
-        if (m_cefSRV == nullptr)
+        if (m_isVisible && m_cefSRV != nullptr)
         {
-            D3D11_TEXTURE2D_DESC sharedTextureDesc = {};
-            sharedTexture->GetDesc(&sharedTextureDesc);
-
-            auto hResult = m_renderData->device->CreateTexture2D(&sharedTextureDesc, nullptr, m_cefTexture.ReleaseAndGetAddressOf());
-            if (FAILED(hResult))
-            {
-                spdlog::error("CEFSyncCopyRenderLayer::Draw() - failed CreateTexture2D(), code {:X}", hResult);
-                return;
-            }
-
-            D3D11_SHADER_RESOURCE_VIEW_DESC sharedResourceViewDesc = {};
-            sharedResourceViewDesc.Format = sharedTextureDesc.Format;
-            sharedResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-            sharedResourceViewDesc.Texture2D.MostDetailedMip = 0;
-            sharedResourceViewDesc.Texture2D.MipLevels = 1;
-
-            hResult = m_renderData->device->CreateShaderResourceView(m_cefTexture.Get(), &sharedResourceViewDesc, m_cefSRV.ReleaseAndGetAddressOf());
-            if (FAILED(hResult))
-            {
-                spdlog::error("CEFSyncCopyRenderLayer::Draw() - failed CreateShaderResourceView(), code {:X}", hResult);
-                return;
-            }
-
-            spdlog::info("CEFSyncCopyRenderLayer::Draw() - texture created");
+            m_renderData->spriteBatch->Draw(
+                m_cefSRV.Get(),
+                _Cef_Menu_Draw_Vector,
+                nullptr,
+                ::DirectX::Colors::White,
+                0.f);
         }
-
-        m_renderData->deviceContext->CopyResource(m_cefTexture.Get(), sharedTexture.Get());
-        // The CopyResource call is asynchronous by default
-        m_renderData->deviceContext->Flush();
-
-        D3D11_QUERY_DESC QueryDesc = {};
-        QueryDesc.Query = D3D11_QUERY_EVENT;
-        QueryDesc.MiscFlags = 0;
-        Microsoft::WRL::ComPtr<ID3D11Query> Query;
-        if (HRESULT hr = m_device1->CreateQuery(&QueryDesc, &Query); FAILED(hr))
-        {
-            spdlog::error("CEFSyncCopyRenderLayer::Draw() - falied CreateQuery(), code {:X}", hr);
-            return;
-        }
-        m_renderData->deviceContext->End(Query.Get());
-
-        while (S_FALSE == m_renderData->deviceContext->GetData(Query.Get(), NULL, 0, 0))
-        {
-            // Optional: Sleep briefly to prevent a 100% CPU core usage busy-wait
-            // Sleep(1);
-        }
-
-        //bool isDone = false;
-        //hr = S_OK;
-        //for (;;)
-        //{
-        //    hr = m_renderData->deviceContext->GetData(Query.Get(), &isDone, sizeof(isDone), 0);
-        //    if (FAILED(hr))
-        //    {
-        //        _com_error err(hr);
-        //        LPCTSTR errMsg = err.ErrorMessage();
-        //        spdlog::error("CEFSyncCopyRenderLayer::Draw() - falied GetData(), code {:#X}: {}", static_cast<unsigned long>(hr), errMsg);
-        //        m_acceleratedPaintReady.clear(std::memory_order_release);
-        //        m_acceleratedPaintReady.notify_all();
-        //        return;
-        //    }
-        //
-        //    // We need to check for S_OK specifically as S_FALSE is also considered a success return code
-        //    if (hr == S_OK && isDone)
-        //    {
-        //        break;
-        //    }
-        //}
-
-        m_renderData->spriteBatch->Draw(
-            m_cefSRV.Get(),
-            _Cef_Menu_Draw_Vector,
-            nullptr,
-            ::DirectX::Colors::White,
-            0.f);
-
-        m_acceleratedPaintReady.clear(std::memory_order_release);
-        m_acceleratedPaintReady.notify_all();
     }
 
     void CEFSyncCopyRenderLayer::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect& rect)
@@ -186,25 +150,14 @@ namespace NL::Render
         }
 
         if (m_renderData == nullptr ||
-            m_device1 == nullptr ||
-            info.shared_texture_handle == nullptr)
+            m_device1 == nullptr)
         {
             spdlog::error("CEFSyncCopyRenderLayer::OnAcceleratedPaint() - device or renderData is nullptr");
             return;
         }
 
-        m_acceleratedPaintReady.test_and_set(std::memory_order_acquire);
-
-        // while (m_acceleratedPaintReady.test_and_set(std::memory_order_acquire))
-        //{
-        //     m_acceleratedPaintReady.wait(true, std::memory_order_relaxed);
-        // }
-
         m_acceleratedPaintInfo = &info;
-
-        // m_acceleratedPaintReady.clear(std::memory_order_release);
+        m_acceleratedPaintReady.test_and_set(std::memory_order_acquire);
         m_acceleratedPaintReady.wait(true, std::memory_order_acquire);
-
-        spdlog::info("OnAcceleratedPaint");
     }
 }

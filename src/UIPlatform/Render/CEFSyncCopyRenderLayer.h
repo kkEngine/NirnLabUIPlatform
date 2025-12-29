@@ -21,6 +21,8 @@ namespace NL::Render
         const CefAcceleratedPaintInfo* m_acceleratedPaintInfo = nullptr;
         std::atomic_flag m_acceleratedPaintReady = ATOMIC_FLAG_INIT;
 
+        void CopySharedTexure();
+
     public:
         ~CEFSyncCopyRenderLayer() override = default;
 
