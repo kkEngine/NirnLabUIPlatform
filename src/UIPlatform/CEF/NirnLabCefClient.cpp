@@ -4,7 +4,7 @@ namespace NL::CEF
 {
     NirnLabCefClient::NirnLabCefClient()
     {
-        m_cefRenderLayer = NL::Render::CEFCopyRenderLayer::make_shared();
+        m_cefRenderLayer = NL::Render::CEFSyncCopyRenderLayer::make_shared();
     }
 
     std::shared_ptr<NL::Render::IRenderLayer> NirnLabCefClient::GetRenderLayer()
