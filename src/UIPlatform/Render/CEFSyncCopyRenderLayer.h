@@ -2,6 +2,7 @@
 
 #include "PCH.h"
 #include "IRenderLayer.h"
+#include "Hooks/ShutdownHook.hpp"
 
 namespace NL::Render
 {
@@ -15,6 +16,14 @@ namespace NL::Render
         static void release_shared(CEFSyncCopyRenderLayer* a_render);
 
     protected:
+        struct AtomicFlagGuard
+        {
+            std::atomic_flag& m_flag;
+
+            AtomicFlagGuard(std::atomic_flag& a_flag);
+            ~AtomicFlagGuard();
+        };
+
         Microsoft::WRL::ComPtr<ID3D11Device1> m_device1 = nullptr;
         Microsoft::WRL::ComPtr<ID3D11Texture2D> m_cefTexture = nullptr;
         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_cefSRV = nullptr;
@@ -24,7 +33,7 @@ namespace NL::Render
         void CopySharedTexure();
 
     public:
-        ~CEFSyncCopyRenderLayer() override = default;
+        virtual ~CEFSyncCopyRenderLayer() override = default;
 
         // IRenderLayer
         void Init(RenderData* a_renderData) override;

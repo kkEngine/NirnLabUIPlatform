@@ -14,6 +14,17 @@ namespace NL::Render
         a_render->Release();
     }
 
+    CEFSyncCopyRenderLayer::AtomicFlagGuard::AtomicFlagGuard(std::atomic_flag& a_flag)
+        : m_flag(a_flag)
+    {
+    }
+
+    CEFSyncCopyRenderLayer::AtomicFlagGuard::~AtomicFlagGuard()
+    {
+        m_flag.clear(std::memory_order_release);
+        m_flag.notify_all();
+    }
+
     void CEFSyncCopyRenderLayer::CopySharedTexure()
     {
         Microsoft::WRL::ComPtr<ID3D11Texture2D> sharedTexture = nullptr;
@@ -40,13 +51,7 @@ namespace NL::Render
             spdlog::info("CEFSyncCopyRenderLayer: texture created");
         }
 
-        spdlog::info("Dirty rect - {}:{}:{}:{}",
-                     m_acceleratedPaintInfo->extra.capture_update_rect.x,
-                     m_acceleratedPaintInfo->extra.capture_update_rect.y,
-                     m_acceleratedPaintInfo->extra.capture_update_rect.width,
-                     m_acceleratedPaintInfo->extra.capture_update_rect.height);
-
-        D3D11_BOX dirtyRect{};
+        D3D11_BOX dirtyRect;
         dirtyRect.left = m_acceleratedPaintInfo->extra.capture_update_rect.x;
         dirtyRect.top = m_acceleratedPaintInfo->extra.capture_update_rect.y;
         dirtyRect.right = m_acceleratedPaintInfo->extra.capture_update_rect.x + m_acceleratedPaintInfo->extra.capture_update_rect.width;
@@ -96,9 +101,8 @@ namespace NL::Render
     {
         if (m_acceleratedPaintReady.test(std::memory_order_acquire))
         {
+            AtomicFlagGuard guard(m_acceleratedPaintReady);
             CopySharedTexure();
-            m_acceleratedPaintReady.clear(std::memory_order_release);
-            m_acceleratedPaintReady.notify_all();
         }
 
         if (m_isVisible && m_cefSRV != nullptr)
@@ -137,6 +141,7 @@ namespace NL::Render
                                          int width,
                                          int height)
     {
+        spdlog::error("CEFCopyRenderLayer::OnPaint called");
     }
 
     void CEFSyncCopyRenderLayer::OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
@@ -158,6 +163,13 @@ namespace NL::Render
 
         m_acceleratedPaintInfo = &info;
         m_acceleratedPaintReady.test_and_set(std::memory_order_acquire);
-        m_acceleratedPaintReady.wait(true, std::memory_order_acquire);
+        while (m_acceleratedPaintReady.test(std::memory_order_acquire))
+        {
+            if (NL::Hooks::ShutdownHook::IsGameClosing)
+            {
+                m_acceleratedPaintReady.clear(std::memory_order_release);
+                break;
+            }
+        }
     }
 }
