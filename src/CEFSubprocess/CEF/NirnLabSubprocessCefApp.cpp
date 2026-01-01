@@ -28,6 +28,7 @@ namespace NL::CEF
             object = CefV8Value::CreateObject(nullptr, nullptr);
             a_parent->SetValue(a_objectName, object, V8_PROPERTY_ATTRIBUTE_NONE);
         }
+
         return object;
     }
 
@@ -52,26 +53,60 @@ namespace NL::CEF
         }
         else
         {
+            const auto global = a_frame->GetV8Context()->GetGlobal();
+            if (global == nullptr)
+            {
+                spdlog::error("{}[{}]: global object is nullptr", NameOf(NirnLabSubprocessCefApp::AddFunctionHandlers), ::GetCurrentProcessId());
+                return addedFuncCount;
+            }
+
             for (const auto& objectName : keyList)
             {
-                auto currentObjectValue = a_frame->GetV8Context()->GetGlobal();
+                if (objectName.empty())
+                {
+                    spdlog::error("{}[{}]: object name is empty", NameOf(NirnLabSubprocessCefApp::AddFunctionHandlers), ::GetCurrentProcessId());
+                    continue;
+                }
+
+                auto currentObjectValue = GetOrCreateObject(global, objectName);
+                if (currentObjectValue == nullptr || currentObjectValue->IsNull() || currentObjectValue->IsUndefined() || !currentObjectValue->IsObject())
+                {
+                    spdlog::error("{}[{}]: can't get or create object \"{}\"",
+                                  NameOf(NirnLabSubprocessCefApp::AddFunctionHandlers),
+                                  ::GetCurrentProcessId(),
+                                  objectName.ToString().c_str());
+                    continue;
+                }
+
                 const auto funcList = a_funcDict->GetList(objectName);
                 for (auto i = 0; i < funcList->GetSize(); ++i)
                 {
                     const auto& funcName = funcList->GetString(i);
                     if (funcName.empty())
                     {
+                        spdlog::warn("{}[{}]: function name is empty, skipping", NameOf(NirnLabSubprocessCefApp::AddFunctionHandlers), ::GetCurrentProcessId());
                         continue;
-                    }
-
-                    if (!objectName.empty())
-                    {
-                        currentObjectValue = GetOrCreateObject(currentObjectValue, objectName);
                     }
 
                     CefRefPtr<NL::JS::CEFFunctionHandler> funcHandler = new NL::JS::CEFFunctionHandler(a_browser, objectName);
                     CefRefPtr<CefV8Value> funcValue = CefV8Value::CreateFunction(funcName, funcHandler);
-                    currentObjectValue->SetValue(funcName, funcValue, V8_PROPERTY_ATTRIBUTE_NONE);
+                    if (funcValue == nullptr)
+                    {
+                        spdlog::error("{}[{}]: failed to create function \"{}\"",
+                                      NameOf(NirnLabSubprocessCefApp::AddFunctionHandlers),
+                                      ::GetCurrentProcessId(),
+                                      funcName.ToString().c_str());
+                        continue;
+                    }
+                    if (!currentObjectValue->SetValue(funcName, funcValue, V8_PROPERTY_ATTRIBUTE_NONE))
+                    {
+                        spdlog::error("{}[{}]: failed to set function \"{}\" to object \"{}\"",
+                                      NameOf(NirnLabSubprocessCefApp::AddFunctionHandlers),
+                                      ::GetCurrentProcessId(),
+                                      funcName.ToString().c_str(),
+                                      objectName.ToString().c_str());
+                        continue;
+                    }
                     ++addedFuncCount;
                 }
             }

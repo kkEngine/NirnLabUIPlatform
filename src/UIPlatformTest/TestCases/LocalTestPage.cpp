@@ -102,7 +102,22 @@ namespace NL::UI::TestCase
 
                 spdlog::info("func1__ callback. params: {}", argsStr);
             };
+            // func2
+            auto func2 = new JS::JSFuncInfo();
+            func2->objectName = "NL";
+            func2->funcName = "func2";
+            func2->callbackData.executeInGameThread = true;
+            func2->callbackData.callback = [](const char** a_args, int a_argsCount) {
+                std::string argsStr = "";
+                for (auto i = 0; i < a_argsCount; ++i)
+                {
+                    argsStr += fmt::format("{}{}", (i > 0 ? ", " : ""), a_args[i]);
+                }
+
+                spdlog::info("func2 callback. params: {}", argsStr);
+            };
             m_browser->AddFunctionCallback(strFunInfo);
+            m_browser->AddFunctionCallback(*func2);
 
             while (!m_browser->IsPageLoaded())
             {
