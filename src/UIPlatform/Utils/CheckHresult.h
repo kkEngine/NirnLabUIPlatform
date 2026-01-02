@@ -31,3 +31,13 @@ inline void CheckHresultThrow(HRESULT hr, const std::string& userMsg)
             return;                                                    \
         }                                                              \
     } while (0)
+
+#define FAST_CHECK_HRESULT_LOG_AND_RETURN(hr, userMsg)             \
+    do                                                             \
+    {                                                              \
+        if (FAILED(hr))                                            \
+        {                                                          \
+            spdlog::error("{}", CheckHresultMessage(hr, userMsg)); \
+            return;                                                \
+        }                                                          \
+    } while (0)

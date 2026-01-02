@@ -39,6 +39,9 @@ namespace NL::CEF
 
         // command_line->AppendSwitch("disable-gpu-vsync");
 
+        // Disables lazy loading of images and frames
+        // command_line->AppendSwitch("disable-lazy-loading");
+
         // Most systems would not need to use this switch - but on older hardware,
         // Chromium may still choose to disable D3D11 for gpu workarounds.
         // Accelerated OSR will not at all with D3D11 disabled, so we force it on.

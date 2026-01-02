@@ -1,7 +1,7 @@
 #pragma once
 
 #include "PCH.h"
-#include "Render/CEFCopyRenderLayer.h"
+#include "Render/CEFSyncCopyRenderLayer.h"
 #include "Render/CEFRenderLayer.h"
 
 namespace NL::CEF
@@ -14,7 +14,7 @@ namespace NL::CEF
         IMPLEMENT_REFCOUNTING(NirnLabCefClient);
 
     protected:
-        std::shared_ptr<NL::Render::CEFCopyRenderLayer> m_cefRenderLayer = nullptr;
+        std::shared_ptr<NL::Render::CEFSyncCopyRenderLayer> m_cefRenderLayer = nullptr;
         CefRefPtr<CefBrowser> m_cefBrowser = nullptr;
 
     public:

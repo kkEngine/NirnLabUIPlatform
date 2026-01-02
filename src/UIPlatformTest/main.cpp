@@ -54,7 +54,7 @@ void Init1stMethodToGetAPI()
         case SKSE::MessagingInterface::kInputLoaded:
             if (s_canUseAPI)
             {
-                NL::UI::Settings defaultSettings;
+                NL::UI::Settings defaultSettings{};
                 // API version is ok. Request interface.
                 SKSE::GetMessagingInterface()->Dispatch(NL::UI::APIMessageType::RequestAPI, &defaultSettings, sizeof(defaultSettings), NL::UI::LibVersion::PROJECT_NAME);
             }
@@ -119,7 +119,7 @@ void Init2ndMethodToGetAPI()
             try
             {
                 NL::UI::IUIPlatformAPI* api = nullptr;
-                NL::UI::Settings defaultSettings;
+                NL::UI::Settings defaultSettings{};
 
                 if (NL::UI::DllLoader::CreateOrGetUIPlatformAPIWithVersionCheck(&api, &defaultSettings, NL::UI::APIVersion::AS_INT, PLUGIN_NAME))
                 {
