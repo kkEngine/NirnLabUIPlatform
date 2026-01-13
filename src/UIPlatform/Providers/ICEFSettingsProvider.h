@@ -9,6 +9,8 @@ namespace NL::Providers
     {
     public:
         virtual ~ICEFSettingsProvider() = default;
+
+        virtual NL::UI::Settings GetGlobalSettings() = 0;
         virtual CefSettings GetCefSettings() = 0;
         virtual CefBrowserSettings GetCefBrowserSettings() = 0;
         virtual CefBrowserSettings MergeAndGetCefBrowserSettings(NL::UI::BrowserSettings* a_settings) = 0;

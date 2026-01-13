@@ -11,7 +11,7 @@ namespace NL::Render
     /// Using this class may cause CTD
     /// </summary>
     class [[deprecated("MAY CAUSE CTD, DON'T USE")]] CEFRenderLayer : public IRenderLayer,
-                                                           public CefRenderHandler
+                                                                      public CefRenderHandler
     {
         IMPLEMENT_REFCOUNTING(CEFRenderLayer);
 
@@ -29,22 +29,21 @@ namespace NL::Render
         ~CEFRenderLayer() override;
 
         // IRenderLayer
-        void Init(RenderData* a_renderData) override;
-        void Draw() override;
+        virtual void Init(RenderData* a_renderData) override;
+        virtual void Draw() override;
+        virtual const char* GetName() override;
 
         // CefRenderHandler
-        void GetViewRect(CefRefPtr<CefBrowser> browser, CefRect& rect) override;
-        void OnPaint(
-            CefRefPtr<CefBrowser> browser,
-            PaintElementType type,
-            const RectList& dirtyRects,
-            const void* buffer,
-            int width,
-            int height) override;
-        void OnAcceleratedPaint(
-            CefRefPtr<CefBrowser> browser,
-            PaintElementType type,
-            const RectList& dirtyRects,
-            const CefAcceleratedPaintInfo& info) override;
+        virtual void GetViewRect(CefRefPtr<CefBrowser> browser, CefRect& rect) override;
+        virtual void OnPaint(CefRefPtr<CefBrowser> browser,
+                             PaintElementType type,
+                             const RectList& dirtyRects,
+                             const void* buffer,
+                             int width,
+                             int height) override;
+        virtual void OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
+                                        PaintElementType type,
+                                        const RectList& dirtyRects,
+                                        const CefAcceleratedPaintInfo& info) override;
     };
 }

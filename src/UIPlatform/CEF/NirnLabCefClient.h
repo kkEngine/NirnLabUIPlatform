@@ -2,7 +2,8 @@
 
 #include "PCH.h"
 #include "Render/CEFSyncCopyRenderLayer.h"
-#include "Render/CEFRenderLayer.h"
+#include "Render/CEFCopyRenderLayer.h"
+#include "Providers/ICEFSettingsProvider.h"
 
 namespace NL::CEF
 {
@@ -14,14 +15,15 @@ namespace NL::CEF
         IMPLEMENT_REFCOUNTING(NirnLabCefClient);
 
     protected:
-        std::shared_ptr<NL::Render::CEFSyncCopyRenderLayer> m_cefRenderLayer = nullptr;
+        CefRefPtr<NL::Render::IRenderLayer> m_cefRenderLayer = nullptr;
+        CefRefPtr<CefRenderHandler> m_cefRenderHandler = nullptr;
         CefRefPtr<CefBrowser> m_cefBrowser = nullptr;
 
     public:
-        NirnLabCefClient();
+        NirnLabCefClient(std::shared_ptr<NL::Providers::ICEFSettingsProvider> a_settingsProvider);
         virtual ~NirnLabCefClient() override = default;
 
-        std::shared_ptr<NL::Render::IRenderLayer> GetRenderLayer();
+        CefRefPtr<NL::Render::IRenderLayer> GetRenderLayer();
         CefRefPtr<CefBrowser> GetBrowser();
         bool IsBrowserReady();
 

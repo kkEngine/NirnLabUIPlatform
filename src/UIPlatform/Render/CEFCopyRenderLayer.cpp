@@ -2,18 +2,6 @@
 
 namespace NL::Render
 {
-    std::shared_ptr<CEFCopyRenderLayer> CEFCopyRenderLayer::make_shared()
-    {
-        const auto cefRender = new CEFCopyRenderLayer();
-        cefRender->AddRef();
-        return std::shared_ptr<CEFCopyRenderLayer>(cefRender, CEFCopyRenderLayer::release_shared);
-    }
-
-    void CEFCopyRenderLayer::release_shared(CEFCopyRenderLayer* a_render)
-    {
-        a_render->Release();
-    }
-
     void CEFCopyRenderLayer::Init(RenderData* a_renderData)
     {
         IRenderLayer::Init(a_renderData);
@@ -86,6 +74,11 @@ namespace NL::Render
                 ::DirectX::Colors::White,
                 0.f);
         }
+    }
+
+    const char* CEFCopyRenderLayer::GetName()
+    {
+        return "DeferredContext";
     }
 
     void CEFCopyRenderLayer::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect& rect)

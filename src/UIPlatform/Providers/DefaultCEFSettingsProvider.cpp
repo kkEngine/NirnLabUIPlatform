@@ -2,6 +2,11 @@
 
 namespace NL::Providers
 {
+    NL::UI::Settings DefaultCEFSettingsProvider::GetGlobalSettings()
+    {
+        return NL::UI::Settings();
+    }
+
     CefSettings DefaultCEFSettingsProvider::GetCefSettings()
     {
         CefSettings settings{};

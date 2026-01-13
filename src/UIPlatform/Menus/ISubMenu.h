@@ -15,7 +15,7 @@ namespace NL::Menus
     class ISubMenu : public NL::Render::IRenderLayer,
                      public RE::MenuEventHandler
     {
-      public:
+    public:
         virtual ~ISubMenu() override = default;
         virtual SubMenuType GetMenuType() = 0;
     };

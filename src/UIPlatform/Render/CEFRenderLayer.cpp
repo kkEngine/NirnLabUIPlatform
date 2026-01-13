@@ -51,6 +51,11 @@ namespace NL::Render
         }
     }
 
+    const char* CEFRenderLayer::GetName()
+    {
+        return "CEFRenderLayer[DEPRECATED]";
+    }
+
     void CEFRenderLayer::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect& rect)
     {
         rect = m_renderData ? CefRect(0, 0, m_renderData->width, m_renderData->height) : CefRect(0, 0, 800, 600);

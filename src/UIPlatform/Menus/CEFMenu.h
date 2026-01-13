@@ -8,11 +8,14 @@
 #include "JS/JSFunctionStorage.h"
 #include "JS/JSEventFuncInfo.h"
 #include "Services/CEFService.h"
+#include "Providers/ICEFSettingsProvider.h"
 
 namespace NL::Menus
 {
     class CEFMenu : public ISubMenu
     {
+        IMPLEMENT_REFCOUNTING(CEFMenu);
+
     protected:
         std::mutex m_startBrowserMutex;
         bool m_started = false;
@@ -21,13 +24,14 @@ namespace NL::Menus
 
         std::shared_ptr<spdlog::logger> m_logger = nullptr;
         std::shared_ptr<NL::JS::JSFunctionStorage> m_jsFuncStorage = nullptr;
-        std::shared_ptr<NL::Render::IRenderLayer> m_cefRenderLayer = nullptr;
+        CefRefPtr<NL::Render::IRenderLayer> m_cefRenderLayer = nullptr;
         std::shared_ptr<NL::CEF::DefaultBrowser> m_browser = nullptr;
 
     public:
         CEFMenu(std::shared_ptr<spdlog::logger> a_logger,
                 std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage,
-                NL::JS::JSEventFuncInfo& a_eventFuncInfo);
+                NL::JS::JSEventFuncInfo& a_eventFuncInfo,
+                std::shared_ptr<NL::Providers::ICEFSettingsProvider> a_settingsProvider);
         ~CEFMenu() override;
 
         bool LoadBrowser(std::string_view a_url,

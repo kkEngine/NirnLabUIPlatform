@@ -2,18 +2,6 @@
 
 namespace NL::Render
 {
-    std::shared_ptr<CEFSyncCopyRenderLayer> CEFSyncCopyRenderLayer::make_shared()
-    {
-        const auto cefRender = new CEFSyncCopyRenderLayer();
-        cefRender->AddRef();
-        return std::shared_ptr<CEFSyncCopyRenderLayer>(cefRender, CEFSyncCopyRenderLayer::release_shared);
-    }
-
-    void CEFSyncCopyRenderLayer::release_shared(CEFSyncCopyRenderLayer* a_render)
-    {
-        a_render->Release();
-    }
-
     CEFSyncCopyRenderLayer::AtomicFlagGuard::AtomicFlagGuard(std::atomic_flag& a_flag)
         : m_flag(a_flag)
     {
@@ -114,6 +102,11 @@ namespace NL::Render
                 ::DirectX::Colors::White,
                 0.f);
         }
+    }
+
+    const char* CEFSyncCopyRenderLayer::GetName()
+    {
+        return "SyncCopy";
     }
 
     void CEFSyncCopyRenderLayer::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect& rect)
