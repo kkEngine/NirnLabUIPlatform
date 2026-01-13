@@ -9,10 +9,12 @@ namespace NL::Providers
     class DefaultCEFSettingsProvider : public ICEFSettingsProvider
     {
     public:
-        ~DefaultCEFSettingsProvider() override = default;
-        CefSettings GetCefSettings() override;
-        CefBrowserSettings GetCefBrowserSettings() override;
-        CefBrowserSettings MergeAndGetCefBrowserSettings(NL::UI::BrowserSettings* a_settings) override;
-        CefWindowInfo GetCefWindowInfo() override;
+        virtual ~DefaultCEFSettingsProvider() override = default;
+
+        virtual NL::UI::Settings GetGlobalSettings() override;
+        virtual CefSettings GetCefSettings() override;
+        virtual CefBrowserSettings GetCefBrowserSettings() override;
+        virtual CefBrowserSettings MergeAndGetCefBrowserSettings(NL::UI::BrowserSettings* a_settings) override;
+        virtual CefWindowInfo GetCefWindowInfo() override;
     };
 }

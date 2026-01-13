@@ -15,10 +15,12 @@ namespace NL::Providers
 
     public:
         CustomCEFSettingsProvider(NL::UI::Settings a_settings);
-        ~CustomCEFSettingsProvider() override = default;
-        CefSettings GetCefSettings() override;
-        CefBrowserSettings GetCefBrowserSettings() override;
-        CefBrowserSettings MergeAndGetCefBrowserSettings(NL::UI::BrowserSettings* a_settings) override;
-        CefWindowInfo GetCefWindowInfo() override;
+        virtual ~CustomCEFSettingsProvider() override = default;
+
+        virtual NL::UI::Settings GetGlobalSettings() override;
+        virtual CefSettings GetCefSettings() override;
+        virtual CefBrowserSettings GetCefBrowserSettings() override;
+        virtual CefBrowserSettings MergeAndGetCefBrowserSettings(NL::UI::BrowserSettings* a_settings) override;
+        virtual CefWindowInfo GetCefWindowInfo() override;
     };
 }

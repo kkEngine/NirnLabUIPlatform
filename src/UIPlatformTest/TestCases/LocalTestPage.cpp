@@ -91,33 +91,36 @@ namespace NL::UI::TestCase
             m_browser->LoadBrowserURL("file:///_testLocalPage.html", true);
 
             // func1
-            JS::JSFuncInfoString strFunInfo("NL", "func1");
-            strFunInfo.callbackData.executeInGameThread = false;
-            strFunInfo.callbackData.callback = [](const char** a_args, int a_argsCount) {
-                std::string argsStr = "";
-                for (auto i = 0; i < a_argsCount; ++i)
-                {
-                    argsStr += fmt::format("{}{}", (i > 0 ? ", " : ""), a_args[i]);
-                }
+            {
+                JS::JSFuncInfoString strFunInfo("NL", "func1");
+                strFunInfo.callbackData.executeInGameThread = false;
+                strFunInfo.callbackData.callback = [](const char** a_args, int a_argsCount) {
+                    std::string argsStr = "";
+                    for (auto i = 0; i < a_argsCount; ++i)
+                    {
+                        argsStr += fmt::format("{}{}", (i > 0 ? ", " : ""), a_args[i]);
+                    }
 
-                spdlog::info("func1__ callback. params: {}", argsStr);
-            };
+                    spdlog::info("func1__ callback. params: {}", argsStr);
+                };
+                m_browser->AddFunctionCallback(strFunInfo);
+            }
+
             // func2
-            auto func2 = new JS::JSFuncInfo();
-            func2->objectName = "NL";
-            func2->funcName = "func2";
-            func2->callbackData.executeInGameThread = true;
-            func2->callbackData.callback = [](const char** a_args, int a_argsCount) {
-                std::string argsStr = "";
-                for (auto i = 0; i < a_argsCount; ++i)
-                {
-                    argsStr += fmt::format("{}{}", (i > 0 ? ", " : ""), a_args[i]);
-                }
+            {
+                JS::JSFuncInfoString strFunInfo("NL", "func2");
+                strFunInfo.callbackData.executeInGameThread = false;
+                strFunInfo.callbackData.callback = [](const char** a_args, int a_argsCount) {
+                    std::string argsStr = "";
+                    for (auto i = 0; i < a_argsCount; ++i)
+                    {
+                        argsStr += fmt::format("{}{}", (i > 0 ? ", " : ""), a_args[i]);
+                    }
 
-                spdlog::info("func2 callback. params: {}", argsStr);
-            };
-            m_browser->AddFunctionCallback(strFunInfo);
-            m_browser->AddFunctionCallback(*func2);
+                    spdlog::info("func2__ callback. params: {}", argsStr);
+                };
+                m_browser->AddFunctionCallback(strFunInfo);
+            }
 
             while (!m_browser->IsPageLoaded())
             {

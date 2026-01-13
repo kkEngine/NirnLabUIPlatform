@@ -1,17 +1,23 @@
 #pragma once
 
+#include "PCH.h"
 #include "RenderData.h"
 
 namespace NL::Render
 {
-    class IRenderLayer
+    class IRenderLayer : public virtual CefBaseRefCounted
     {
-      protected:
+    protected:
         bool m_isVisible = true;
         RenderData* m_renderData = nullptr;
 
-      public:
+    public:
         virtual ~IRenderLayer() = default;
+
+        virtual const char* GetName()
+        {
+            return "Unknown";
+        }
 
         virtual void Init(RenderData* a_renderData)
         {
@@ -29,6 +35,6 @@ namespace NL::Render
             return m_isVisible;
         }
 
-        virtual void Draw(){};
+        virtual void Draw() {};
     };
 }

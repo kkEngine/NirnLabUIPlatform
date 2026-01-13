@@ -2,12 +2,34 @@
 
 namespace NL::CEF
 {
-    NirnLabCefClient::NirnLabCefClient()
+    NirnLabCefClient::NirnLabCefClient(std::shared_ptr<NL::Providers::ICEFSettingsProvider> a_settingsProvider)
     {
-        m_cefRenderLayer = NL::Render::CEFCopyRenderLayer::make_shared();
+        const auto rendererType = a_settingsProvider->GetGlobalSettings().rendererType;
+        switch (rendererType)
+        {
+        case NL::UI::RendererType::DeferredContext:
+        default: {
+            using RenderLayer = NL::Render::CEFCopyRenderLayer;
+            static_assert(std::is_base_of_v<CefRenderHandler, RenderLayer>);
+
+            auto renderLayer = new RenderLayer();
+            m_cefRenderLayer = CefRefPtr<NL::Render::IRenderLayer>(renderLayer);
+            m_cefRenderHandler = CefRefPtr<CefRenderHandler>(static_cast<CefRenderHandler*>(renderLayer));
+            break;
+        }
+        case NL::UI::RendererType::SyncCopy: {
+            using RenderLayer = NL::Render::CEFSyncCopyRenderLayer;
+            static_assert(std::is_base_of_v<CefRenderHandler, RenderLayer>);
+
+            auto renderLayer = new RenderLayer();
+            m_cefRenderLayer = CefRefPtr<NL::Render::IRenderLayer>(renderLayer);
+            m_cefRenderHandler = CefRefPtr<CefRenderHandler>(static_cast<CefRenderHandler*>(renderLayer));
+            break;
+        }
+        }
     }
 
-    std::shared_ptr<NL::Render::IRenderLayer> NirnLabCefClient::GetRenderLayer()
+    CefRefPtr<NL::Render::IRenderLayer> NirnLabCefClient::GetRenderLayer()
     {
         return m_cefRenderLayer;
     }
@@ -34,7 +56,7 @@ namespace NL::CEF
 
     CefRefPtr<CefRenderHandler> NirnLabCefClient::GetRenderHandler()
     {
-        return m_cefRenderLayer.get();
+        return m_cefRenderHandler;
     }
 
     CefRefPtr<CefJSDialogHandler> NirnLabCefClient::GetJSDialogHandler()
@@ -54,6 +76,7 @@ namespace NL::CEF
     void NirnLabCefClient::OnAfterCreated(CefRefPtr<CefBrowser> browser)
     {
         m_cefBrowser = browser;
+        spdlog::info("{}: browser with id {} using \"{}\" render layer", NameOf(NirnLabCefClient::OnAfterCreated), browser->GetIdentifier(), m_cefRenderLayer->GetName());
         onAfterBrowserCreated(browser);
     }
 

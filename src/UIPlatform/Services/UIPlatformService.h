@@ -51,6 +51,7 @@ namespace NL::Services
 
         std::shared_ptr<NL::Menus::MultiLayerMenu> GetMultiLayerMenu();
         std::shared_ptr<NL::Menus::CEFMenu> CreateCefMenu(std::shared_ptr<NL::JS::JSFunctionStorage> a_funcStorage,
-                                                          NL::JS::JSEventFuncInfo& a_eventFuncInfo);
+                                                          NL::JS::JSEventFuncInfo& a_eventFuncInfo,
+                                                          std::shared_ptr<NL::Providers::ICEFSettingsProvider> a_settingsProvider);
     };
 }

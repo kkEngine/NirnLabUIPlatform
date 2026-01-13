@@ -7,6 +7,11 @@ namespace NL::Providers
     {
     }
 
+    NL::UI::Settings CustomCEFSettingsProvider::GetGlobalSettings()
+    {
+        return m_settings;
+    }
+
     CefSettings CustomCEFSettingsProvider::GetCefSettings()
     {
         auto settings = m_defaultSettings->GetCefSettings();

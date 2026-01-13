@@ -2,31 +2,34 @@
 
 #include "PCH.h"
 #include "IRenderLayer.h"
-#include "Common/SpinLock.h"
+#include "Hooks/ShutdownHook.hpp"
 
 namespace NL::Render
 {
-    /// <summary>
-    /// OBSOLETE
-    /// Using this class may cause CTD
-    /// </summary>
-    class [[deprecated("MAY CAUSE CTD, DON'T USE")]] CEFRenderLayer : public IRenderLayer,
-                                                                      public CefRenderHandler
+    class CEFSyncCopyRenderLayer : public IRenderLayer,
+                                   public CefRenderHandler
     {
-        IMPLEMENT_REFCOUNTING(CEFRenderLayer);
-
-    public:
-        static std::shared_ptr<CEFRenderLayer> make_shared();
-        static void release_shared(CEFRenderLayer* a_render);
+        IMPLEMENT_REFCOUNTING(CEFSyncCopyRenderLayer);
 
     protected:
-        HANDLE m_sharedTextureHandle = nullptr;
-        ID3D11Texture2D* m_cefTexture = nullptr;
-        ID3D11ShaderResourceView* m_cefSRV = nullptr;
+        struct AtomicFlagGuard
+        {
+            std::atomic_flag& m_flag;
+
+            AtomicFlagGuard(std::atomic_flag& a_flag);
+            ~AtomicFlagGuard();
+        };
+
         Microsoft::WRL::ComPtr<ID3D11Device1> m_device1 = nullptr;
+        Microsoft::WRL::ComPtr<ID3D11Texture2D> m_cefTexture = nullptr;
+        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_cefSRV = nullptr;
+        const CefAcceleratedPaintInfo* m_acceleratedPaintInfo = nullptr;
+        std::atomic_flag m_acceleratedPaintReady = ATOMIC_FLAG_INIT;
+
+        void CopySharedTexure();
 
     public:
-        ~CEFRenderLayer() override;
+        virtual ~CEFSyncCopyRenderLayer() override = default;
 
         // IRenderLayer
         virtual void Init(RenderData* a_renderData) override;
