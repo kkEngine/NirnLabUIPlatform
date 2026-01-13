@@ -19,7 +19,7 @@ namespace NL::CEF
             CheckHresultThrow(hr, fmt::format("{}: failed to get dxgi adapter", NameOf(NirnLabCefApp)));
 
             DXGI_ADAPTER_DESC adapterDesc;
-            dxgiAdapter->GetDesc(&adapterDesc);
+            hr = dxgiAdapter->GetDesc(&adapterDesc);
             CheckHresultThrow(hr, fmt::format("{}: failed to get dxgi adapter desc", NameOf(NirnLabCefApp)));
 
             return fmt::format("{},{}", adapterDesc.AdapterLuid.HighPart, adapterDesc.AdapterLuid.LowPart);
@@ -35,7 +35,7 @@ namespace NL::CEF
         // command_line->AppendSwitch("disable-accelerated-video-decode");
 
         // un-comment to show the built-in Chromium fps meter
-        // command_line->AppendSwitch("show-fps-counter");
+        command_line->AppendSwitch("show-fps-counter");
 
         // command_line->AppendSwitch("disable-gpu-vsync");
 
@@ -72,6 +72,25 @@ namespace NL::CEF
 
         // Allow subprocesses to run with inherited admin privileges
         command_line->AppendSwitch("do-not-de-elevate");
+
+        // Run the GPU process as a thread in the browser process (fixed GPU lag?)
+        command_line->AppendSwitch("in-process-gpu");
+
+        // Disable task throttling of timer tasks from background pages
+        command_line->AppendSwitch("disable-background-timer-throttling");
+
+        // Prevent renderer process backgrounding when set
+        command_line->AppendSwitch("disable-renderer-backgrounding");
+
+        // Specifies that the main-thread Isolate should initialize in foreground mode
+        // If not specified, the the Isolate will start in background mode for extension processes and foreground mode otherwise
+        command_line->AppendSwitch("init-isolate-as-foreground");
+
+        // Set default encoding to UTF-8
+        command_line->AppendSwitchWithValue("default-encoding", "utf-8");
+
+        // https://chromestatus.com/features
+        // command_line->AppendSwitchWithValue("disable-features", "PrintCompositorLPAC");
     }
 
     CefRefPtr<CefBrowserProcessHandler> CEF::NirnLabCefApp::GetBrowserProcessHandler()
