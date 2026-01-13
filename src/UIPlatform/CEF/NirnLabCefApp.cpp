@@ -35,7 +35,7 @@ namespace NL::CEF
         // command_line->AppendSwitch("disable-accelerated-video-decode");
 
         // un-comment to show the built-in Chromium fps meter
-        command_line->AppendSwitch("show-fps-counter");
+        // command_line->AppendSwitch("show-fps-counter");
 
         // command_line->AppendSwitch("disable-gpu-vsync");
 
