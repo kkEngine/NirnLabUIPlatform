@@ -99,7 +99,16 @@ void ReleaseBrowser(NL::UI::IUIPlatformAPI::BrowserRefHandle a_handle)
 You can create special "event function" that will receive events.
 An example of creating an event function can be found in LocalTestPage.cpp
 
-```js
+Example of use in TypeScript
+```ts
+declare global {
+    interface NL {
+        addEventListener(type: string, callback: (data: string) => void): void;
+    }
+
+    const NL: NL;
+}
+
 NL.addEventListener("on:message", (data) => {
 	const para = document.createElement("p");
 	const node = document.createTextNode(data);
@@ -107,6 +116,7 @@ NL.addEventListener("on:message", (data) => {
 });
 ```
 
+C++ part
 ```cpp
 auto eventFunc = new JS::JSFuncInfo();
 eventFunc->objectName = "NL";
