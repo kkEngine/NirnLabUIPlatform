@@ -290,9 +290,13 @@ namespace NL::Converters
         {
             result->SetBool(a_v8Value->GetBoolValue());
         }
-        else if (a_v8Value->IsInt() || a_v8Value->IsUInt())
+        else if (a_v8Value->IsInt())
         {
             result->SetInt(a_v8Value->GetIntValue());
+        }
+        else if (a_v8Value->IsUInt())
+        {
+            result->SetDouble(a_v8Value->GetDoubleValue());
         }
         else if (a_v8Value->IsDouble())
         {
