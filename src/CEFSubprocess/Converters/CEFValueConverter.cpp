@@ -268,7 +268,27 @@ namespace NL::Converters
             return result;
         }
 
-        if (a_v8Value->IsArrayBuffer())
+        if (a_v8Value->IsInt())
+        {
+            result->SetInt(a_v8Value->GetIntValue());
+        }
+        else if (a_v8Value->IsUInt())
+        {
+            result->SetDouble(a_v8Value->GetUIntValue());
+        }
+        else if (a_v8Value->IsDouble())
+        {
+            result->SetDouble(a_v8Value->GetDoubleValue());
+        }
+        else if (a_v8Value->IsString() || a_v8Value->IsDate())
+        {
+            result->SetString(a_v8Value->GetStringValue());
+        }
+        else if (a_v8Value->IsBool())
+        {
+            result->SetBool(a_v8Value->GetBoolValue());
+        }
+        else if (a_v8Value->IsArrayBuffer())
         {
             a_warnMap.emplace(fmt::format("{}: can't serialize array buffer", NameOf(CEFValueConverter::ConvertValue)), 0).first->second++;
             result->SetNull();
@@ -286,29 +306,9 @@ namespace NL::Converters
             result->SetNull();
             return result;
         }
-        else if (a_v8Value->IsBool())
-        {
-            result->SetBool(a_v8Value->GetBoolValue());
-        }
-        else if (a_v8Value->IsInt())
-        {
-            result->SetInt(a_v8Value->GetIntValue());
-        }
-        else if (a_v8Value->IsUInt())
-        {
-            result->SetDouble(a_v8Value->GetDoubleValue());
-        }
-        else if (a_v8Value->IsDouble())
-        {
-            result->SetDouble(a_v8Value->GetDoubleValue());
-        }
         else if (a_v8Value->IsNull())
         {
             result->SetNull();
-        }
-        else if (a_v8Value->IsString() || a_v8Value->IsDate())
-        {
-            result->SetString(a_v8Value->GetStringValue());
         }
         else if (a_v8Value->IsArray())
         {

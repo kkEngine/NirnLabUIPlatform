@@ -21,8 +21,15 @@ using namespace std::string_literals;
 #include <SKSE/Impl/Stubs.h>
 #include <SKSE/SKSE.h>
 
+namespace logger = SKSE::log;
+
 // Win
 #include <Windows.h>
+
+// spdlog
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/msvc_sink.h>
+#include <spdlog/sinks/basic_file_sink.h>
 
 // this
 #include "Version.h"
@@ -33,6 +40,45 @@ using PreloadFunc = void (*)();
 inline void ShowMessageBox(const char* a_msg)
 {
     MessageBoxA(0, a_msg, "ERROR", MB_ICONERROR);
+}
+
+void InitDefaultLog()
+{
+    static bool s_loggerInited = false;
+
+    if (s_loggerInited)
+    {
+        return;
+    }
+
+    const auto level = spdlog::level::info;
+    auto path = logger::log_directory();
+    if (!path)
+    {
+        SKSE::stl::report_and_fail("Failed to find standard logging directory"sv);
+    }
+
+    *path /= fmt::format("{}.log"sv, "NirnLabUIPlugin");
+    auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true);
+
+    auto log = std::make_shared<spdlog::logger>("global log"s, std::move(sink));
+    log->set_level(level);
+    log->flush_on(level);
+
+    spdlog::set_default_logger(std::move(log));
+    spdlog::set_pattern("[%T.%e] [%^%l%$] : %v"s);
+    s_loggerInited = true;
+}
+
+void LogError(const char* a_error)
+{
+    InitDefaultLog();
+    spdlog::error(a_error);
+}
+
+void LogError(std::string&& a_error)
+{
+    LogError(a_error.data());
 }
 
 std::string GetLastErrorAsString()
@@ -68,11 +114,19 @@ std::string GetLastErrorAsString()
 static inline void SetEnvPath(std::filesystem::path a_path)
 {
     if (!std::filesystem::exists(a_path))
-        throw std::logic_error("Directory does not exist: " + a_path.string());
+    {
+        throw std::runtime_error("Directory does not exist: " + a_path.string());
+    }
+
     if (!std::filesystem::is_directory(a_path))
-        throw std::logic_error("Path is not a directory: " + a_path.string());
+    {
+        throw std::runtime_error("Path is not a directory: " + a_path.string());
+    }
+
     if (!a_path.is_absolute())
-        throw std::logic_error("An absolute path expected: " + a_path.string());
+    {
+        throw std::runtime_error("An absolute path expected: " + a_path.string());
+    }
 
     std::vector<wchar_t> path;
     path.resize(GetEnvironmentVariableW(L"PATH", nullptr, 0));
@@ -93,14 +147,17 @@ static inline std::filesystem::path GetUIRelPath()
     return std::filesystem::current_path() / L"" NL_UI_REL_PATH;
 }
 
-bool g_isEnvPathSet = false;
 static inline void SetUIEnvPath()
 {
-    if (!g_isEnvPathSet)
+    static bool s_envPathSet = false;
+
+    if (s_envPathSet)
     {
-        SetEnvPath(GetUIRelPath());
-        g_isEnvPathSet = true;
+        return;
     }
+
+    SetEnvPath(GetUIRelPath());
+    s_envPathSet = true;
 }
 
 HMODULE g_nirnLabUILib = nullptr;
@@ -111,21 +168,20 @@ static inline void LoadNirnLabUILib()
         auto nirnLabUILib = LoadLibraryA(NL_UI_LIB_NAME);
         if (!nirnLabUILib)
         {
-            std::string errDesc;
+            std::string errMsg;
             const auto errCode = GetLastError();
             switch (errCode)
             {
             // Not found
             case 126:
-                errDesc = NL_UI_LIB_NAME " not found";
+                errMsg = NL_UI_LIB_NAME ".dll not found";
                 break;
             default:
-                errDesc.append(fmt::format("Error code: {}, desc: \"{}\"", errCode, GetLastErrorAsString()));
+                errMsg = std::format("Failed to LoadLibraryA(), error code: {}, desc: \"{}\"", errCode, GetLastErrorAsString());
                 break;
             }
 
-            ShowMessageBox(errDesc.data());
-            throw std::runtime_error(errDesc);
+            throw std::runtime_error(errMsg);
         }
         else
         {
@@ -143,9 +199,8 @@ static inline TFunc ExecLibFunc(const char* a_funcName)
     auto func = reinterpret_cast<TFunc>(GetProcAddress(g_nirnLabUILib, a_funcName));
     if (!func)
     {
-        auto funcNotFoundMsg = fmt::format("{} \"{}\" function not found", NL_UI_LIB_NAME, a_funcName);
-        ShowMessageBox(funcNotFoundMsg.data());
-        throw std::runtime_error(funcNotFoundMsg);
+        auto errMsg = std::format("{} \"{}\" function not found", NL_UI_LIB_NAME, a_funcName);
+        throw std::runtime_error(errMsg);
     }
 
     return func;
@@ -164,8 +219,22 @@ extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() {
 
 extern "C" void DLLEXPORT APIENTRY Initialize()
 {
-    auto preload = ExecLibFunc<PreloadFunc>("Initialize");
-    preload();
+    try
+    {
+        auto preload = ExecLibFunc<PreloadFunc>("Initialize");
+        if (!preload)
+        {
+            LogError(std::format("Failed to ExecLibFunc<PreloadFunc>(), {}", GetLastErrorAsString().data()));
+            return;
+        }
+
+        preload();
+    }
+    catch (const std::exception& e)
+    {
+        LogError(std::format("Exception while Initialize(), {}, desc {}", e.what(), GetLastErrorAsString().data()));
+        ShowMessageBox(e.what());
+    }
 }
 
 SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
@@ -173,10 +242,17 @@ SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
     try
     {
         auto entry = ExecLibFunc<EntryFunc>("Entry");
+        if (!entry)
+        {
+            LogError(std::format("Failed to ExecLibFunc<EntryFunc>(), {}", GetLastErrorAsString().data()));
+            return false;
+        }
+
         return entry(a_skse);
     }
     catch (const std::exception& e)
     {
+        LogError(std::format("Exception while SKSEPlugin_Load(), {}, desc", e.what(), GetLastErrorAsString().data()));
         ShowMessageBox(e.what());
         return false;
     }
