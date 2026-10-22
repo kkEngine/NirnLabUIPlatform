@@ -41,10 +41,16 @@ namespace NL::Menus
 
         RE::UI::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(this));
 
-        const auto inputEventSource = RE::BSInputDeviceManager::GetSingleton();
-        inputEventSource->lock.Lock();
-        NL::Utils::PushFront<RE::BSTEventSink<RE::InputEvent*>>(RE::BSInputDeviceManager::GetSingleton()->sinks, this);
-        inputEventSource->lock.Unlock();
+        const auto inputDeviceManager = RE::BSInputDeviceManager::GetSingleton();
+        if (inputDeviceManager)
+        {
+            RE::BSSpinLockGuard locker(inputDeviceManager->lock);
+            NL::Utils::PushFront<RE::BSTEventSink<RE::InputEvent*>>(RE::BSInputDeviceManager::GetSingleton()->sinks, this);
+        }
+        else
+        {
+            m_logger->error("{}: failed to get BSInputDeviceManager", NameOf(MultiLayerMenu));
+        }
 
         // todo: move to settings
         NL::Services::InputLangSwitchService::GetSingleton().SetActive(true);
