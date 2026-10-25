@@ -24,6 +24,7 @@ namespace NL::UI::TestCase
 
         m_browser->ToggleBrowserFocusByKeys(RE::BSKeyboardDevice::Keys::kF6, 0);
         m_browser->ToggleBrowserVisibleByKeys(RE::BSKeyboardDevice::Keys::kF7, 0);
+        m_browser->SetInputMode(NL::CEF::IBrowser::InputMode::NonExclusive);
         m_browser->SetBrowserFocused(true);
     }
 }
