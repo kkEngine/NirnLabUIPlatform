@@ -41,10 +41,16 @@ namespace NL::Menus
 
         RE::UI::GetSingleton()->AddEventSink(static_cast<RE::BSTEventSink<RE::MenuOpenCloseEvent>*>(this));
 
-        const auto inputEventSource = RE::BSInputDeviceManager::GetSingleton();
-        inputEventSource->lock.Lock();
-        NL::Utils::PushFront<RE::BSTEventSink<RE::InputEvent*>>(RE::BSInputDeviceManager::GetSingleton()->sinks, this);
-        inputEventSource->lock.Unlock();
+        const auto inputDeviceManager = RE::BSInputDeviceManager::GetSingleton();
+        if (inputDeviceManager)
+        {
+            RE::BSSpinLockGuard locker(inputDeviceManager->lock);
+            NL::Utils::PushFront<RE::BSTEventSink<RE::InputEvent*>>(inputDeviceManager->sinks, this);
+        }
+        else
+        {
+            m_logger->error("{}: failed to get BSInputDeviceManager", NameOf(MultiLayerMenu));
+        }
 
         // todo: move to settings
         NL::Services::InputLangSwitchService::GetSingleton().SetActive(true);
@@ -57,14 +63,22 @@ namespace NL::Menus
 
     bool MultiLayerMenu::AddSubMenu(std::string_view a_menuName, std::shared_ptr<ISubMenu> a_subMenu)
     {
-        std::lock_guard<std::mutex> lock(m_mapMenuMutex);
-        const std::string menuName = a_menuName.data();
-        if (m_menuMap.contains(menuName))
+        if (!a_subMenu)
         {
+            m_logger->error("{}: sub menu is nullptr", NameOf(MultiLayerMenu::AddSubMenu));
             return false;
         }
 
-        m_menuMap.insert({menuName, a_subMenu});
+        const std::string menuName(a_menuName);
+        {
+            std::lock_guard<std::mutex> locker(m_mapMenuMutex);
+            auto [it, inserted] = m_menuMap.try_emplace(menuName, a_subMenu);
+            if (!inserted)
+            {
+                return false;
+            }
+        }
+
         a_subMenu->Init(&m_renderData);
         return true;
     }
@@ -90,7 +104,6 @@ namespace NL::Menus
     bool MultiLayerMenu::RemoveSubMenu(const std::string& a_menuName)
     {
         std::lock_guard<std::mutex> lock(m_mapMenuMutex);
-        const auto menuIt = m_menuMap.find(a_menuName);
         return m_menuMap.erase(a_menuName) > 0;
     }
 
@@ -144,7 +157,7 @@ namespace NL::Menus
 
     bool MultiLayerMenu::ProcessMouseMove(RE::MouseMoveEvent* a_event)
     {
-        std::lock_guard<std::mutex> lock(m_mapMenuMutex);
+        std::lock_guard<std::mutex> locker(m_mapMenuMutex);
         for (const auto& subMenu : m_menuMap)
         {
             if (subMenu.second->ProcessMouseMove(a_event))
@@ -158,7 +171,7 @@ namespace NL::Menus
 
     bool MultiLayerMenu::ProcessButton(RE::ButtonEvent* a_event)
     {
-        std::lock_guard<std::mutex> lock(m_mapMenuMutex);
+        std::lock_guard<std::mutex> locker(m_mapMenuMutex);
         for (const auto& subMenu : m_menuMap)
         {
             if (subMenu.second->ProcessButton(a_event))
@@ -201,12 +214,12 @@ namespace NL::Menus
 
         auto inputEvent = *a_event;
         auto result = RE::BSEventNotifyControl::kContinue;
-        if (!CanProcess(inputEvent)) [[unlikely]]
+        if (!CanProcess(inputEvent))
         {
-            return RE::BSEventNotifyControl::kContinue;
+            return result;
         }
 
-        std::lock_guard<std::mutex> lock(m_mapMenuMutex);
+        std::lock_guard<std::mutex> locker(m_mapMenuMutex);
         while (inputEvent != nullptr)
         {
             for (const auto& subMenu : m_menuMap)

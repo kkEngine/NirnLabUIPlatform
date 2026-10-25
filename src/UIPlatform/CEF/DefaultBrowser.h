@@ -14,8 +14,8 @@ namespace NL::CEF
 {
     class NirnLabCefClient;
 
-    class DefaultBrowser : public IBrowser,
-                           public RE::MenuEventHandler
+    class DefaultBrowser final : public IBrowser,
+                                 public RE::MenuEventHandler
     {
     protected:
         std::shared_ptr<spdlog::logger> m_logger = nullptr;
@@ -32,6 +32,7 @@ namespace NL::CEF
         // Focus
         bool m_isFocused = false;
         bool m_isFocusedCached = false;
+        InputMode m_inputMode = IBrowser::InputMode::Exclusive;
 
         // JS execution
         std::vector<std::tuple<std::string, std::string>> m_jsExecCache;
@@ -79,20 +80,24 @@ namespace NL::CEF
         bool __cdecl IsBrowserReady() override;
         bool __cdecl IsPageLoaded() override;
 
-        void __cdecl SetBrowserVisible(bool a_value) override;
+        void __cdecl SetBrowserVisible(bool a_visible) override;
         bool __cdecl IsBrowserVisible() override;
         void __cdecl ToggleBrowserVisibleByKeys(const std::uint32_t a_keyCode1, const std::uint32_t a_keyCode2) override;
 
-        void __cdecl SetBrowserFocused(bool a_value) override;
+        void __cdecl SetBrowserFocused(bool a_focused) override;
         bool __cdecl IsBrowserFocused() override;
         void __cdecl ToggleBrowserFocusByKeys(const std::uint32_t a_keyCode1, const std::uint32_t a_keyCode2) override;
 
         void __cdecl LoadBrowserURL(const char* a_url, bool a_clearJSFunctions = true) override;
-        void __cdecl ExecuteJavaScript(const char* a_script, const char* a_scriptUrl = JS_EXECUTE_SCRIPT_URL) override;
+        void __cdecl ExecuteJavaScript(const char* a_script, const char* a_scriptUrl = kJSExecuteScriptURL) override;
         void __cdecl AddFunctionCallback(const NL::JS::JSFuncInfo& a_callbackInfo) override;
         void __cdecl RemoveFunctionCallback(const char* a_objectName, const char* a_funcName) override;
         void __cdecl RemoveFunctionCallback(const NL::JS::JSFuncInfo& a_callbackInfo) override;
         void __cdecl ExecEventFunction(const char* a_eventName, const char* a_data) override;
+
+        void __cdecl SetInputMode(InputMode a_mode) override;
+        InputMode __cdecl GetInputMode() override;
+        void __cdecl SendBrowserHostFocus(bool a_focused) override;
 
         // RE::MenuEventHandler
         bool CanProcess(RE::InputEvent* a_event) override;

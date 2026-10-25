@@ -227,10 +227,10 @@ namespace NL::CEF
         return m_isPageLoaded;
     }
 
-    void __cdecl DefaultBrowser::SetBrowserVisible(bool a_value)
+    void __cdecl DefaultBrowser::SetBrowserVisible(bool a_visible)
     {
-        m_cefClient->GetRenderLayer()->SetVisible(a_value);
-        if (!a_value)
+        m_cefClient->GetRenderLayer()->SetVisible(a_visible);
+        if (!a_visible)
         {
             SetBrowserFocused(false);
         }
@@ -247,10 +247,10 @@ namespace NL::CEF
         m_toggleVisibleKeyCode2 = a_keyCode2 < sizeof(RE::BSInputDeviceManager::GetSingleton()->GetKeyboard()->curState) ? a_keyCode2 : 0;
     }
 
-    void __cdecl DefaultBrowser::SetBrowserFocused(bool a_value)
+    void __cdecl DefaultBrowser::SetBrowserFocused(bool a_focused)
     {
         std::lock_guard locker(m_urlMutex);
-        if (m_isFocused == a_value)
+        if (m_isFocused == a_focused)
         {
             return;
         }
@@ -258,12 +258,12 @@ namespace NL::CEF
         if (!IsPageLoaded())
         {
             m_isFocusedCached = true;
-            m_isFocused = a_value;
+            m_isFocused = a_focused;
             return;
         }
 
         const auto uiMsgQ = RE::UIMessageQueue::GetSingleton();
-        if (a_value)
+        if (a_focused)
         {
             m_wasCursorOpen = RE::UI::GetSingleton()->IsMenuOpen(RE::CursorMenu::MENU_NAME);
             if (uiMsgQ != nullptr)
@@ -279,9 +279,9 @@ namespace NL::CEF
             }
         }
 
-        m_cefClient->GetBrowser()->GetHost()->SetFocus(a_value);
+        m_cefClient->GetBrowser()->GetHost()->SetFocus(a_focused);
         m_isFocusedCached = false;
-        m_isFocused = a_value;
+        m_isFocused = a_focused;
         if (m_isFocused)
         {
             auto& cdata = RE::PlayerControls::GetSingleton()->data;
@@ -418,6 +418,24 @@ namespace NL::CEF
         }
     }
 
+    void __cdecl DefaultBrowser::SetInputMode(InputMode a_mode)
+    {
+        m_inputMode = a_mode;
+    }
+
+    IBrowser::InputMode __cdecl DefaultBrowser::GetInputMode()
+    {
+        return m_inputMode;
+    }
+
+    void __cdecl DefaultBrowser::SendBrowserHostFocus(bool a_focused)
+    {
+        if (IsPageLoaded())
+        {
+            m_cefClient->GetBrowser()->GetHost()->SetFocus(a_focused);
+        }
+    }
+
 #pragma endregion
 
 #pragma region RE::MenuEventHandler
@@ -434,17 +452,20 @@ namespace NL::CEF
             return false;
         }
 
-        auto cursor = RE::UI::GetSingleton()->GetMenu<RE::CursorMenu>(RE::CursorMenu::MENU_NAME);
-        if (cursor.get())
+        if (m_inputMode == IBrowser::InputMode::Exclusive)
         {
-            cursor->ProcessMouseMove(a_event);
+            auto cursor = RE::UI::GetSingleton()->GetMenu<RE::CursorMenu>(RE::CursorMenu::MENU_NAME);
+            if (cursor.get())
+            {
+                cursor->ProcessMouseMove(a_event);
+            }
         }
 
         m_lastCefMouseEvent.x = static_cast<int>(m_currentMousePosX);
         m_lastCefMouseEvent.y = static_cast<int>(m_currentMousePosY);
         m_cefClient->GetBrowser()->GetHost()->SendMouseMoveEvent(m_lastCefMouseEvent, false);
 
-        return true;
+        return m_inputMode == IBrowser::InputMode::Exclusive;
     }
 
     bool DefaultBrowser::ProcessButton(RE::ButtonEvent* a_event)
@@ -464,7 +485,7 @@ namespace NL::CEF
         case RE::INPUT_DEVICE::kMouse:
             if (!a_event->IsDown() && !a_event->IsUp())
             {
-                return true;
+                return m_inputMode == IBrowser::InputMode::Exclusive;
             }
 
             switch (scanCode)
@@ -505,7 +526,7 @@ namespace NL::CEF
             break;
         }
 
-        return true;
+        return m_inputMode == IBrowser::InputMode::Exclusive;
     }
 
 #pragma endregion
