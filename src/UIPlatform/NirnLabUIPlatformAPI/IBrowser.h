@@ -99,7 +99,8 @@ namespace NL::CEF
         /// <returns></returns>
         virtual void __cdecl SendBrowserHostFocus(bool a_focused) = 0;
 
-        // Next methods allow manual input control without intercepting Skyrim's input system.
+        // The following methods allow manual control over input without intercepting Skyrim's input system.
+        // They provide the ability to programmatically inject simulated mouse and keyboard events.
         // There are forward declarations for the input classes; if you decide to use these methods,
         // you should use a CommonLib (see RE::MenuEventHandler) or do some reverse engineering.
         virtual bool __cdecl CanProcess(RE::InputEvent* a_event) = 0;
