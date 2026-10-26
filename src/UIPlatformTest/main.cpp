@@ -10,7 +10,7 @@ extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() {
     v.pluginVersion = 1;
     v.PluginName(PLUGIN_NAME);
     v.AuthorName("kkEngine"sv);
-    v.CompatibleVersions({SKSE::RUNTIME_SSE_1_6_640, REL::Version(1, 6, 1170, 0)});
+    v.CompatibleVersions({SKSE::RUNTIME_SSE_1_5_97, SKSE::RUNTIME_SSE_1_6_640, REL::Version(1, 6, 1170, 0)});
     v.UsesAddressLibrary(true);
     v.UsesStructsPost629(true);
     return v;
@@ -63,7 +63,7 @@ void Init1stMethodToGetAPI()
             break;
         }
     });
-    SKSE::GetMessagingInterface()->RegisterListener(NL::UI::LibVersion::PROJECT_NAME, [](SKSE::MessagingInterface::Message* a_msg) {
+    SKSE::GetMessagingInterface()->RegisterListener(nullptr, [](SKSE::MessagingInterface::Message* a_msg) {
         spdlog::info("Received message({}) from \"{}\"", a_msg->type, a_msg->sender ? a_msg->sender : "nullptr");
         switch (a_msg->type)
         {
@@ -149,6 +149,14 @@ void Init3rdMethodToGetAPI()
     NL::UI::SKSELoader::GetUIPlatformAPIWithVersionCheck([](NL::UI::IUIPlatformAPI* a_api) {
         NL::UI::TestCase::StartTests(a_api);
     });
+}
+
+extern "C" [[maybe_unused]] __declspec(dllexport) bool SKSEPlugin_Query(::SKSE::QueryInterface*, ::SKSE::PluginInfo* pluginInfo)
+{
+    pluginInfo->infoVersion = SKSEPlugin_Version.pluginVersion;
+    pluginInfo->name = SKSEPlugin_Version.pluginName;
+    pluginInfo->version = SKSEPlugin_Version.pluginVersion;
+    return true;
 }
 
 SKSEPluginLoad(const SKSE::LoadInterface* a_skse)

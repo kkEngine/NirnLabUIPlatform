@@ -211,7 +211,7 @@ extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() {
     v.pluginVersion = NL::UI::LibVersion::AS_INT;
     v.PluginName(NL::UI::LibVersion::PROJECT_NAME);
     v.AuthorName("kkEngine"sv);
-    v.CompatibleVersions({SKSE::RUNTIME_SSE_1_6_640, REL::Version(1, 6, 1170, 0)});
+    v.CompatibleVersions({SKSE::RUNTIME_SSE_1_5_97, SKSE::RUNTIME_SSE_1_6_640, REL::Version(1, 6, 1170, 0)});
     v.UsesAddressLibrary(true);
     v.UsesStructsPost629(true);
     return v;
@@ -235,6 +235,14 @@ extern "C" void DLLEXPORT APIENTRY Initialize()
         LogError(std::format("Exception while Initialize(), {}, desc {}", e.what(), GetLastErrorAsString().data()));
         ShowMessageBox(e.what());
     }
+}
+
+extern "C" [[maybe_unused]] __declspec(dllexport) bool SKSEPlugin_Query(::SKSE::QueryInterface*, ::SKSE::PluginInfo* pluginInfo)
+{
+    pluginInfo->infoVersion = SKSEPlugin_Version.pluginVersion;
+    pluginInfo->name = SKSEPlugin_Version.pluginName;
+    pluginInfo->version = SKSEPlugin_Version.pluginVersion;
+    return true;
 }
 
 SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
