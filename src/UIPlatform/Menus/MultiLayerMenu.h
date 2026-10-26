@@ -24,7 +24,7 @@ namespace NL::Menus
     public:
         using RE::IMenu::operator new;
         using RE::IMenu::operator delete;
-        MultiLayerMenu(std::shared_ptr<spdlog::logger> a_logger);
+        MultiLayerMenu(std::shared_ptr<spdlog::logger> a_logger, decltype(RE::IMenu::depthPriority) a_depthPriority);
         ~MultiLayerMenu() override;
 
         bool AddSubMenu(std::string_view a_menuName, std::shared_ptr<ISubMenu> a_subMenu);

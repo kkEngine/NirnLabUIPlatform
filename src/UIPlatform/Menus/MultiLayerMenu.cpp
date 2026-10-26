@@ -2,7 +2,7 @@
 
 namespace NL::Menus
 {
-    MultiLayerMenu::MultiLayerMenu(std::shared_ptr<spdlog::logger> a_logger)
+    MultiLayerMenu::MultiLayerMenu(std::shared_ptr<spdlog::logger> a_logger, decltype(RE::IMenu::depthPriority) a_depthPriority)
     {
         ThrowIfNullptr(MultiLayerMenu, a_logger);
         m_logger = a_logger;
@@ -33,7 +33,7 @@ namespace NL::Menus
         m_renderData.height = textDesc.Height;
 
         // IMenu props
-        depthPriority = 8;
+        depthPriority = a_depthPriority;
         menuFlags.set(RE::UI_MENU_FLAGS::kAlwaysOpen);
         menuFlags.set(RE::UI_MENU_FLAGS::kCustomRendering);
         menuFlags.set(RE::UI_MENU_FLAGS::kAssignCursorToRenderer);

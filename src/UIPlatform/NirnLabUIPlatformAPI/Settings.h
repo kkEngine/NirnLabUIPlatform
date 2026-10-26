@@ -25,7 +25,14 @@ namespace NL::UI
         /// Renderer type
         /// </summary>
         RendererType rendererType = RendererType::SyncCopy;
-        char pad1[2] = {};
+        /// <summary>
+        /// This value determines the rendering order of the menu among the game's native menus.
+        /// Native menu example:
+        /// Cursor: menuDepth = 13
+        /// Console: menuDepth = 12
+        /// HUD: menuDepth = 2
+        /// </summary>
+        std::int8_t menuDepthPriority = 8;
     };
     static_assert(sizeof(Settings) == 8);
 

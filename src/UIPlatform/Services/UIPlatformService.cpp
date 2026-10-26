@@ -31,7 +31,7 @@ namespace NL::Services
 
         try
         {
-            m_mlMenu = std::make_shared<NL::Menus::MultiLayerMenu>(m_logger);
+            m_mlMenu = std::make_shared<NL::Menus::MultiLayerMenu>(m_logger, a_settingsProvider->GetGlobalSettings().menuDepthPriority);
         }
         catch (const std::runtime_error& error)
         {
