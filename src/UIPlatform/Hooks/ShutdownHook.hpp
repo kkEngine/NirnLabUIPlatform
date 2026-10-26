@@ -23,11 +23,8 @@ namespace NL::Hooks
 
         static bool Install()
         {
-            static constexpr REL::ID WinMain(36544);
-
-            static REL::Relocation<std::uintptr_t> target{WinMain};
-            auto& trampoline = SKSE::GetTrampoline();
-            _Shutdown = trampoline.write_call<5>(target.address() + 0x1AE, &Shutdown); // Main::Shutdown
+            REL::Relocation<std::uintptr_t> winMain{RELOCATION_ID(35545, 36544), REL::VariantOffset(0x35, 0x1AE, 0)};
+            _Shutdown = winMain.write_call<5>(&Shutdown);
 
             return true;
         }

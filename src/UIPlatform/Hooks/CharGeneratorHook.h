@@ -17,7 +17,7 @@ namespace NL::Hooks
     public:
         static bool Install()
         {
-            REL::Relocation<std::uintptr_t> toUnicodeFunc{RELOCATION_ID(0, 68782), REL::VariantOffset(0, 0x2CB, 0)};
+            REL::Relocation<std::uintptr_t> toUnicodeFunc{RELOCATION_ID(67472, 68782), REL::VariantOffset(0x20D, 0x2CB, 0)};
             _ToUnicodeCall = SKSE::GetTrampoline().write_call<6>(toUnicodeFunc.address(), &ToUnicodeCall);
 
             return true;

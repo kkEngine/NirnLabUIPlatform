@@ -93,7 +93,7 @@ namespace NL::UI::SKSELoader
     {
         LoaderData::s_apiReadyCallback = a_apiReadyCallback;
 
-        SKSE::GetMessagingInterface()->RegisterListener(NL::UI::LibVersion::PROJECT_NAME, [](SKSE::MessagingInterface::Message* a_msg) {
+        SKSE::GetMessagingInterface()->RegisterListener(nullptr, [](SKSE::MessagingInterface::Message* a_msg) {
             ProcessSKSEMessage(a_msg);
         });
     }
