@@ -96,17 +96,17 @@ namespace NL::Menus
 
     bool CEFMenu::CanProcess(RE::InputEvent* a_event)
     {
-        return m_browser->CanProcess(a_event);
+        return m_browser->CanProcessInner(a_event);
     }
 
     bool CEFMenu::ProcessMouseMove(RE::MouseMoveEvent* a_event)
     {
-        return m_browser->ProcessMouseMove(a_event);
+        return m_browser->ProcessMouseMoveInner(a_event);
     }
 
     bool CEFMenu::ProcessButton(RE::ButtonEvent* a_event)
     {
-        return m_browser->ProcessButton(a_event);
+        return m_browser->ProcessButtonInner(a_event);
     }
 
 #pragma endregion

@@ -4,9 +4,9 @@ option(BUILD_AS_SHARED "Build as dll skse plugin else build as static lib" ON)
 
 # Version
 set(LIB_MAJOR_VERSION 3)
-set(LIB_MINOR_VERSION 4)
+set(LIB_MINOR_VERSION 5)
 set(API_MAJOR_VERSION 3)
-set(API_MINOR_VERSION 4)
+set(API_MINOR_VERSION 5)
 
 # VCPKG config
 string(REPLACE "\\" "/" ENV_VCPKG_ROOT "$ENV{VCPKG_ROOT}")
@@ -253,6 +253,14 @@ target_compile_definitions(
     PRIVATE
         NL_UI_REL_PATH="${NL_UI_REL_PATH}"
         NL_UI_SUBPROC_NAME="${CEFSubprocessProjectName}.exe"
+)
+
+add_custom_command(
+    TARGET ${UIPlatformProjectName} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${API_FOLDER_PATH}"
+        "${NL_UI_PATH}/NirnLabUIPlatformAPI"
+    COMMENT "Copying custom folder to output directory..."
 )
 
 # ============================ UIPlugin ============================

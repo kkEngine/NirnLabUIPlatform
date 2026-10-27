@@ -76,6 +76,10 @@ namespace NL::CEF
         void AddFunctionCallbackAndSendMessage(const NL::JS::JSFuncInfo& a_callbackInfo);
         void RemoveFunctionCallbackAndSendMessage(const char* a_objectName, const char* a_funcName);
 
+        bool CanProcessInner(RE::InputEvent* a_event);
+        bool ProcessMouseMoveInner(RE::MouseMoveEvent* a_event);
+        bool ProcessButtonInner(RE::ButtonEvent* a_event);
+
         // IBrowser
         bool __cdecl IsBrowserReady() override;
         bool __cdecl IsPageLoaded() override;
@@ -97,7 +101,6 @@ namespace NL::CEF
 
         void __cdecl SetInputMode(InputMode a_mode) override;
         InputMode __cdecl GetInputMode() override;
-        void __cdecl SendBrowserHostFocus(bool a_focused) override;
 
         // RE::MenuEventHandler
         bool CanProcess(RE::InputEvent* a_event) override;

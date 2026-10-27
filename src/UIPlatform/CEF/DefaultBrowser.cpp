@@ -215,6 +215,40 @@ namespace NL::CEF
         }
     }
 
+    bool DefaultBrowser::CanProcessInner(RE::InputEvent* a_event)
+    {
+        return CanProcess(a_event);
+    }
+
+    bool DefaultBrowser::ProcessMouseMoveInner(RE::MouseMoveEvent* a_event)
+    {
+        if (m_inputMode == IBrowser::InputMode::Manual)
+        {
+            return false;
+        }
+
+        if (IsBrowserFocused() && m_inputMode == IBrowser::InputMode::Exclusive)
+        {
+            auto cursor = RE::UI::GetSingleton()->GetMenu<RE::CursorMenu>(RE::CursorMenu::MENU_NAME);
+            if (cursor.get())
+            {
+                cursor->ProcessMouseMove(a_event);
+            }
+        }
+
+        return ProcessMouseMove(a_event);
+    }
+
+    bool DefaultBrowser::ProcessButtonInner(RE::ButtonEvent* a_event)
+    {
+        if (m_inputMode == IBrowser::InputMode::Manual)
+        {
+            return false;
+        }
+
+        return ProcessButton(a_event);
+    }
+
 #pragma region IBrowser
 
     bool __cdecl DefaultBrowser::IsBrowserReady()
@@ -428,14 +462,6 @@ namespace NL::CEF
         return m_inputMode;
     }
 
-    void __cdecl DefaultBrowser::SendBrowserHostFocus(bool a_focused)
-    {
-        if (IsPageLoaded())
-        {
-            m_cefClient->GetBrowser()->GetHost()->SetFocus(a_focused);
-        }
-    }
-
 #pragma endregion
 
 #pragma region RE::MenuEventHandler
@@ -450,15 +476,6 @@ namespace NL::CEF
         if (!IsBrowserFocused())
         {
             return false;
-        }
-
-        if (m_inputMode == IBrowser::InputMode::Exclusive)
-        {
-            auto cursor = RE::UI::GetSingleton()->GetMenu<RE::CursorMenu>(RE::CursorMenu::MENU_NAME);
-            if (cursor.get())
-            {
-                cursor->ProcessMouseMove(a_event);
-            }
         }
 
         m_lastCefMouseEvent.x = static_cast<int>(m_currentMousePosX);

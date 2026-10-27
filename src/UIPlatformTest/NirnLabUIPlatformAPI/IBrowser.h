@@ -29,6 +29,11 @@ namespace NL::CEF
             /// Shows the cursor.
             /// </summary>
             NonExclusive,
+
+            /// <summary>
+            /// You can control input manually with this mode
+            /// </summary>
+            Manual,
         };
 
         virtual ~IBrowser() = default;
@@ -92,12 +97,6 @@ namespace NL::CEF
         /// <returns></returns>
         virtual void __cdecl SetInputMode(InputMode a_mode) = 0;
         virtual InputMode __cdecl GetInputMode() = 0;
-        /// <summary>
-        /// Sends focus to the CEF without intercepting input. Suitable for manual input.
-        /// </summary>
-        /// <param name="a_focused"></param>
-        /// <returns></returns>
-        virtual void __cdecl SendBrowserHostFocus(bool a_focused) = 0;
 
         // The following methods allow manual control over input without intercepting Skyrim's input system.
         // They provide the ability to programmatically inject simulated mouse and keyboard events.
