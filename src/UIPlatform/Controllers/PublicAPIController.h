@@ -37,6 +37,7 @@ namespace NL::Controllers
         void __cdecl ReleaseBrowserHandle(BrowserRefHandle a_handle) override;
 
         BrowserRefHandle __cdecl AddOrGetBrowser(const char* a_browserName,
+                                                 void* a_userData,
                                                  NL::JS::JSFuncInfo* const* a_funcInfoArr,
                                                  const std::uint32_t a_funcInfoArrSize,
                                                  const char* a_startUrl,

@@ -31,7 +31,7 @@ namespace NL::UI::TestCase
         func1->objectName = "NL";
         func1->funcName = "func1";
         func1->callbackData.executeInGameThread = false;
-        func1->callbackData.callback = [](const char** a_args, int a_argsCount) {
+        func1->callbackData.callback = [](NL::CEF::IBrowser* a_sourceBrowser, const char** a_args, int a_argsCount) {
             std::string argsStr = "";
             for (auto i = 0; i < a_argsCount; ++i)
             {
@@ -46,7 +46,7 @@ namespace NL::UI::TestCase
         func2->objectName = "NL";
         func2->funcName = "func2";
         func2->callbackData.executeInGameThread = true;
-        func2->callbackData.callback = [](const char** a_args, int a_argsCount) {
+        func2->callbackData.callback = [](NL::CEF::IBrowser* a_sourceBrowser, const char** a_args, int a_argsCount) {
             std::string argsStr = "";
             for (auto i = 0; i < a_argsCount; ++i)
             {
@@ -71,6 +71,8 @@ namespace NL::UI::TestCase
                                                  static_cast<std::uint32_t>(m_funcInfoVector.size()),
                                                  "https://www.youtube.com",
                                                  m_browser);
+        auto userData = new std::string("Custom user data");
+        m_browser->SetUserData(userData);
 
         if (m_browserHandle == NL::UI::IUIPlatformAPI::InvalidBrowserRefHandle)
         {
@@ -94,14 +96,16 @@ namespace NL::UI::TestCase
             {
                 JS::JSFuncInfoString strFunInfo("NL", "func1");
                 strFunInfo.callbackData.executeInGameThread = false;
-                strFunInfo.callbackData.callback = [](const char** a_args, int a_argsCount) {
+                strFunInfo.callbackData.callback = [](NL::CEF::IBrowser* a_sourceBrowser, const char** a_args, int a_argsCount) {
                     std::string argsStr = "";
                     for (auto i = 0; i < a_argsCount; ++i)
                     {
                         argsStr += fmt::format("{}{}", (i > 0 ? ", " : ""), a_args[i]);
                     }
 
-                    spdlog::info("func1__ callback. params: {}", argsStr);
+                    auto userData = static_cast<std::string*>(a_sourceBrowser->GetUserData());
+
+                    spdlog::info("func1__ callback. userData: \"{}\", params: {}", userData->data(), argsStr);
                 };
                 m_browser->AddFunctionCallback(strFunInfo);
             }
@@ -110,7 +114,7 @@ namespace NL::UI::TestCase
             {
                 JS::JSFuncInfoString strFunInfo("NL", "func2");
                 strFunInfo.callbackData.executeInGameThread = false;
-                strFunInfo.callbackData.callback = [](const char** a_args, int a_argsCount) {
+                strFunInfo.callbackData.callback = [](NL::CEF::IBrowser* a_sourceBrowser, const char** a_args, int a_argsCount) {
                     std::string argsStr = "";
                     for (auto i = 0; i < a_argsCount; ++i)
                     {

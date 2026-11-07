@@ -1,8 +1,13 @@
 #pragma once
 
+namespace NL::CEF
+{
+    class IBrowser;
+}
+
 namespace NL::JS
 {
-    using JSFuncCallback = void (*)(const char** a_args, int a_argsCount);
+    using JSFuncCallback = void (*)(NL::CEF::IBrowser* a_sourceBrowser, const char** a_args, int a_argsCount);
 
     struct JSFuncCallbackData
     {
@@ -44,7 +49,7 @@ namespace NL::JS
             funcName = funcNameString.c_str();
             callbackData = a_other.callbackData;
         }
-        JSFuncInfoString(JSFuncInfoString&& a_other)
+        JSFuncInfoString(JSFuncInfoString&& a_other) noexcept
         {
             objectNameString = std::move(a_other.objectNameString);
             funcNameString = std::move(a_other.funcNameString);

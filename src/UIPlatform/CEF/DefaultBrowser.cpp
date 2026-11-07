@@ -4,7 +4,9 @@ namespace NL::CEF
 {
     DefaultBrowser::DefaultBrowser(std::shared_ptr<spdlog::logger> a_logger,
                                    CefRefPtr<NirnLabCefClient> a_cefClient,
-                                   std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage)
+                                   std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage,
+                                   void* a_userData)
+        : m_userData(a_userData)
     {
         ThrowIfNullptr(DefaultBrowser, a_logger);
         m_logger = a_logger;
@@ -45,7 +47,7 @@ namespace NL::CEF
                 const auto argList = ipcArgs->GetList(2);
 
                 const auto params = NL::Converters::CefValueToJSONConverter::ConvertToJSONStringArgs(argList);
-                m_jsFuncStorage->ExecuteFunctionCallback(objName, funcName, params, a_jsFuncStorage);
+                m_jsFuncStorage->ExecuteFunctionCallback(this, objName, funcName, params, a_jsFuncStorage);
             }
             else if (a_message->GetName() == IPC_LOG_EVENT)
             {
@@ -460,6 +462,16 @@ namespace NL::CEF
     IBrowser::InputMode __cdecl DefaultBrowser::GetInputMode()
     {
         return m_inputMode;
+    }
+
+    void __cdecl DefaultBrowser::SetUserData(void* a_userData)
+    {
+        m_userData = a_userData;
+    }
+
+    void* __cdecl DefaultBrowser::GetUserData()
+    {
+        return m_userData;
     }
 
 #pragma endregion

@@ -7,11 +7,11 @@ namespace NL::JS
 {
     class JSFunctionStorage
     {
-      protected:
+    protected:
         std::recursive_mutex m_funcCallbackMapMutex;
         std::unordered_map<std::string, std::unordered_map<std::string, NL::JS::JSFuncCallbackData>> m_funcCallbackMap;
 
-      public:
+    public:
         sigslot::signal<> OnQueueItemAdded;
 
         std::recursive_mutex& GetCallbackMutex();
@@ -21,7 +21,8 @@ namespace NL::JS
         virtual bool RemoveFunctionCallback(const std::string& a_objectName, const std::string& a_funcName);
         virtual void ClearFunctionCallback();
         virtual JSFuncCallbackData GetFunctionCallbackData(const std::string& a_objectName, const std::string& a_funcName);
-        virtual void ExecuteFunctionCallback(const std::string& a_objectName,
+        virtual void ExecuteFunctionCallback(NL::CEF::IBrowser* a_sourceBrowser,
+                                             const std::string& a_objectName,
                                              const std::string& a_funcName,
                                              std::shared_ptr<std::vector<std::string>> a_funcArgs,
                                              std::shared_ptr<JSFunctionStorage> a_storage = nullptr);

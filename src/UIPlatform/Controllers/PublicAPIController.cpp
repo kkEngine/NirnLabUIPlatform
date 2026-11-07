@@ -164,10 +164,11 @@ namespace NL::Controllers
                                                                   NL::CEF::IBrowser*& a_outBrowser)
     {
         NL::UI::BrowserSettings defaultSettings{};
-        return AddOrGetBrowser(a_browserName, a_funcInfoArr, a_funcInfoArrSize, a_startUrl, &defaultSettings, a_outBrowser);
+        return AddOrGetBrowser(a_browserName, nullptr, a_funcInfoArr, a_funcInfoArrSize, a_startUrl, &defaultSettings, a_outBrowser);
     }
 
     BrowserRefHandle __cdecl PublicAPIController::AddOrGetBrowser(const char* a_browserName,
+                                                                  void* a_userData,
                                                                   NL::JS::JSFuncInfo* const* a_funcInfoArr,
                                                                   const std::uint32_t a_funcInfoArrSize,
                                                                   const char* a_startUrl,
@@ -229,8 +230,8 @@ namespace NL::Controllers
                     }
                 }
             }
-            
-            auto newCefMenu = NL::Services::UIPlatformService::GetSingleton().CreateCefMenu(jsFuncStorage, a_eventFuncInfo, m_settingsProvider);
+
+            auto newCefMenu = NL::Services::UIPlatformService::GetSingleton().CreateCefMenu(jsFuncStorage, a_eventFuncInfo, m_settingsProvider, a_userData);
             if (!newCefMenu->LoadBrowser(a_startUrl, m_settingsProvider->GetCefWindowInfo(), m_settingsProvider->MergeAndGetCefBrowserSettings(a_settings)))
             {
                 spdlog::error("{}: failed to load browser ({}) with name \"{}\"", NameOf(PublicAPIController), a_startUrl, a_browserName);

@@ -21,6 +21,7 @@ namespace NL::CEF
         std::shared_ptr<spdlog::logger> m_logger = nullptr;
         CefRefPtr<NirnLabCefClient> m_cefClient = nullptr;
         std::shared_ptr<NL::JS::JSFunctionStorage> m_jsFuncStorage = nullptr;
+        void* m_userData = nullptr;
 
         // Url
         std::recursive_mutex m_urlMutex;
@@ -64,7 +65,8 @@ namespace NL::CEF
     public:
         DefaultBrowser(std::shared_ptr<spdlog::logger> a_logger,
                        CefRefPtr<NirnLabCefClient> a_cefClient,
-                       std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage);
+                       std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage,
+                       void* a_userData);
         ~DefaultBrowser() override;
 
         void CheckToggleFocusKeys(const RE::ButtonEvent* a_event);
@@ -101,6 +103,9 @@ namespace NL::CEF
 
         void __cdecl SetInputMode(InputMode a_mode) override;
         InputMode __cdecl GetInputMode() override;
+
+        virtual void __cdecl SetUserData(void* a_userData) override;
+        virtual void* __cdecl GetUserData() override;
 
         // RE::MenuEventHandler
         bool CanProcess(RE::InputEvent* a_event) override;

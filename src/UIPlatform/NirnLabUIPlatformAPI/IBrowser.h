@@ -105,5 +105,8 @@ namespace NL::CEF
         virtual bool __cdecl CanProcess(RE::InputEvent* a_event) = 0;
         virtual bool __cdecl ProcessMouseMove(RE::MouseMoveEvent* a_event) = 0;
         virtual bool __cdecl ProcessButton(RE::ButtonEvent* a_event) = 0;
+
+        virtual void __cdecl SetUserData(void* a_userData) = 0;
+        virtual void* __cdecl GetUserData() = 0;
     };
 }

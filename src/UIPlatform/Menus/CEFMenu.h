@@ -31,7 +31,8 @@ namespace NL::Menus
         CEFMenu(std::shared_ptr<spdlog::logger> a_logger,
                 std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage,
                 NL::JS::JSEventFuncInfo& a_eventFuncInfo,
-                std::shared_ptr<NL::Providers::ICEFSettingsProvider> a_settingsProvider);
+                std::shared_ptr<NL::Providers::ICEFSettingsProvider> a_settingsProvider,
+                void* a_userData);
         ~CEFMenu() override;
 
         bool LoadBrowser(std::string_view a_url,

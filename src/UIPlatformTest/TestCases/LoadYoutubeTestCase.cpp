@@ -8,7 +8,7 @@ namespace NL::UI::TestCase
         // bSettings.frameRate = 30;
 
         // m_browserHandle = a_api->AddOrGetBrowser("YOUTUBE_TEST_CEF", nullptr, 0, "https://youtube.com", m_browser);
-        m_browserHandle = a_api->AddOrGetBrowser("YOUTUBE_TEST_CEF", nullptr, 0, "https://google.com", &bSettings, m_browser);
+        m_browserHandle = a_api->AddOrGetBrowser("YOUTUBE_TEST_CEF", nullptr, nullptr, 0, "https://google.com", &bSettings, m_browser);
 
         if (m_browserHandle == NL::UI::IUIPlatformAPI::InvalidBrowserRefHandle)
         {

@@ -76,7 +76,8 @@ namespace NL::JS
         return funcIt->second;
     }
 
-    void JSFunctionStorage::ExecuteFunctionCallback(const std::string& a_objectName,
+    void JSFunctionStorage::ExecuteFunctionCallback(NL::CEF::IBrowser* a_sourceBrowser,
+                                                    const std::string& a_objectName,
                                                     const std::string& a_funcName,
                                                     std::shared_ptr<std::vector<std::string>> a_funcArgs,
                                                     std::shared_ptr<JSFunctionStorage> a_storage)
@@ -102,13 +103,13 @@ namespace NL::JS
                 }
 
                 auto argsCharArray = NL::Converters::CefValueToJSONConverter::ConvertToCharArray(a_funcArgs);
-                innerCallbackData.callback(argsCharArray.data(), static_cast<int>(argsCharArray.size()));
+                innerCallbackData.callback(a_sourceBrowser, argsCharArray.data(), static_cast<int>(argsCharArray.size()));
             });
         }
         else
         {
             auto argsCharArray = NL::Converters::CefValueToJSONConverter::ConvertToCharArray(a_funcArgs);
-            callbackData.callback(argsCharArray.data(), static_cast<int>(argsCharArray.size()));
+            callbackData.callback(a_sourceBrowser, argsCharArray.data(), static_cast<int>(argsCharArray.size()));
         }
     }
 

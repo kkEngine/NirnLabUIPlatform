@@ -5,7 +5,8 @@ namespace NL::Menus
     CEFMenu::CEFMenu(std::shared_ptr<spdlog::logger> a_logger,
                      std::shared_ptr<NL::JS::JSFunctionStorage> a_jsFuncStorage,
                      NL::JS::JSEventFuncInfo& a_eventFuncInfo,
-                     std::shared_ptr<NL::Providers::ICEFSettingsProvider> a_settingsProvider)
+                     std::shared_ptr<NL::Providers::ICEFSettingsProvider> a_settingsProvider,
+                     void* a_userData)
     {
         ThrowIfNullptr(CEFMenu, a_logger);
         m_logger = a_logger;
@@ -14,7 +15,7 @@ namespace NL::Menus
         m_eventFuncInfo = a_eventFuncInfo;
 
         const auto cefClient = CefRefPtr<NL::CEF::NirnLabCefClient>(new NL::CEF::NirnLabCefClient(a_settingsProvider));
-        m_browser = std::make_shared<NL::CEF::DefaultBrowser>(m_logger, cefClient, m_jsFuncStorage);
+        m_browser = std::make_shared<NL::CEF::DefaultBrowser>(m_logger, cefClient, m_jsFuncStorage, a_userData);
         m_cefRenderLayer = m_browser->GetCefClient()->GetRenderLayer();
     }
 

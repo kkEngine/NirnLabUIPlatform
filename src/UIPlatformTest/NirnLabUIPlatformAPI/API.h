@@ -50,6 +50,7 @@ namespace NL::UI
         /// <param name="a_outBrowser">Browser interface</param>
         /// <returns></returns>
         virtual BrowserRefHandle __cdecl AddOrGetBrowser(const char* a_browserName,
+                                                         void* a_userData,
                                                          NL::JS::JSFuncInfo* const* a_funcInfoArr,
                                                          const std::uint32_t a_funcInfoArrSize,
                                                          const char* a_startUrl,
