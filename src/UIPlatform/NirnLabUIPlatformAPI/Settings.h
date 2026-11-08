@@ -6,6 +6,7 @@ namespace NL::UI
     {
         DeferredContext = 0,
         SyncCopy = 1,
+        SyncCopy2 = 2,
     };
 
     /// <summary>
@@ -24,7 +25,7 @@ namespace NL::UI
         /// <summary>
         /// Renderer type
         /// </summary>
-        RendererType rendererType = RendererType::SyncCopy;
+        RendererType rendererType = RendererType::SyncCopy2;
         /// <summary>
         /// This value determines the rendering order of the menu among the game's native menus.
         /// Native menu example:

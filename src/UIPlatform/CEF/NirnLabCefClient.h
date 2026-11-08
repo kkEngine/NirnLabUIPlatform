@@ -2,6 +2,7 @@
 
 #include "PCH.h"
 #include "Render/CEFSyncCopyRenderLayer.h"
+#include "Render/CEFSyncCopy2RenderLayer.h"
 #include "Render/CEFCopyRenderLayer.h"
 #include "Providers/ICEFSettingsProvider.h"
 

@@ -26,6 +26,15 @@ namespace NL::CEF
             m_cefRenderHandler = CefRefPtr<CefRenderHandler>(static_cast<CefRenderHandler*>(renderLayer));
             break;
         }
+        case NL::UI::RendererType::SyncCopy2: {
+            using RenderLayer = NL::Render::CEFSyncCopy2RenderLayer;
+            static_assert(std::is_base_of_v<CefRenderHandler, RenderLayer>);
+
+            auto renderLayer = new RenderLayer();
+            m_cefRenderLayer = CefRefPtr<NL::Render::IRenderLayer>(renderLayer);
+            m_cefRenderHandler = CefRefPtr<CefRenderHandler>(static_cast<CefRenderHandler*>(renderLayer));
+            break;
+        }
         }
     }
 

@@ -70,6 +70,12 @@ namespace NL::Menus
 
     void CEFMenu::Draw()
     {
+        auto browser = m_browser->GetCefClient()->GetBrowser();
+        if (browser && browser->GetHost())
+        {
+            browser->GetHost()->SendExternalBeginFrame();
+        }
+
         m_cefRenderLayer->Draw();
     }
 

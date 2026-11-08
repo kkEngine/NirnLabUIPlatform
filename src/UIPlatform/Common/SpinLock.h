@@ -4,10 +4,10 @@ namespace NL::Common
 {
     class SpinLock
     {
-      protected:
+    protected:
         std::atomic_flag m_locked = ATOMIC_FLAG_INIT;
 
-      public:
+    public:
         void Lock()
         {
             while (m_locked.test_and_set(std::memory_order_acquire))
@@ -26,6 +26,24 @@ namespace NL::Common
         void Unlock()
         {
             m_locked.clear(std::memory_order_release);
+        }
+    };
+
+    class SpinLockGuard
+    {
+    private:
+        SpinLock& lock_;
+
+    public:
+        SpinLockGuard(SpinLock& lock)
+            : lock_(lock)
+        {
+            lock_.Lock();
+        }
+
+        ~SpinLockGuard()
+        {
+            lock_.Unlock();
         }
     };
 }

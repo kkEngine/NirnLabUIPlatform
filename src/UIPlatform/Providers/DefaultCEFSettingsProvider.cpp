@@ -68,7 +68,7 @@ namespace NL::Providers
 
         info.SetAsWindowless(nullptr);
         info.windowless_rendering_enabled = true;
-        info.external_begin_frame_enabled = false;
+        info.external_begin_frame_enabled = true;
         info.shared_texture_enabled = true;
 
         return info;

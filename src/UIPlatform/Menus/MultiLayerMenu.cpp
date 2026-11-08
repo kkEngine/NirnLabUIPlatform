@@ -124,21 +124,20 @@ namespace NL::Menus
         }
 
         m_renderData.spriteBatch->Begin(::DirectX::SpriteSortMode_Deferred, m_renderData.commonStates->NonPremultiplied());
-        m_renderData.drawLock.Lock();
+        NL::Common::SpinLockGuard locker(m_renderData.drawLock);
         try
         {
             for (const auto& subMenu : m_menuMap)
             {
                 subMenu.second->Draw();
             }
-            m_renderData.deviceContext->Flush1(D3D11_CONTEXT_TYPE::D3D11_CONTEXT_TYPE_COPY, nullptr);
+            // m_renderData.deviceContext->Flush1(D3D11_CONTEXT_TYPE::D3D11_CONTEXT_TYPE_COPY, nullptr);
         }
         catch (const std::exception& err)
         {
             m_logger->error("{}: {}", NameOf(MultiLayerMenu), err.what());
         }
         m_renderData.spriteBatch->End();
-        m_renderData.drawLock.Unlock();
     }
 
     RE::UI_MESSAGE_RESULTS MultiLayerMenu::ProcessMessage(RE::UIMessage& a_message)

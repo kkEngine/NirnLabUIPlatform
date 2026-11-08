@@ -109,7 +109,20 @@ namespace NL::CEF
         virtual void __cdecl SetUserData(void* a_userData) = 0;
         virtual void* __cdecl GetUserData() = 0;
 
+        /// <summary>
+        /// Sets or overwrites binary data for the object, which JavaScript can read via DataView.
+        /// See examples in "LocalTestPage.cpp".
+        /// </summary>
+        /// <param name="a_objectName"></param>
+        /// <param name="a_bufferName"></param>
+        /// <param name="a_data"></param>
+        /// <param name="a_dataLength"></param>
         virtual void SetArrayBuffer(const char* a_objectName, const char* a_bufferName, void* a_data, size_t a_dataLength) = 0;
+        /// <summary>
+        /// Deletes the binary data or another object; does nothing if the object does not exist.
+        /// </summary>
+        /// <param name="a_objectName"></param>
+        /// <param name="a_bufferName"></param>
         virtual void RemoveArrayBuffer(const char* a_objectName, const char* a_bufferName) = 0;
     };
 }
