@@ -107,6 +107,9 @@ namespace NL::CEF
         virtual void __cdecl SetUserData(void* a_userData) override;
         virtual void* __cdecl GetUserData() override;
 
+        void SetArrayBuffer(const char* a_objectName, const char* a_bufferName, void* a_data, size_t a_dataLength) override;
+        void RemoveArrayBuffer(const char* a_objectName, const char* a_bufferName) override;
+
         // RE::MenuEventHandler
         bool CanProcess(RE::InputEvent* a_event) override;
         bool ProcessMouseMove(RE::MouseMoveEvent* a_event) override;

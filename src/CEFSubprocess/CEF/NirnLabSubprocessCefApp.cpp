@@ -290,6 +290,105 @@ namespace NL::CEF
             NL::JS::CEFEventFunctionHandler::CallEventFunc(message->GetArgumentList()->GetString(0), browser, message->GetArgumentList()->GetString(1));
             isMessageHandled = true;
         }
+        else if (message->GetName() == IPC_JS_SET_BINARY_DATA)
+        {
+            CEFV8ContextGuard v8ContextGuard(frame->GetV8Context());
+            if (!v8ContextGuard.IsEntered())
+            {
+                spdlog::error("{}[{}]: can't enter v8 context while \"{}\"",
+                              NameOf(NirnLabSubprocessCefApp::OnProcessMessageReceived),
+                              ::GetCurrentProcessId(),
+                              NameOf(IPC_JS_SET_BINARY_DATA));
+                return true;
+            }
+
+            const auto global = frame->GetV8Context()->GetGlobal();
+            if (global == nullptr)
+            {
+                spdlog::error("{}[{}]: global object is nullptr while \"{}\"",
+                              NameOf(NirnLabSubprocessCefApp::OnProcessMessageReceived),
+                              ::GetCurrentProcessId(),
+                              NameOf(IPC_JS_SET_BINARY_DATA));
+                return true;
+            }
+
+            auto argList = message->GetArgumentList();
+            const auto& objectName = argList->GetString(0);
+            const auto& bufferName = argList->GetString(1);
+            const auto binData = message->GetArgumentList()->GetBinary(2);
+
+            auto jsObject = global;
+            if (!objectName.empty())
+            {
+                jsObject = GetOrCreateObject(jsObject, objectName);
+            }
+
+            auto arrayBuffer = CefV8Value::CreateArrayBufferWithCopy(
+                const_cast<void*>(binData->GetRawData()),
+                binData->GetSize());
+            if (!arrayBuffer.get() || !arrayBuffer->IsValid())
+            {
+                spdlog::error("{}[{}]: failed to CreateArrayBuffer",
+                              NameOf(NirnLabSubprocessCefApp::OnProcessMessageReceived),
+                              ::GetCurrentProcessId());
+                return true;
+            }
+
+            if (!jsObject->SetValue(bufferName, arrayBuffer, V8_PROPERTY_ATTRIBUTE_NONE))
+            {
+                spdlog::error("{}[{}]: failed to SetValue for ArrayBuffer",
+                              NameOf(NirnLabSubprocessCefApp::OnProcessMessageReceived),
+                              ::GetCurrentProcessId());
+            }
+
+            isMessageHandled = true;
+        }
+        else if (message->GetName() == IPC_JS_REMOVE_BINARY_DATA)
+        {
+            CEFV8ContextGuard v8ContextGuard(frame->GetV8Context());
+            if (!v8ContextGuard.IsEntered())
+            {
+                spdlog::error("{}[{}]: can't enter v8 context while \"{}\"",
+                              NameOf(NirnLabSubprocessCefApp::OnProcessMessageReceived),
+                              ::GetCurrentProcessId(),
+                              NameOf(IPC_JS_REMOVE_BINARY_DATA));
+                return true;
+            }
+
+            const auto global = frame->GetV8Context()->GetGlobal();
+            if (global == nullptr)
+            {
+                spdlog::error("{}[{}]: global object is nullptr while \"{}\"",
+                              NameOf(NirnLabSubprocessCefApp::OnProcessMessageReceived),
+                              ::GetCurrentProcessId(),
+                              NameOf(IPC_JS_REMOVE_BINARY_DATA));
+                return true;
+            }
+
+            auto argList = message->GetArgumentList();
+            const auto& objectName = argList->GetString(0);
+            const auto& bufferName = argList->GetString(1);
+
+            auto jsObject = global;
+            if (!objectName.empty())
+            {
+                jsObject = GetOrCreateObject(jsObject, objectName);
+            }
+            
+            if (!jsObject->HasValue(bufferName))
+            {
+                return true;
+            }
+
+            if (!jsObject->DeleteValue(bufferName))
+            {
+                spdlog::error("{}[{}]: failed to DeleteValue for ArrayBuffer",
+                              NameOf(NirnLabSubprocessCefApp::OnProcessMessageReceived),
+                              ::GetCurrentProcessId());
+            }
+
+            isMessageHandled = true;
+        }
 
         return isMessageHandled;
     }

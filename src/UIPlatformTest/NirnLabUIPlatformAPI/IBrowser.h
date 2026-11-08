@@ -108,5 +108,8 @@ namespace NL::CEF
 
         virtual void __cdecl SetUserData(void* a_userData) = 0;
         virtual void* __cdecl GetUserData() = 0;
+
+        virtual void SetArrayBuffer(const char* a_objectName, const char* a_bufferName, void* a_data, size_t a_dataLength) = 0;
+        virtual void RemoveArrayBuffer(const char* a_objectName, const char* a_bufferName) = 0;
     };
 }

@@ -1,5 +1,7 @@
 #include "LocalTestPage.h"
 
+#include <Windows.h>
+
 namespace NL::UI::TestCase
 {
     LocalTestPage::LocalTestPage()
@@ -133,9 +135,22 @@ namespace NL::UI::TestCase
             // m_browser->RemoveFunctionCallback(strFunInfo.objectName, strFunInfo.funcName);
 
             int i = 0;
+            struct ArrayBufferItem
+            {
+                std::uint64_t field1 = 0;
+                std::uint64_t field2 = 0;
+            };
+            std::vector<ArrayBufferItem> arrayBuffer;
+            arrayBuffer.resize(10);
+
             while (i < 10 && !stopToken.stop_requested())
             {
+                arrayBuffer[0].field1 = GetTickCount64();
+                arrayBuffer[5].field2 = GetTickCount64() / 2;
+
                 std::this_thread::sleep_for(1s);
+                // See "_testLocalPage.html" how to read array buffer
+                m_browser->SetArrayBuffer("NL", "Ticks", arrayBuffer.data(), arrayBuffer.size() * sizeof(ArrayBufferItem));
                 m_browser->ExecEventFunction("on:message", "EVENT_FUNC WORKS!");
                 m_browser->ExecuteJavaScript(fmt::format("NL.func1({})", std::to_string(++i).c_str()).c_str());
             }

@@ -372,4 +372,13 @@ if(BUILD_AS_SHARED)
         PUBLIC
             CommonLibSSE::CommonLibSSE
     )
+	
+	add_custom_command(
+		TARGET ${UIPlatformTestName} 
+		POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy
+				"${CMAKE_CURRENT_SOURCE_DIR}/src/UIPlatformTest/_testLocalPage.html"
+				"${OUTPUT_PATH}"
+		COMMENT "Copying test html..."
+	)
 endif()

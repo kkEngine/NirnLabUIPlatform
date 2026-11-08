@@ -474,6 +474,36 @@ namespace NL::CEF
         return m_userData;
     }
 
+    void DefaultBrowser::SetArrayBuffer(const char* a_objectName, const char* a_bufferName, void* a_data, size_t a_dataLength)
+    {
+        const auto browser = m_cefClient->GetBrowser();
+        if (browser != nullptr)
+        {
+            auto cefMessage = CefProcessMessage::Create(IPC_JS_SET_BINARY_DATA);
+            auto binData = CefBinaryValue::Create(a_data, a_dataLength);
+            auto argList = cefMessage->GetArgumentList();
+
+            argList->SetString(0, a_objectName);
+            argList->SetString(1, a_bufferName);
+            argList->SetBinary(2, binData);
+            browser->GetMainFrame()->SendProcessMessage(CefProcessId::PID_RENDERER, cefMessage);
+        }
+    }
+
+    void DefaultBrowser::RemoveArrayBuffer(const char* a_objectName, const char* a_bufferName)
+    {
+        const auto browser = m_cefClient->GetBrowser();
+        if (browser != nullptr)
+        {
+            auto cefMessage = CefProcessMessage::Create(IPC_JS_REMOVE_BINARY_DATA);
+            auto argList = cefMessage->GetArgumentList();
+
+            argList->SetString(0, a_objectName);
+            argList->SetString(1, a_bufferName);
+            browser->GetMainFrame()->SendProcessMessage(CefProcessId::PID_RENDERER, cefMessage);
+        }
+    }
+
 #pragma endregion
 
 #pragma region RE::MenuEventHandler
