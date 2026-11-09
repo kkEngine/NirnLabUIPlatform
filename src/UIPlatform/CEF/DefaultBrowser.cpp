@@ -515,7 +515,7 @@ namespace NL::CEF
 
     bool DefaultBrowser::ProcessMouseMove(RE::MouseMoveEvent* a_event)
     {
-        if (!IsBrowserFocused())
+        if (!IsBrowserFocused() || !m_cefClient->IsBrowserReady())
         {
             return false;
         }
@@ -532,7 +532,7 @@ namespace NL::CEF
         CheckToggleFocusKeys(a_event);
         CheckToggleVisibleKeys(a_event);
 
-        if (!IsBrowserFocused())
+        if (!IsBrowserFocused() || !m_cefClient->IsBrowserReady())
         {
             return false;
         }
