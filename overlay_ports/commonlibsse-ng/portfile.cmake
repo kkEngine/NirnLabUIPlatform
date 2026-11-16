@@ -1,15 +1,16 @@
-vcpkg_from_github(
+# kkEngine fork with Skyrim 1.7.99+/1.7.104 support (format 5 address library, 1.7.99 vtable layouts).
+# The commit is on branch feat/skyrim-1.7.104 of https://github.com/kkEngine/CommonLibSSE-NG.
+vcpkg_from_git(
     OUT_SOURCE_PATH SOURCE_PATH
-    REPO CharmedBaryon/CommonLibSSE-NG
-    REF 9b7c386d0355e756b4153416a76b0532f755f8de
-    SHA512 6c9e4861a985eda04074ee157996a5f5294d3e2ce5c79ff481c4b11c86caf5a49847d31d9b5509fc1ae786c01438364f98de6ed3dc28b84dc408bde23dbfa057
-    HEAD_REF main
+    URL https://github.com/kkEngine/CommonLibSSE-NG.git
+    REF 4c2049cdf0f82ef3db1eb932bf5c1eef47c551f1
+    FETCH_REF feat/skyrim-1.7.104
 )
 
 vcpkg_configure_cmake(
         SOURCE_PATH "${SOURCE_PATH}"
         PREFER_NINJA
-        OPTIONS -DBUILD_TESTS=off -DSKSE_SUPPORT_XBYAK=on -DENABLE_SKYRIM_SE=on -DENABLE_SKYRIM_AE=on -DENABLE_SKYRIM_VR=off
+        OPTIONS -DBUILD_TESTS=off -DSKSE_SUPPORT_XBYAK=on -DENABLE_SKYRIM_SE=off -DENABLE_SKYRIM_AE=on -DENABLE_SKYRIM_VR=off -DENABLE_SKYRIM_AE_1799=on
 )
 
 vcpkg_install_cmake()

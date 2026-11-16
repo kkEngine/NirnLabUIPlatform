@@ -211,8 +211,10 @@ extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() {
     v.pluginVersion = NL::UI::LibVersion::AS_INT;
     v.PluginName(NL::UI::LibVersion::PROJECT_NAME);
     v.AuthorName("kkEngine"sv);
-    v.CompatibleVersions({SKSE::RUNTIME_SSE_1_5_97, SKSE::RUNTIME_SSE_1_6_640, REL::Version(1, 6, 1170, 0)});
+    v.CompatibleVersions({SKSE::RUNTIME_SSE_1_7_104});
     v.UsesAddressLibrary(true);
+    // SKSE 2.3+ (Skyrim 1.7.99+) only loads plugins that can read the format 5 address library
+    v.UsesAddressLibraryV5(true);
     v.UsesStructsPost629(true);
     return v;
 }();
