@@ -3,7 +3,7 @@
 vcpkg_from_git(
     OUT_SOURCE_PATH SOURCE_PATH
     URL https://github.com/kkEngine/CommonLibSSE-NG.git
-    REF 4c2049cdf0f82ef3db1eb932bf5c1eef47c551f1
+    REF 8c0bef4ac44f535777412b858ac60ebe95b34328
     FETCH_REF feat/skyrim-1.7.104
 )
 
