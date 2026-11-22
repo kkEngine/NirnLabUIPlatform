@@ -64,10 +64,15 @@ extern "C"
         v.pluginVersion = NL::UI::LibVersion::AS_INT;
         v.PluginName(NL::UI::LibVersion::PROJECT_NAME);
         v.AuthorName("kkEngine"sv);
+#ifdef ENABLE_SKYRIM_SE
+        v.CompatibleVersions({SKSE::RUNTIME_SSE_1_5_97});
+        v.UsesAddressLibrary(true);
+#else
         v.CompatibleVersions({SKSE::RUNTIME_SSE_1_7_104});
         v.UsesAddressLibrary(true);
-        // SKSE 2.3+ (Skyrim 1.7.99+) only loads plugins that can read the format 5 address library
+        // SKSE 2.3+ (Skyrim 1.7.99+): the plugin reads the format 5 address library
         v.UsesAddressLibraryV5(true);
+#endif
         v.UsesStructsPost629(true);
         return v;
     }();

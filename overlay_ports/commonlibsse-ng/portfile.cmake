@@ -1,16 +1,21 @@
-# kkEngine fork with Skyrim 1.7.99+/1.7.104 support (format 5 address library, 1.7.99 vtable layouts).
-# The commit is on branch feat/skyrim-1.7.104 of https://github.com/kkEngine/CommonLibSSE-NG.
+# kkEngine fork: Skyrim SE 1.5.97 or AE 1.7.99+, one runtime per build (feature "se" selects SE).
+# The commit is fetched by its hash (it is in https://github.com/kkEngine/CommonLibSSE-NG through PR #3).
 vcpkg_from_git(
     OUT_SOURCE_PATH SOURCE_PATH
     URL https://github.com/kkEngine/CommonLibSSE-NG.git
-    REF 8c0bef4ac44f535777412b858ac60ebe95b34328
-    FETCH_REF feat/skyrim-1.7.104
+    REF e45cc3cb9fc539cdb9b06be58c50f4f6cdf33e94
 )
+
+if("se" IN_LIST FEATURES)
+    set(SKYRIM_TARGET -DENABLE_SKYRIM_SE=on -DENABLE_SKYRIM_AE=off)
+else()
+    set(SKYRIM_TARGET -DENABLE_SKYRIM_SE=off -DENABLE_SKYRIM_AE=on)
+endif()
 
 vcpkg_configure_cmake(
         SOURCE_PATH "${SOURCE_PATH}"
         PREFER_NINJA
-        OPTIONS -DBUILD_TESTS=off -DSKSE_SUPPORT_XBYAK=on -DENABLE_SKYRIM_SE=off -DENABLE_SKYRIM_AE=on -DENABLE_SKYRIM_VR=off -DENABLE_SKYRIM_AE_1799=on
+        OPTIONS -DBUILD_TESTS=off -DSKSE_SUPPORT_XBYAK=on ${SKYRIM_TARGET}
 )
 
 vcpkg_install_cmake()

@@ -23,7 +23,7 @@ namespace NL::Hooks
 
         static bool Install()
         {
-            REL::Relocation<std::uintptr_t> winMain{RELOCATION_ID(35545, 36544), REL::VariantOffset(0x35, 0x1AE, 0)};
+            REL::Relocation<std::uintptr_t> winMain{RELOCATION_ID(35545, 36544), REL::VariantOffset(0x35, 0x1AE)};
             _Shutdown = winMain.write_call<5>(&Shutdown);
 
             return true;
