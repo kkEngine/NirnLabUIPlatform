@@ -136,6 +136,13 @@ m_browser->ExecEventFunction("on:message", "EVENT_FUNC WORKS!");
     - C++ desktop dev
 - Microsoft Visual C++ 2015-2022 Redistributable (x64)
 
+### Game versions
+A build targets one game version, use a separate build directory for each:
+- Skyrim AE 1.7.104 (default): `cmake ..`
+- Skyrim SE 1.5.97: `cmake .. -DNL_UI_SKYRIM_SE=ON`
+
+The plugin stops the game with a message if it runs on another version than the one it was built for.
+
 ## Runtime dependencies
 - Address library (https://www.nexusmods.com/skyrimspecialedition/mods/32444)
 - SKSE (https://skse.silverlock.org/)
