@@ -1,5 +1,4 @@
 # kkEngine fork: Skyrim SE 1.5.97 or AE 1.7.99+, one runtime per build (feature "se" selects SE).
-# The commit is in https://github.com/kkEngine/CommonLibSSE-NG through PR #3, not on a branch yet.
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO kkEngine/CommonLibSSE-NG
