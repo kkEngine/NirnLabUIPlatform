@@ -19,5 +19,18 @@
     "spdlog",
     "commonlibsse-ng",
     "nlohmann-json"
-  ]
+  ],
+  "features": {
+    "skyrim-se": {
+      "description": "Build for Skyrim SE 1.5.97 instead of Skyrim AE 1.7.104",
+      "dependencies": [
+        {
+          "name": "commonlibsse-ng",
+          "features": [
+            "se"
+          ]
+        }
+      ]
+    }
+  }
 }

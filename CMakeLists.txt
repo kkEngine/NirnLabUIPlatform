@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.23)
 
 option(BUILD_AS_SHARED "Build as dll skse plugin else build as static lib" ON)
+# One build targets one game version: Skyrim AE 1.7.104 (default) or, with this option, Skyrim SE 1.5.97.
+# Use a separate build directory for each.
+option(NL_UI_SKYRIM_SE "Build for Skyrim SE 1.5.97 instead of Skyrim AE 1.7.104" OFF)
+if (NL_UI_SKYRIM_SE)
+    list(APPEND VCPKG_MANIFEST_FEATURES "skyrim-se")
+endif()
 
 # Version
 set(LIB_MAJOR_VERSION 4)

@@ -1,15 +1,23 @@
+# kkEngine fork: Skyrim SE 1.5.97 or AE 1.7.99+, one runtime per build (feature "se" selects SE).
+# The commit is in https://github.com/kkEngine/CommonLibSSE-NG through PR #3, not on a branch yet.
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
-    REPO CharmedBaryon/CommonLibSSE-NG
-    REF 9b7c386d0355e756b4153416a76b0532f755f8de
-    SHA512 6c9e4861a985eda04074ee157996a5f5294d3e2ce5c79ff481c4b11c86caf5a49847d31d9b5509fc1ae786c01438364f98de6ed3dc28b84dc408bde23dbfa057
+    REPO kkEngine/CommonLibSSE-NG
+    REF e45cc3cb9fc539cdb9b06be58c50f4f6cdf33e94
+    SHA512 9a87b804887a7e3142f31a7a41560d1b6367ce895264e894d8d00c0f148ea8496d4550fb140acf93da22c9bcad7650a1efce872b57694374d654968dbd2a803b
     HEAD_REF main
 )
+
+if("se" IN_LIST FEATURES)
+    set(SKYRIM_TARGET -DENABLE_SKYRIM_SE=on -DENABLE_SKYRIM_AE=off)
+else()
+    set(SKYRIM_TARGET -DENABLE_SKYRIM_SE=off -DENABLE_SKYRIM_AE=on)
+endif()
 
 vcpkg_configure_cmake(
         SOURCE_PATH "${SOURCE_PATH}"
         PREFER_NINJA
-        OPTIONS -DBUILD_TESTS=off -DSKSE_SUPPORT_XBYAK=on -DENABLE_SKYRIM_SE=on -DENABLE_SKYRIM_AE=on -DENABLE_SKYRIM_VR=off
+        OPTIONS -DBUILD_TESTS=off -DSKSE_SUPPORT_XBYAK=on ${SKYRIM_TARGET}
 )
 
 vcpkg_install_cmake()

@@ -3,7 +3,7 @@
   "name": "commonlibsse-ng",
   "version-semver": "3.7.0",
   "port-version": 0,
-  "description": "A reverse engineered resource for developing SKSE plugins, supporting portable plugins that work across AE, SE, and VR.",
+  "description": "A reverse engineered resource for developing SKSE plugins (kkEngine fork: Skyrim SE 1.5.97 or AE 1.7.99+ per build).",
   "homepage": "https://github.com/CharmedBaryon/CommonLibSSE",
   "license": "MIT",
   "supports": "windows & x64",
@@ -13,8 +13,12 @@
       "host": true
     },
     "fmt",
-    "rapidcsv",
     "spdlog",
     "xbyak"
-  ]
+  ],
+  "features": {
+    "se": {
+      "description": "Build for Skyrim SE 1.5.97 instead of Skyrim AE 1.7.99+"
+    }
+  }
 }
