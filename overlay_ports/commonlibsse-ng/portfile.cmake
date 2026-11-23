@@ -1,9 +1,11 @@
 # kkEngine fork: Skyrim SE 1.5.97 or AE 1.7.99+, one runtime per build (feature "se" selects SE).
-# The commit is fetched by its hash (it is in https://github.com/kkEngine/CommonLibSSE-NG through PR #3).
-vcpkg_from_git(
+# The commit is in https://github.com/kkEngine/CommonLibSSE-NG through PR #3, not on a branch yet.
+vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
-    URL https://github.com/kkEngine/CommonLibSSE-NG.git
+    REPO kkEngine/CommonLibSSE-NG
     REF e45cc3cb9fc539cdb9b06be58c50f4f6cdf33e94
+    SHA512 9a87b804887a7e3142f31a7a41560d1b6367ce895264e894d8d00c0f148ea8496d4550fb140acf93da22c9bcad7650a1efce872b57694374d654968dbd2a803b
+    HEAD_REF main
 )
 
 if("se" IN_LIST FEATURES)
